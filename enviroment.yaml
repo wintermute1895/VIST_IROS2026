@@ -10,6 +10,7 @@ dependencies:
   - meshcat    # 可视化
   - qpsolvers  # IK求解器需要
   - pip
+  - dex-retargeting
   - pip:
     - pink==0.1.0  # 逆运动学库 (注意版本)
     - mediapipe    # 视觉捕捉
