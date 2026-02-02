@@ -86,7 +86,7 @@ $$
 ## 🛠️ 系统架构 (Architecture)
 
 ```mermaid
-ggraph TD
+graph TD
     %% 定义样式
     classDef input fill:#f9f,stroke:#333,stroke-width:2px;
     classDef algo fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
