@@ -120,7 +120,7 @@ graph TD
     %% 执行层
     subgraph Hardware [Hardware Layer]
         Retarget -->|Joint Commands| Driver[Robot Driver]
-        Driver --> Arm[Realman/AgileX Arm]
+        Driver --> Arm[Linkerarm A7]
     end
 
     %% 闭环
