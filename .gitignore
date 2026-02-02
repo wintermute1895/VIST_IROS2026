@@ -1,0 +1,13 @@
+# Python 编译垃圾
+__pycache__/
+*.pyc
+
+# IDE 配置 (不要传你自己的 VSCode 配置给队友)
+.vscode/
+.idea/
+
+# 敏感配置 (防止你把 IP 地址写死传上去)
+config/settings.yaml
+
+# 操作系统垃圾
+.DS_Store
