@@ -1,0 +1,48 @@
+# VIST/config/hand_config.yaml
+
+retargeting:
+  type: "vector"
+  urdf_path: "config/l10/right/linkerhand_l10_right.urdf" # 注意这里改为相对路径
+  
+  # 目标关节名称 (优化器需要调整的关节)
+  target_joint_names:
+    - "thumb_cmc_roll"
+    - "thumb_cmc_yaw"
+    - "thumb_cmc_pitch"
+    - "index_mcp_roll"
+    - "index_mcp_pitch"
+    - "middle_mcp_pitch"
+    - "ring_mcp_roll"
+    - "ring_mcp_pitch"
+    - "pinky_mcp_roll"
+    - "pinky_mcp_pitch"
+
+  # 向量重定向的起点 (Wrist)
+  target_origin_link_names:
+    - "hand_base_link"
+    - "hand_base_link"
+    - "hand_base_link"
+    - "hand_base_link"
+    - "hand_base_link"
+
+  # 向量重定向的终点 (Fingertips)
+  target_task_link_names:
+    - "thumb_distal"
+    - "index_distal"
+    - "middle_distal"
+    - "ring_distal"
+    - "pinky_distal"
+
+  # 人手关键点索引 [Start_Indices, End_Indices]
+  # 对应 MediaPipe: 0=Wrist, 4=ThumbTip, 8=IndexTip...
+  target_link_human_indices:
+    - [0, 0, 0, 0, 0]
+    - [4, 8, 12, 16, 20]
+
+  # 缩放因子 (根据人手大小和机械手大小比例调整)
+  scaling_factor: 1.0
+
+  # 优化参数
+  huber_delta: 0.02
+  normal_delta: 0.001
+  low_pass_alpha: 0.2

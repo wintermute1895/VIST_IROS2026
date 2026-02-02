@@ -23,7 +23,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Body_Base_link.STL" />
+          filename="package://my_robot/meshes/arm/Body_Base_link.STL" />
       </geometry>
       <material
         name="">
@@ -37,7 +37,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Body_Base_link.STL" />
+          filename="package://my_robot/meshes/arm/Body_Base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -63,7 +63,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Shoulder_Base_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Shoulder_Base_Link.STL" />
       </geometry>
       <material
         name="">
@@ -77,7 +77,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Shoulder_Base_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Shoulder_Base_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -116,7 +116,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Shoulder_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Shoulder_Pitch_Link.STL" />
       </geometry>
       <material
         name="">
@@ -130,7 +130,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Shoulder_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Shoulder_Pitch_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -174,7 +174,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Shoulder_Roll_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Shoulder_Roll_Link.STL" />
       </geometry>
       <material
         name="">
@@ -188,7 +188,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Shoulder_Roll_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Shoulder_Roll_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -232,7 +232,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Shoulder_Yaw_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Shoulder_Yaw_Link.STL" />
       </geometry>
       <material
         name="">
@@ -246,7 +246,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Shoulder_Yaw_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Shoulder_Yaw_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -290,7 +290,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Elbow_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Elbow_Pitch_Link.STL" />
       </geometry>
       <material
         name="">
@@ -304,7 +304,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Elbow_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Elbow_Pitch_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -348,7 +348,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Wrist_Yaw_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Wrist_Yaw_Link.STL" />
       </geometry>
       <material
         name="">
@@ -362,7 +362,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Wrist_Yaw_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Wrist_Yaw_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -406,7 +406,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Wrist_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Wrist_Pitch_Link.STL" />
       </geometry>
       <material
         name="">
@@ -420,7 +420,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Wrist_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Wrist_Pitch_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -464,7 +464,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Wrist_Roll_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Wrist_Roll_Link.STL" />
       </geometry>
       <material
         name="">
@@ -478,7 +478,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Left_Wrist_Roll_Link.STL" />
+          filename="package://my_robot/meshes/arm/Left_Wrist_Roll_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -522,7 +522,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Shoulder_Base_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Shoulder_Base_Link.STL" />
       </geometry>
       <material
         name="">
@@ -536,7 +536,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Shoulder_Base_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Shoulder_Base_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -575,7 +575,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Shoulder_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Shoulder_Pitch_Link.STL" />
       </geometry>
       <material
         name="">
@@ -589,7 +589,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Shoulder_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Shoulder_Pitch_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -633,7 +633,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Shoulder_Roll_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Shoulder_Roll_Link.STL" />
       </geometry>
       <material
         name="">
@@ -647,7 +647,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Shoulder_Roll_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Shoulder_Roll_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -691,7 +691,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Shoulder_Yaw_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Shoulder_Yaw_Link.STL" />
       </geometry>
       <material
         name="">
@@ -705,7 +705,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Shoulder_Yaw_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Shoulder_Yaw_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -749,7 +749,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Elbow_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Elbow_Pitch_Link.STL" />
       </geometry>
       <material
         name="">
@@ -763,7 +763,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Elbow_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Elbow_Pitch_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -807,7 +807,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Wrist_Yaw_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Wrist_Yaw_Link.STL" />
       </geometry>
       <material
         name="">
@@ -821,7 +821,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Wrist_Yaw_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Wrist_Yaw_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -865,7 +865,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Wrist_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Wrist_Pitch_Link.STL" />
       </geometry>
       <material
         name="">
@@ -879,7 +879,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Wrist_Pitch_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Wrist_Pitch_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -923,7 +923,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Wrist_Roll_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Wrist_Roll_Link.STL" />
       </geometry>
       <material
         name="">
@@ -937,7 +937,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/arm/Right_Wrist_Roll_Link.STL" />
+          filename="package://my_robot/meshes/arm/Right_Wrist_Roll_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -963,7 +963,7 @@
   <joint name="right_arm_hand_fixed_joint" type="fixed">
     <parent link="Right_Wrist_Roll_Link"/>
     <child link="hand_base_link"/>
-    <origin xyz="0 0 0" rpy="0 3.14159 0"/>
+    <origin xyz="-0.02 0 -0.055" rpy="0 3.14159 0"/>
   </joint>
 
   <link
@@ -988,7 +988,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/hand_base_link.STL" />
+          filename="package://my_robot/meshes/hand/hand_base_link.STL" />
       </geometry>
       <material
         name="">
@@ -1002,7 +1002,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/hand_base_link.STL" />
+          filename="package://my_robot/meshes/hand/hand_base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -1028,7 +1028,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_metacarpals_base1.STL" />
+          filename="package://my_robot/meshes/hand/thumb_metacarpals_base1.STL" />
       </geometry>
       <material
         name="">
@@ -1042,7 +1042,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_metacarpals_base1.STL" />
+          filename="package://my_robot/meshes/hand/thumb_metacarpals_base1.STL" />
       </geometry>
     </collision>
   </link>
@@ -1086,7 +1086,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_metacarpals_base2.STL" />
+          filename="package://my_robot/meshes/hand/thumb_metacarpals_base2.STL" />
       </geometry>
       <material
         name="">
@@ -1100,7 +1100,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_metacarpals_base2.STL" />
+          filename="package://my_robot/meshes/hand/thumb_metacarpals_base2.STL" />
       </geometry>
     </collision>
   </link>
@@ -1144,7 +1144,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_metacarpals.STL" />
+          filename="package://my_robot/meshes/hand/thumb_metacarpals.STL" />
       </geometry>
       <material
         name="">
@@ -1158,7 +1158,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_metacarpals.STL" />
+          filename="package://my_robot/meshes/hand/thumb_metacarpals.STL" />
       </geometry>
     </collision>
   </link>
@@ -1202,7 +1202,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_proximal.STL" />
+          filename="package://my_robot/meshes/hand/thumb_proximal.STL" />
       </geometry>
       <material
         name="">
@@ -1216,7 +1216,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_proximal.STL" />
+          filename="package://my_robot/meshes/hand/thumb_proximal.STL" />
       </geometry>
     </collision>
   </link>
@@ -1264,7 +1264,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_distal.STL" />
+          filename="package://my_robot/meshes/hand/thumb_distal.STL" />
       </geometry>
       <material
         name="">
@@ -1278,7 +1278,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/thumb_distal.STL" />
+          filename="package://my_robot/meshes/hand/thumb_distal.STL" />
       </geometry>
     </collision>
   </link>
@@ -1326,7 +1326,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/index_metacarpals.STL" />
+          filename="package://my_robot/meshes/hand/index_metacarpals.STL" />
       </geometry>
       <material
         name="">
@@ -1340,7 +1340,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/index_metacarpals.STL" />
+          filename="package://my_robot/meshes/hand/index_metacarpals.STL" />
       </geometry>
     </collision>
   </link>
@@ -1384,7 +1384,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/index_proximal.STL" />
+          filename="package://my_robot/meshes/hand/index_proximal.STL" />
       </geometry>
       <material
         name="">
@@ -1398,7 +1398,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/index_proximal.STL" />
+          filename="package://my_robot/meshes/hand/index_proximal.STL" />
       </geometry>
     </collision>
   </link>
@@ -1442,7 +1442,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/index_middle.STL" />
+          filename="package://my_robot/meshes/hand/index_middle.STL" />
       </geometry>
       <material
         name="">
@@ -1456,7 +1456,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/index_middle.STL" />
+          filename="package://my_robot/meshes/hand/index_middle.STL" />
       </geometry>
     </collision>
   </link>
@@ -1504,7 +1504,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/index_distal.STL" />
+          filename="package://my_robot/meshes/hand/index_distal.STL" />
       </geometry>
       <material
         name="">
@@ -1518,7 +1518,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/index_distal.STL" />
+          filename="package://my_robot/meshes/hand/index_distal.STL" />
       </geometry>
     </collision>
   </link>
@@ -1566,7 +1566,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/middle_proximal.STL" />
+          filename="package://my_robot/meshes/hand/middle_proximal.STL" />
       </geometry>
       <material
         name="">
@@ -1580,7 +1580,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/middle_proximal.STL" />
+          filename="package://my_robot/meshes/hand/middle_proximal.STL" />
       </geometry>
     </collision>
   </link>
@@ -1624,7 +1624,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/middle_middle.STL" />
+          filename="package://my_robot/meshes/hand/middle_middle.STL" />
       </geometry>
       <material
         name="">
@@ -1638,7 +1638,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/middle_middle.STL" />
+          filename="package://my_robot/meshes/hand/middle_middle.STL" />
       </geometry>
     </collision>
   </link>
@@ -1686,7 +1686,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/middle_distal.STL" />
+          filename="package://my_robot/meshes/hand/middle_distal.STL" />
       </geometry>
       <material
         name="">
@@ -1700,7 +1700,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/middle_distal.STL" />
+          filename="package://my_robot/meshes/hand/middle_distal.STL" />
       </geometry>
     </collision>
   </link>
@@ -1748,7 +1748,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/ring_metacarpals.STL" />
+          filename="package://my_robot/meshes/hand/ring_metacarpals.STL" />
       </geometry>
       <material
         name="">
@@ -1762,7 +1762,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/ring_metacarpals.STL" />
+          filename="package://my_robot/meshes/hand/ring_metacarpals.STL" />
       </geometry>
     </collision>
   </link>
@@ -1806,7 +1806,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/ring_proximal.STL" />
+          filename="package://my_robot/meshes/hand/ring_proximal.STL" />
       </geometry>
       <material
         name="">
@@ -1820,7 +1820,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/ring_proximal.STL" />
+          filename="package://my_robot/meshes/hand/ring_proximal.STL" />
       </geometry>
     </collision>
   </link>
@@ -1864,7 +1864,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/ring_middle.STL" />
+          filename="package://my_robot/meshes/hand/ring_middle.STL" />
       </geometry>
       <material
         name="">
@@ -1878,7 +1878,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/ring_middle.STL" />
+          filename="package://my_robot/meshes/hand/ring_middle.STL" />
       </geometry>
     </collision>
   </link>
@@ -1926,7 +1926,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/ring_distal.STL" />
+          filename="package://my_robot/meshes/hand/ring_distal.STL" />
       </geometry>
       <material
         name="">
@@ -1940,7 +1940,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/ring_distal.STL" />
+          filename="package://my_robot/meshes/hand/ring_distal.STL" />
       </geometry>
     </collision>
   </link>
@@ -1988,7 +1988,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/pinky_metacarpals.STL" />
+          filename="package://my_robot/meshes/hand/pinky_metacarpals.STL" />
       </geometry>
       <material
         name="">
@@ -2002,7 +2002,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/pinky_metacarpals.STL" />
+          filename="package://my_robot/meshes/hand/pinky_metacarpals.STL" />
       </geometry>
     </collision>
   </link>
@@ -2046,7 +2046,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/pinky_proximal.STL" />
+          filename="package://my_robot/meshes/hand/pinky_proximal.STL" />
       </geometry>
       <material
         name="">
@@ -2060,7 +2060,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/pinky_proximal.STL" />
+          filename="package://my_robot/meshes/hand/pinky_proximal.STL" />
       </geometry>
     </collision>
   </link>
@@ -2104,7 +2104,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/pinky_middle.STL" />
+          filename="package://my_robot/meshes/hand/pinky_middle.STL" />
       </geometry>
       <material
         name="">
@@ -2118,7 +2118,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/pinky_middle.STL" />
+          filename="package://my_robot/meshes/hand/pinky_middle.STL" />
       </geometry>
     </collision>
   </link>
@@ -2166,7 +2166,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/pinky_distal.STL" />
+          filename="package://my_robot/meshes/hand/pinky_distal.STL" />
       </geometry>
       <material
         name="">
@@ -2180,7 +2180,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="meshes/hand/pinky_distal.STL" />
+          filename="package://my_robot/meshes/hand/pinky_distal.STL" />
       </geometry>
     </collision>
   </link>
