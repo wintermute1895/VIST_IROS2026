@@ -5,8 +5,19 @@ import numpy as np
 import socket
 import json
 import time
+import sys
 import os
 from scipy.signal import butter, lfilter
+
+
+# ================= 路径修复 =================
+# 获取当前脚本所在目录 (scripts/)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+# 获取项目根目录 (VIST/)
+PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
+# 将根目录加入 Python 搜索路径，这样才能 import src
+sys.path.append(PROJECT_ROOT)
+# ===========================================
 
 # ================= 配置 =================
 # 确保名字正确
