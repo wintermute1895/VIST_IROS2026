@@ -86,18 +86,50 @@ $$
 ## 🛠️ 系统架构 (Architecture)
 
 ```mermaid
-graph LR
-    A[Human Input (Noisy 6D Pose)] --> B(Intent Inference Module);
-    C[Visual Perception (Hole/Axis)] --> B;
-    C --> D{Intent-Adaptive Estimator};
-    A --> D;
-    
-    subgraph "The Core (VIST)"
-    B -- Adjust Q & R Matrix --> D;
-    D -- 1. Denoising <br> 2. Virtual Fixture Fusion <br> 3. Latent State Inference --> E[Optimal Robot State];
+ggraph TD
+    %% 定义样式
+    classDef input fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef algo fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
+    classDef robot fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+
+    %% 输入层
+    subgraph Perception [Perception Layer]
+        direction TB
+        Cam[Camera / RealSense] --> HumanTrack[Human Tracker<br>MediaPipe]
+        Cam --> ObjTrack[Object Tracker<br>ArUco/AprilTag]
+        
+        HumanTrack -- "z_human (Noisy 6D)" --> Estimator
+        ObjTrack -- "z_virtual (Hole Pose)" --> Estimator
     end
-    
-    E --> F[Robot Controller];
+
+    %% 核心算法层
+    subgraph Core [VIST Core Algorithm]
+        direction TB
+        
+        Estimator{Intent-Adaptive<br>Estimator}
+        
+        subgraph Logic [Unified Framework]
+            Intent[Intent Inference<br>Context Awareness] -.->|Adjust Q & R| KF[Kalman Filter]
+            Dynamics[Dynamics Prior<br>Pinocchio] -.->|Prediction| KF
+        end
+        
+        Estimator --> Logic
+        Logic -->|Optimal State| Retarget[Dex-Retargeting<br>Optimizer]
+    end
+
+    %% 执行层
+    subgraph Hardware [Hardware Layer]
+        Retarget -->|Joint Commands| Driver[Robot Driver]
+        Driver --> Arm[Realman/AgileX Arm]
+    end
+
+    %% 闭环
+    Arm -.->|Visual Feedback| Cam
+
+    %% 应用样式
+    class Cam,HumanTrack,ObjTrack input;
+    class Estimator,Intent,Dynamics,KF,Retarget algo;
+    class Driver,Arm robot;
 ```
 
 ## 🚀 快速开始 (Quick Start)
