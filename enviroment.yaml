@@ -1,0 +1,17 @@
+name: vist_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy
+  - scipy
+  - pinocchio  # 机器人动力学库，conda装最稳
+  - meshcat    # 可视化
+  - qpsolvers  # IK求解器需要
+  - pip
+  - pip:
+    - pink==0.1.0  # 逆运动学库 (注意版本)
+    - mediapipe    # 视觉捕捉
+    - pyrealsense2 # 如果用Realsense相机
+    - opencv-python
