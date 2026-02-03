@@ -60,6 +60,12 @@ class ArmNode:
 
         # 存储最新的人体关键点数据
         self.latest_human_kps = None
+        self.last_data_timestamp = None  # 最后接收数据的时间戳
+        self.data_timeout = 0.5  # 数据过期阈值（秒）
+
+        # IK 失败计数器（安全保护）
+        self.ik_failure_count = 0
+        self.max_ik_failures = 5  # 连续失败阈值
 
         # 6. 初始化可视化器（可选）
         self.visualize = visualize
@@ -226,6 +232,13 @@ class ArmNode:
         # A. 听 (IO) - 接收人体关键点数据（UDP）
         self._receive_human_keypoints()
 
+        # 检查数据是否过期
+        if self.last_data_timestamp is not None:
+            data_age = time.time() - self.last_data_timestamp
+            if data_age > self.data_timeout:
+                print(f"⚠️ [ArmNode] 数据过期 ({data_age*1000:.0f}ms)，停止运动")
+                self.latest_human_kps = None  # 清除过期数据
+
         # B. 想 (Core Logic) - 运动映射
         if self.latest_human_kps is not None:
             try:
@@ -287,6 +300,7 @@ class ArmNode:
                 if success:
                     # 成功收敛，更新命令
                     self.q_cmd = q_solution
+                    self.ik_failure_count = 0  # 重置失败计数器
 
                     # 每 60 帧打印一次调试信息
                     if self._debug_counter % 60 == 0:
@@ -295,11 +309,21 @@ class ArmNode:
                         print(f"   IK 误差: {ik_error*1000:.2f}mm")
                         print(f"   计算耗时: {ik_elapsed:.2f}ms")
                 else:
-                    # 未收敛，保持上一帧姿态（安全策略）
-                    # 注意：不要回退到只做位置追踪，这会导致跳变
+                    # 未收敛，增加失败计数
+                    self.ik_failure_count += 1
                     print(f"⚠️ [IK] 6-DoF 姿态追踪失败 (误差={ik_error*1000:.2f}mm, 耗时={ik_elapsed:.2f}ms)")
-                    print(f"   保持上一帧姿态不动")
-                    # self.q_cmd 保持不变
+                    print(f"   失败计数: {self.ik_failure_count}/{self.max_ik_failures}")
+
+                    # 检查是否超过失败阈值
+                    if self.ik_failure_count >= self.max_ik_failures:
+                        print(f"❌ [IK] 连续失败 {self.max_ik_failures} 次，进入安全模式")
+                        print(f"   保持当前姿态，清除目标数据")
+                        self.latest_human_kps = None  # 清除数据，停止运动
+                        self.ik_failure_count = 0  # 重置计数器
+                    else:
+                        # 保持上一帧姿态（安全策略）
+                        print(f"   保持上一帧姿态不动")
+                        # self.q_cmd 保持不变
 
             except ValueError as e:
                 print(f"⚠️ [ArmNode] 映射失败: {e}")
@@ -328,31 +352,45 @@ class ArmNode:
                 self.viz.display(q_display)
 
     def _receive_human_keypoints(self):
-        """从 UDP 接收人体关键点数据"""
+        """从 UDP 接收人体关键点数据（带时间戳检查）"""
         try:
             data, addr = self.sock.recvfrom(4096)
             packet = json.loads(data.decode('utf-8'))
 
-            # 期望的数据格式（新版：使用指关节）：
-            # {
-            #   "shoulder": [x, y, z],
-            #   "elbow": [x, y, z],
-            #   "wrist": [x, y, z],
-            #   "index_mcp": [x, y, z],
-            #   "pinky_mcp": [x, y, z]
-            # }
-            required_keys = ['shoulder', 'elbow', 'wrist', 'index_mcp', 'pinky_mcp']
-            if all(key in packet for key in required_keys):
-                self.latest_human_kps = {
-                    'shoulder': np.array(packet['shoulder']),
-                    'elbow': np.array(packet['elbow']),
-                    'wrist': np.array(packet['wrist']),
-                    'index_mcp': np.array(packet['index_mcp']),
-                    'pinky_mcp': np.array(packet['pinky_mcp'])
-                }
+            # 新格式：包含 keypoints 和 timestamp
+            if 'keypoints' in packet and 'timestamp' in packet:
+                keypoints = packet['keypoints']
+                timestamp = packet['timestamp']
+
+                # 期望的数据格式
+                required_keys = ['shoulder', 'elbow', 'wrist', 'index_mcp', 'pinky_mcp']
+                if all(key in keypoints for key in required_keys):
+                    self.latest_human_kps = {
+                        'shoulder': np.array(keypoints['shoulder']),
+                        'elbow': np.array(keypoints['elbow']),
+                        'wrist': np.array(keypoints['wrist']),
+                        'index_mcp': np.array(keypoints['index_mcp']),
+                        'pinky_mcp': np.array(keypoints['pinky_mcp'])
+                    }
+                    self.last_data_timestamp = timestamp
+                else:
+                    print(f"⚠️ [ArmNode] 收到的数据格式不正确: {keypoints.keys()}")
+                    print(f"   期望的键: {required_keys}")
             else:
-                print(f"⚠️ [ArmNode] 收到的数据格式不正确: {packet.keys()}")
-                print(f"   期望的键: {required_keys}")
+                # 兼容旧格式（无时间戳）
+                required_keys = ['shoulder', 'elbow', 'wrist', 'index_mcp', 'pinky_mcp']
+                if all(key in packet for key in required_keys):
+                    self.latest_human_kps = {
+                        'shoulder': np.array(packet['shoulder']),
+                        'elbow': np.array(packet['elbow']),
+                        'wrist': np.array(packet['wrist']),
+                        'index_mcp': np.array(packet['index_mcp']),
+                        'pinky_mcp': np.array(packet['pinky_mcp'])
+                    }
+                    self.last_data_timestamp = time.time()  # 使用接收时间
+                else:
+                    print(f"⚠️ [ArmNode] 收到的数据格式不正确: {packet.keys()}")
+                    print(f"   期望的键: {required_keys}")
 
         except BlockingIOError:
             # 没有数据可读（非阻塞模式）

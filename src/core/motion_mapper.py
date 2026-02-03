@@ -46,8 +46,10 @@ class ArmMotionMapper:
         self.L_fore = arm_lengths['fore']
 
         # Calibration matrix (camera to robot base frame)
-        # Default: Identity (assumes frames are aligned)
+        # ⚠️ IMPORTANT: VisionNode already transforms to robot frame!
+        # This matrix should remain IDENTITY. Only modify if you disable VisionNode's transformation.
         self.R_cam_to_base = np.eye(3, dtype=np.float64)
+        self._warn_if_not_identity()
 
         # Filtering parameters (for smoothing)
         self.alpha = 0.3  # Default smoothing coefficient (0=no smoothing, 1=no filtering)
@@ -58,6 +60,14 @@ class ArmMotionMapper:
         print(f"   Upper Arm Length: {self.L_upper:.3f}m")
         print(f"   Forearm Length: {self.L_fore:.3f}m")
         print(f"   Base Shoulder Position: {self.P_base_shoulder}")
+
+    def _warn_if_not_identity(self):
+        """检查 R_cam_to_base 是否为单位矩阵，如果不是则警告"""
+        if not np.allclose(self.R_cam_to_base, np.eye(3), atol=1e-6):
+            print(f"⚠️ [ArmMotionMapper] WARNING: R_cam_to_base is NOT identity!")
+            print(f"   VisionNode already transforms to robot frame.")
+            print(f"   This will cause DOUBLE transformation!")
+            print(f"   Current R_cam_to_base:\n{self.R_cam_to_base}")
 
     def set_calibration_matrix(self, matrix):
         """
@@ -91,13 +101,18 @@ class ArmMotionMapper:
         """
         Map human arm keypoints to robot end-effector pose using Three-Vector Mapping.
 
+        ⚠️ IMPORTANT: Expects input data in ROBOT FRAME, relative to shoulder origin!
+        VisionNode already performs:
+        1. Dynamic zeroing (shoulder at [0,0,0])
+        2. Coordinate transformation (MediaPipe → Robot)
+
         Args:
             human_kps: Dictionary with keys:
-                      - 'shoulder': numpy array [x, y, z] in camera frame
-                      - 'elbow': numpy array [x, y, z] in camera frame
-                      - 'wrist': numpy array [x, y, z] in camera frame
-                      - 'index_mcp': numpy array [x, y, z] - index finger knuckle
-                      - 'pinky_mcp': numpy array [x, y, z] - pinky finger knuckle
+                      - 'shoulder': numpy array [0, 0, 0] (origin, in robot frame)
+                      - 'elbow': numpy array [x, y, z] (relative to shoulder, in robot frame)
+                      - 'wrist': numpy array [x, y, z] (relative to shoulder, in robot frame)
+                      - 'index_mcp': numpy array [x, y, z] - index finger (in robot frame)
+                      - 'pinky_mcp': numpy array [x, y, z] - pinky finger (in robot frame)
 
         Returns:
             tuple: (target_pos, target_quat, debug_info)
@@ -122,7 +137,8 @@ class ArmMotionMapper:
         except KeyError as e:
             raise ValueError(f"Missing keypoint: {e}")
 
-        # Compute human arm vectors in camera frame
+        # Compute arm vectors (already in robot frame, relative to shoulder)
+        # Since shoulder is at origin [0,0,0], these ARE the direction vectors
         V_upper = P_E - P_S  # Upper arm vector (shoulder → elbow)
         V_fore = P_W - P_E   # Forearm vector (elbow → wrist)
         V_knuckle = P_index - P_pinky  # Knuckle vector (pinky → index, 横向参考向量)
@@ -150,10 +166,11 @@ class ArmMotionMapper:
         # ==========================================
         # Step 3: Coordinate Transformation
         # ==========================================
-        # Transform vectors from camera frame to robot base frame
-        V_upper_robot = self.R_cam_to_base @ V_upper
-        V_fore_robot = self.R_cam_to_base @ V_fore
-        V_knuckle_robot = self.R_cam_to_base @ V_knuckle
+        # ⚠️ SKIP: VisionNode already transformed to robot frame!
+        # Vectors are already in robot base frame, no transformation needed
+        V_upper_robot = V_upper  # Already in robot frame
+        V_fore_robot = V_fore    # Already in robot frame
+        V_knuckle_robot = V_knuckle  # Already in robot frame
 
         # ==========================================
         # Step 4: Position Mapping
