@@ -41,20 +41,30 @@ class HumanTracker:
         return None, False
 
 class ObjectTracker:
-    def __init__(self, intrinsic_matrix, dist_coeffs):
-        self.K = intrinsic_matrix
-        self.D = dist_coeffs
-        self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+    def __init__(self):
+        # 1. 定义字典和参数
+        self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
         self.parameters = cv2.aruco.DetectorParameters()
+        
+        # 2. [关键修复] 初始化检测器 (适配 OpenCV 4.7+)
+        # 如果你的 cv2 有 ArucoDetector 类，就实例化它
+        if hasattr(cv2.aruco, 'ArucoDetector'):
+            self.detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.parameters)
+        else:
+            self.detector = None # 旧版本兼容标志
 
     def detect_hole(self, image):
-        """
-        检测贴在孔附近的 ArUco Marker
-        返回: 孔的 6D 位姿 (相对于相机系) -> z_virtual
-        """
-        corners, ids, rejected = cv2.aruco.detectMarkers(
-            image, self.aruco_dict, parameters=self.parameters
-        )
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
+        # 3. [关键修复] 执行检测
+        if self.detector is not None:
+            # 新版 API (4.7+)
+            corners, ids, rejected = self.detector.detectMarkers(gray)
+        else:
+            # 旧版 API (<4.7)
+            corners, ids, rejected = cv2.aruco.detectMarkers(
+                gray, self.aruco_dict, parameters=self.parameters
+            )
         
         if ids is not None and len(ids) > 0:
             # 估计姿态

@@ -1,36 +1,33 @@
-# scripts/test_vision.py
+import numpy as np
 import cv2
-import yaml
-from src.perception.camera import CameraStream
-from src.perception.detector import HumanTracker, ObjectTracker
+import sys
+import os
 
-# 读取配置
-with open("config/hardware.yaml", "r") as f:
-    config = yaml.safe_load(f)
+# 路径黑魔法
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-cam = CameraStream(config)
-human_tracker = HumanTracker()
-obj_tracker = ObjectTracker(cam.K, cam.dist_coeffs)
+from src.perception.detector import ObjectTracker
 
-while True:
-    ret, frame, _ = cam.read()
-    if not ret: break
+# ❌ 错误写法：直接在外面写逻辑
+# obj_tracker = ObjectTracker()
+# frame = cv2.imread("test.jpg")
+# hole_pose, has_hole = obj_tracker.detect_hole(frame)  <-- 这里导致了报错
 
-    # 1. 检测人手 (噪声源)
-    hand_pose, has_hand = human_tracker.detect(frame)
-    if has_hand:
-        print(f"Hand (Human Input): {hand_pose[:3]}")
-        # 画个圈表示检测到了
-        cv2.circle(frame, (320, 240), 10, (0, 255, 0), -1)
+# ✅ 正确写法：封装进测试函数
+def test_hole_detection_workflow():
+    # 1. 准备数据
+    tracker = ObjectTracker()
+    
+    # 创建一个假的黑白图像 (模拟相机帧)
+    fake_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+    
+    # 2. 运行功能
+    # 这里我们只测试"代码不崩"，不指望它真的在黑图上检测出孔
+    try:
+        corners, found = tracker.detect_hole(fake_frame)
+        print(f"Detection ran successfully. Found: {found}")
+    except Exception as e:
+        pytest.fail(f"Detector crashed with error: {e}")
 
-    # 2. 检测孔位 (虚拟观测源)
-    hole_pose, has_hole = obj_tracker.detect_hole(frame)
-    if has_hole:
-        print(f"Hole (Virtual Fixture): {hole_pose[:3]}")
-
-    cv2.imshow("VIST Perception Test", frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cam.close()
-cv2.destroyAllWindows()
+    # 3. 如果你想测试真的检测，需要生成带 ArUco 的图
+    # 但作为单元测试，只要跑通流程不报错就算 Pass

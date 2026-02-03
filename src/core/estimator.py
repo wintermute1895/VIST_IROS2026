@@ -2,80 +2,79 @@ import numpy as np
 
 class IntentAdaptiveEstimator:
     """
-    IROS 2026 Innovation: Vision-based Intent-aware State Estimator
-    
-    原理：
-    当用户意图被识别为"精细操作"（如低速靠近孔位）时，显著增加观测噪声协方差 R，
-    迫使滤波器更多地依赖内部状态预测（F），从而实现"软锁定"效果，消除视觉抖动。
+    VIST 核心：意图自适应卡尔曼滤波器 (Joint Space 7DOF)
+    对应文档 [cite: 20, 70-79]
     """
     def __init__(self, dt=0.01):
+        self.n = 7           # 关节自由度 [cite: 13]
+        self.dim_x = 14      # 状态维度: 7 pos + 7 vel 
+        self.dim_z = 14      # 观测维度: 7 human + 7 virtual [cite: 35]
         self.dt = dt
-        self.initialized = False
         
-        # 1. 状态向量 x = [px, py, pz, vx, vy, vz]^T (位置 + 速度)
-        self.x = np.zeros(6)
+        # --- 1. 状态转移矩阵 F [cite: 24] ---
+        # [ I   dt*I ]
+        # [ 0    I   ]
+        self.F = np.eye(self.dim_x)
+        self.F[0:self.n, self.n:2*self.n] = np.eye(self.n) * dt
         
-        # 2. 状态协方差矩阵 P (初始不确定性)
-        self.P = np.eye(6) * 1.0
+        # --- 2. 过程噪声 Q [cite: 28] ---
+        # 隐式冗余约束：让关节速度变化稍微“懒”一点
+        self.Q = np.eye(self.dim_x) * 1e-3
+        # 我们可以稍微降低肘部对应的噪声（这里简化处理，均匀噪声）
         
-        # 3. 状态转移矩阵 F (恒速模型 CV Model)
-        # p_new = p + v * dt
-        # v_new = v
-        self.F = np.eye(6)
-        self.F[0:3, 3:6] = np.eye(3) * dt
-        
-        # 4. 观测矩阵 H (我们只观测位置 px, py, pz)
-        self.H = np.zeros((3, 6))
-        self.H[0:3, 0:3] = np.eye(3)
-        
-        # 5. 噪声参数 (这些是需要调参的关键！)
-        self.Q = np.eye(6) * 0.001       # 过程噪声：相信物理模型的程度
-        self.R_base = np.eye(3) * 0.005  # 基础视觉噪声：当完全信任视觉时
-        
-    def init_state(self, initial_pos):
-        """初始化滤波器状态"""
-        self.x[0:3] = initial_pos
-        self.x[3:6] = 0  # 初始速度设为0
-        self.initialized = True
-        print("✅ Estimator Initialized with pos:", initial_pos)
+        # --- 3. 观测矩阵 H [cite: 43] ---
+        # [ I  0 ] -> z_human 观测位置
+        # [ I  0 ] -> z_virtual 观测位置
+        self.H = np.zeros((self.dim_z, self.dim_x))
+        self.H[0:self.n, 0:self.n] = np.eye(self.n)
+        self.H[self.n:2*self.n, 0:self.n] = np.eye(self.n)
 
-    def update(self, measurement_pos, intent_score):
+        # 初始化状态和协方差
+        self.x = np.zeros(self.dim_x)
+        self.P = np.eye(self.dim_x) * 0.1
+
+        # 噪声基准参数 [cite: 64, 66]
+        self.R_base = 1e-3
+        self.R_inf = 1e3
+        self.R_min = 1e-5
+
+    def update(self, z_human, z_virtual, alpha):
         """
-        核心更新步
-        :param measurement_pos: 视觉原始观测值 [x, y, z] (Numpy array)
-        :param intent_score: 0.0 (快速移动) ~ 1.0 (精细操作)
-        :return: 平滑后的位置 [x, y, z]
+        执行卡尔曼更新 [cite: 77]
+        :param alpha: 意图因子 (0~1)
         """
-        if not self.initialized:
-            self.init_state(measurement_pos)
-            return measurement_pos
+        # --- A. 预测 (Time Update) ---
+        x_pred = self.F @ self.x
+        P_pred = self.F @ self.P @ self.F.T + self.Q
+        
+        # --- B. 协方差调度 (Covariance Scheduling) [cite: 63] ---
+        R = np.zeros((self.dim_z, self.dim_z))
+        
+        # 1. 人类噪声 R_human: alpha 越大，噪声越大 (不信人) [cite: 64]
+        # 使用 50.0 作为增益系数 gamma1
+        r_hum_val = self.R_base * (1.0 + 50.0 * alpha)
+        R[0:self.n, 0:self.n] = np.eye(self.n) * r_hum_val
+        
+        # 2. 虚拟噪声 R_virtual: alpha 越大，噪声越小 (信虚拟) [cite: 66]
+        # 使用 20.0 作为衰减系数 gamma2
+        # 当 alpha=0, val -> R_inf; 当 alpha=1, val -> R_min
+        r_virt_val = self.R_inf * np.exp(-20.0 * alpha) + self.R_min
+        R[self.n:2*self.n, self.n:2*self.n] = np.eye(self.n) * r_virt_val
 
-        # --- IROS 核心创新点: 自适应 R 矩阵 ---
-        # 动态调节因子 alpha
-        # intent=0 -> alpha=1.0 (保持原状)
-        # intent=1 -> alpha=50.0 (极度不信视觉，像是在粘滞流体中运动)
-        alpha = 1.0 + (intent_score * 50.0) 
-        R_adaptive = self.R_base * alpha
-
-        # --- 标准卡尔曼滤波流程 ---
+        # --- C. 更新 (Measurement Update) ---
+        z_k = np.concatenate([z_human, z_virtual])
+        y = z_k - self.H @ x_pred
         
-        # 1. 预测 (Predict)
-        self.x = self.F @ self.x
-        self.P = self.F @ self.P @ self.F.T + self.Q
+        S = self.H @ P_pred @ self.H.T + R
+        S += np.eye(self.dim_z) * 1e-9 # 防奇异
         
-        # 2. 更新 (Update)
-        y = measurement_pos - self.H @ self.x  # 观测残差 (Innovation)
-        S = self.H @ self.P @ self.H.T + R_adaptive
-        
-        # 计算卡尔曼增益 K (最优融合权重)
-        # K = P * H.T * inv(S)
         try:
-            K = self.P @ self.H.T @ np.linalg.inv(S)
+            K = P_pred @ self.H.T @ np.linalg.inv(S)
         except np.linalg.LinAlgError:
-            # 极少数情况S不可逆，退化为相信预测
-            K = np.zeros((6, 3))
+            K = np.zeros((self.dim_x, self.dim_z))
 
-        self.x = self.x + K @ y
-        self.P = (np.eye(6) - K @ self.H) @ self.P
+        self.x = x_pred + K @ y
+        self.P = (np.eye(self.dim_x) - K @ self.H) @ P_pred
         
-        return self.x[0:3] # 只返回位置用于控制
+        # 返回位置部分
+        return self.x[0:self.n]

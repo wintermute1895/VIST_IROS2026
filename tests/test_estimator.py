@@ -2,44 +2,36 @@ import numpy as np
 import pytest
 import sys
 import os
-
-# 路径黑魔法，确保能 import src
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core.estimator import IntentAdaptiveEstimator
 
-def test_estimator_initialization():
-    """测试初始化是否正常"""
+def test_estimator_mechanics():
+    # 1. 初始化测试
     est = IntentAdaptiveEstimator(dt=0.01)
-    # 第一帧数据输入
-    res = est.update(np.array([0.1, 0.2, 0.3]), intent_score=0.0)
-    # 第一帧应该直接返回原值（Warm start）
-    assert np.allclose(res, np.array([0.1, 0.2, 0.3]))
+    assert est.P.shape == (14, 14)
+    
+    # 2. 静态保持测试 (输入全0，输出应该收敛到0)
+    z_human = np.zeros(7)
+    z_virtual = np.zeros(7)
+    
+    for _ in range(50):
+        q_cmd = est.update(z_human, z_virtual, alpha=0.5)
+    
+    assert np.allclose(q_cmd, np.zeros(7), atol=1e-3), "Estimator drifting!"
 
-def test_estimator_smoothing_effect():
-    """测试：高意图分(精细操作)时，应该有强平滑效果"""
+def test_virtual_attraction():
+    # 测试：当 alpha=1 时，是否真的被吸附到了 z_virtual
     est = IntentAdaptiveEstimator(dt=0.01)
     
-    # 1. 初始化
-    est.update(np.array([0.0, 0.0, 0.0]), intent_score=0.0)
+    z_human = np.ones(7) * 10.0  # 人想去很远的地方 (10.0)
+    z_virtual = np.zeros(7)      # 孔在这里 (0.0)
     
-    # 2. 突然输入一个大跳变 [1.0, 0, 0]
-    # 意图分设为 1.0 (极度慢速/精细)，这时候 R 很大，信任模型
-    input_pos = np.array([1.0, 0.0, 0.0])
-    output_pos = est.update(input_pos, intent_score=1.0)
-    
-    # 3. 断言：输出绝对不应该直接变成 1.0，应该远小于 1.0 (比如 0.1 左右)
-    print(f"Input: 1.0, Output with high intent: {output_pos[0]}")
-    assert output_pos[0] < 0.5, "Error: Estimator did not smooth the signal enough!"
-
-def test_estimator_fast_response():
-    """测试：低意图分(快速移动)时，应该快速跟随"""
-    est = IntentAdaptiveEstimator(dt=0.01)
-    est.update(np.array([0.0, 0.0, 0.0]), intent_score=0.0)
-    
-    # 意图分设为 0.0 (快速)，这时候 R 很小，信任观测
-    input_pos = np.array([1.0, 0.0, 0.0])
-    output_pos = est.update(input_pos, intent_score=0.0)
-    
-    # 断言：输出应该很接近 1.0
-    assert output_pos[0] > 0.8, "Error: Estimator is lagging too much!"
+    # 强制开启精密模式
+    for _ in range(100):
+        # alpha=1.0 意味着极其信任 z_virtual
+        q_cmd = est.update(z_human, z_virtual, alpha=1.0)
+        
+    # 结果应该非常接近 0.0，而不是 10.0
+    print(f"Final Q: {q_cmd[0]}")
+    assert q_cmd[0] < 0.5, "Virtual Guide failed to attract!"
