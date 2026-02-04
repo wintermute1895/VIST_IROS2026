@@ -1,0 +1,126 @@
+# LinkerHand L10 Dex-Retargeting 配置文件
+# 用于将 MediaPipe 手部关键点映射到 LinkerHand L10 关节空间
+
+retargeting:
+  # 机器人 URDF 模型路径（相对于项目根目录）
+  urdf_path: "config/robot.urdf"
+
+  # Retargeting 类型
+  type: "vector"
+
+  # 目标关节名称（LinkerHand L10 的主动关节 - 10个）
+  # 这些是优化器直接控制的关节
+  target_joint_names:
+    - "thumb_cmc_pitch"    # [Active] 拇指根部俯仰
+    - "thumb_cmc_yaw"      # [Active] 拇指根部偏航
+    - "thumb_cmc_roll"     # [Active] 拇指根部滚转
+    - "index_mcp_pitch"    # [Active] 食指MCP弯曲
+    - "index_mcp_roll"     # [Active] 食指MCP侧摆
+    - "middle_mcp_pitch"   # [Active] 中指MCP弯曲
+    - "ring_mcp_pitch"     # [Active] 无名指MCP弯曲
+    - "ring_mcp_roll"      # [Active] 无名指MCP侧摆
+    - "pinky_mcp_pitch"    # [Active] 小指MCP弯曲
+    - "pinky_mcp_roll"     # [Active] 小指MCP侧摆
+
+  # Vector retargeting 所需的起始链接（每个手指的基座）
+  # 对于所有手指，起始点都是手掌基座
+  target_origin_link_names:
+    - "hand_base_link"  # thumb
+    - "hand_base_link"  # index
+    - "hand_base_link"  # middle
+    - "hand_base_link"  # ring
+    - "hand_base_link"  # pinky
+
+  # Vector retargeting 所需的任务链接（每个手指的指尖）
+  target_task_link_names:
+    - "thumb_distal"   # thumb fingertip
+    - "index_distal"   # index fingertip
+    - "middle_distal"  # middle fingertip
+    - "ring_distal"    # ring fingertip
+    - "pinky_distal"   # pinky fingertip
+
+  # MediaPipe 手部关键点索引（对应 5 个手指的起始点和指尖）
+  # 格式：2D 数组 [[起始点索引], [指尖索引]]
+  # MediaPipe 21 个关键点中：
+  # 0: 手腕, 4: 拇指尖, 8: 食指尖, 12: 中指尖, 16: 无名指尖, 20: 小指尖
+  target_link_human_indices:
+    - [0, 0, 0, 0, 0]      # 起始点：所有手指都从手腕开始
+    - [4, 8, 12, 16, 20]   # 指尖：拇指、食指、中指、无名指、小指
+
+# LinkerHand SDK 配置
+linkerhand:
+  # 手部类型：left 或 right
+  hand_type: "right"
+
+  # 手部型号
+  hand_joint: "L10"
+
+  # CAN 接口
+  can: "can0"
+
+  # 速度设置（5个主要手指的速度，降低速度以获得更平滑的运动）
+  # 原始值: [120, 250, 250, 250, 250]
+  # 降低后: 减少到原来的 40% 左右
+  speed: [50, 100, 100, 100, 100]
+
+  # 扭矩设置（5个主要手指的扭矩）
+  torque: [200, 200, 200, 200, 200]
+
+  # 禁用碰撞检测（设置为 false）
+  collision_detection: false
+
+# 关节映射：从 dex-retargeting 输出的弧度值映射到 LinkerHand 的 0-255 范围
+# L10 的 10 个关节顺序：
+# 0: Thumb CMC Pitch
+# 1: Thumb Adduction/Abduction (Yaw)
+# 2: Index Finger MCP Pitch
+# 3: Middle Finger MCP Pitch
+# 4: Ring Finger MCP Pitch
+# 5: Pinky Finger MCP Pitch
+# 6: Index Finger Adduction/Abduction (Yaw)
+# 7: Ring Finger Adduction/Abduction (Yaw)
+# 8: Pinky Finger Adduction/Abduction (Yaw)
+# 9: Thumb Rotation (Roll)
+
+joint_mapping:
+  # 每个关节的弧度范围和对应的硬件原始值范围
+  # 注意：raw_range已反转，使手指张开/闭合方向正确
+  thumb_cmc_pitch:
+    rad_range: [0.0, 1.57]  # 0 到 90 度
+    raw_range: [255, 0]  # 反转：张开=255, 闭合=0
+
+  thumb_cmc_yaw:
+    rad_range: [-0.5, 0.5]  # -30 到 30 度
+    raw_range: [200, 50]  # 反转
+
+  index_mcp_pitch:
+    rad_range: [0.0, 1.57]
+    raw_range: [255, 0]  # 反转：张开=255, 闭合=0
+
+  middle_mcp_pitch:
+    rad_range: [0.0, 1.57]
+    raw_range: [255, 0]  # 反转：张开=255, 闭合=0
+
+  ring_mcp_pitch:
+    rad_range: [0.0, 1.57]
+    raw_range: [255, 0]  # 反转：张开=255, 闭合=0
+
+  pinky_mcp_pitch:
+    rad_range: [0.0, 1.57]
+    raw_range: [255, 0]  # 反转：张开=255, 闭合=0
+
+  index_mcp_roll:
+    rad_range: [-0.3, 0.3]
+    raw_range: [200, 100]  # 反转
+
+  ring_mcp_roll:
+    rad_range: [-0.3, 0.3]
+    raw_range: [200, 100]  # 反转
+
+  pinky_mcp_roll:
+    rad_range: [-0.3, 0.3]
+    raw_range: [200, 100]  # 反转
+
+  thumb_cmc_roll:
+    rad_range: [-1.57, 1.57]
+    raw_range: [255, 0]  # 反转

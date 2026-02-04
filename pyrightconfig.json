@@ -1,0 +1,15 @@
+{
+    "include": [
+        "src",
+        "scripts",
+        "config"
+    ],
+    "extraPaths": [
+        "src",
+        "src/robot/sdk/linkerhand-python-sdk-main"
+    ],
+    "pythonVersion": "3.10",
+    "typeCheckingMode": "basic",
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": false
+}
