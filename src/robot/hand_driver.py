@@ -23,7 +23,9 @@ from typing import List, Optional
 import logging
 
 # Add SDK to Python path
-SDK_PATH = "linkerhand-python-sdk-main"
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SDK_PATH = os.path.join(SCRIPT_DIR, "sdk", "linkerhand-python-sdk-main")
 SDK_LINKERHAND_PATH = os.path.join(SDK_PATH, "LinkerHand")
 
 if SDK_PATH not in sys.path:
