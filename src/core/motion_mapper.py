@@ -45,11 +45,22 @@ class ArmMotionMapper:
         self.L_upper = arm_lengths['upper']
         self.L_fore = arm_lengths['fore']
 
-        # Calibration matrix (camera to robot base frame)
-        # ⚠️ IMPORTANT: VisionNode already transforms to robot frame!
-        # This matrix should remain IDENTITY. Only modify if you disable VisionNode's transformation.
+        # Coordinate transformation matrix: Vision Frame → Robot Base Frame
+        # Vision Frame (Shoulder Frame): X=up, Y=right, Z=forward
+        # Robot Base Frame (body_base_link): X=forward, Y=left, Z=up
+        # 用户和机器人同向放置（不是面对面）
+        # Transformation:
+        #   X_robot = Z_vision (forward = forward, 同向)
+        #   Y_robot = -Y_vision (left = -right)
+        #   Z_robot = X_vision (up = up)
+        self.R_vision_to_robot = np.array([
+            [0,  0,  1],  # X_robot = Z_vision (同向放置)
+            [0,  1,  0],  # Y_robot = -Y_vision
+            [1,  0,  0]   # Z_robot = X_vision
+        ], dtype=np.float64)
+
+        # Legacy: Keep for backward compatibility (deprecated)
         self.R_cam_to_base = np.eye(3, dtype=np.float64)
-        self._warn_if_not_identity()
 
         # Filtering parameters (for smoothing)
         self.alpha = 0.3  # Default smoothing coefficient (0=no smoothing, 1=no filtering)
@@ -166,11 +177,18 @@ class ArmMotionMapper:
         # ==========================================
         # Step 3: Coordinate Transformation
         # ==========================================
-        # ⚠️ SKIP: VisionNode already transformed to robot frame!
-        # Vectors are already in robot base frame, no transformation needed
-        V_upper_robot = V_upper  # Already in robot frame
-        V_fore_robot = V_fore    # Already in robot frame
-        V_knuckle_robot = V_knuckle  # Already in robot frame
+        # ⚠️ CRITICAL: VisionNode sends data in Shoulder Frame, NOT Robot Frame!
+        # Must transform from Shoulder Frame to Robot Base Frame
+        #
+        # Shoulder Frame (from VisionNode):
+        #   X = up, Y = right, Z = forward
+        # Robot Base Frame:
+        #   X = forward, Y = left, Z = up
+        #
+        # Transformation: R_vision_to_robot @ vector
+        V_upper_robot = self.R_vision_to_robot @ V_upper
+        V_fore_robot = self.R_vision_to_robot @ V_fore
+        V_knuckle_robot = self.R_vision_to_robot @ V_knuckle
 
         # ==========================================
         # Step 4: Position Mapping

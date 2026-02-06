@@ -1,0 +1,120 @@
+
+
+
+
+
+
+
+
+
+# VIST System Configuration
+# 系统配置文件 - 统一管理所有参数
+
+# ==========================================
+# 机器人参数
+# ==========================================
+robot:
+  # 肩部位置（相对于 body_base_link）
+  shoulder_position: [0.0, -0.096, 1.217]  # [x, y, z] in meters
+
+  # 臂长参数
+  arm_lengths:
+    upper: 0.2908    # 上臂长度 (meters)
+    forearm: 0.2366  # 前臂长度 (meters)
+
+  # 关节限位
+  joint_limits:
+    - [-2.0, 2.0]      # Joint 0: Shoulder_Pitch
+    - [-2.0, 3.14]     # Joint 1: Shoulder_Roll
+    - [-3.14, 3.14]    # Joint 2: Shoulder_Yaw
+    - [-2.35, 2.0]     # Joint 3: Elbow_Pitch
+    - [-3.14, 3.14]    # Joint 4: Wrist_Yaw
+    - [-3.14, 3.14]    # Joint 5: Wrist_Pitch
+    - [-3.14, 3.14]    # Joint 6: Wrist_Roll
+
+# ==========================================
+# 坐标系转换
+# ==========================================
+coordinate_transform:
+  # 转换矩阵：Shoulder Frame → Robot Base Frame
+  # 用户和机器人同向放置（不是面对面）
+  rotation_matrix: [
+    [0,  0,  1],  # X_robot = Z_shoulder (前 = 前)
+    [0, -1,  0],  # Y_robot = -Y_shoulder (左 = -右)
+    [1,  0,  0]   # Z_robot = X_shoulder (上 = 上)
+  ]
+
+  # 坐标系说明
+  shoulder_frame:
+    description: "Vision node output (relative to shoulder)"
+    axes:
+      x: "up (vertical)"
+      y: "right (horizontal)"
+      z: "forward (toward camera)"
+
+  robot_base_frame:
+    description: "Robot base coordinate system (body_base_link)"
+    axes:
+      x: "forward"
+      y: "left"
+      z: "up"
+
+# ==========================================
+# 控制参数
+# ==========================================
+control:
+  # 微分 IK 参数
+  ik_gain: 0.9  # 增益系数 (0-1)
+
+  # 速度和加速度限制
+  max_joint_velocity: 0.8      # rad/s
+  max_joint_acceleration: 2.0  # rad/s^2
+
+  # 控制频率
+  frequency: 50  # Hz
+  dt: 0.02       # 1/frequency (seconds)
+
+  # 运动映射参数
+  filter_alpha: 0.5  # EMA 滤波系数 (0=最大平滑, 1=无滤波)
+
+  # 双目标 IK 权重
+  wrist_weight: 1.0   # 手腕权重
+  elbow_weight: 0.5   # 肘部权重
+
+# ==========================================
+# 网络参数
+# ==========================================
+network:
+  udp_ip: "127.0.0.1"
+  udp_port: 6001
+  buffer_size: 65536
+
+# ==========================================
+# 视觉参数
+# ==========================================
+vision:
+  # 相机参数
+  width: 640
+  height: 480
+  fps: 30
+
+  # 坐标缩放
+  scale: 1.0
+
+  # 深度融合
+  use_realsense_depth: true
+  depth_valid_threshold: 0.001  # meters
+
+# ==========================================
+# 安全参数
+# ==========================================
+safety:
+  # 数据超时
+  max_data_timeout: 50  # frames (1秒 @ 50Hz)
+
+  # 位置限制
+  max_distance_from_shoulder: 0.7  # meters (1.2 * arm_length)
+
+  # 调试模式
+  debug_mode: false
+  debug_print_interval: 30  # frames
