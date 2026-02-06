@@ -202,17 +202,25 @@ def main():
             )
             ik_time = (time.time() - ik_start_time) * 1000  # ms
 
-            success_count += 1
+            # ==========================================
+            # 综合安全检查（使用 SafetyMonitor 的完整功能）
+            # ==========================================
+            # 检查：关节限位 + 速度限制 + 加速度限制
+            is_safe, violations = safety_monitor.check_command(
+                q_solution,
+                time.time(),
+                end_effector_pos=target_pos_filtered  # 可选：工作空间检查
+            )
 
-            # 安全检查
-            violations = safety_monitor.check_joint_limits(q_solution)
-            if not violations:
-                # 速度限制（关节空间）
+            if is_safe:
+                success_count += 1
+
+                # 速度限制（关节空间）- 作为额外保护层
                 q_velocity = (q_solution - q_cmd_prev) / dt
                 q_velocity_limited = np.clip(q_velocity, -max_joint_velocity, max_joint_velocity)
                 q_cmd = q_cmd_prev + q_velocity_limited * dt
 
-                # 再次检查限位
+                # 再次检查限位（双重保护）
                 q_cmd = np.clip(q_cmd, joint_limits[:, 0], joint_limits[:, 1])
 
                 # 发送指令
@@ -235,9 +243,9 @@ def main():
                     total_latency = map_time + filter_time + ik_time
                     print(f"✅ 控制: {success_count}/{total_count} | 误差: {ik_error*1000:.1f}mm | 延迟: {total_latency:.1f}ms (IK:{ik_time:.1f}ms){joint1_warning}", end='\r')
             else:
-                # 关节限位违规
-                if success_count % 50 == 0:
-                    print(f"\n⚠️ 关节限位违规: {violations}")
+                # 安全违规：跳过此帧，不发送指令
+                if total_count % 50 == 0:
+                    print(f"\n⚠️ 安全违规（跳过指令）: {violations}")
 
             # 控制频率
             elapsed = time.time() - loop_start

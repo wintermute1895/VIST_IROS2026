@@ -17,7 +17,7 @@ Reference: VIST (Vision-based Intent-aware State Teleoperation), IROS 2026
 """
 
 import numpy as np
-from scipy.spatial.transform import Rotation
+from scipy.spatial.transform import Rotation, Slerp
 import sys
 import os
 
@@ -69,7 +69,28 @@ class ArmMotionMapper:
         # Vision Frame (Shoulder Frame): X=up, Y=right, Z=forward
         # Robot Base Frame (body_base_link): X=forward, Y=left, Z=up
         # 转换矩阵定义在 config/system_config.yaml
-        self.R_vision_to_robot = config.rotation_matrix
+        R = config.rotation_matrix
+
+        # 验证旋转矩阵的有效性
+        # 1. 检查正交性: R^T @ R = I
+        orthogonality_check = R @ R.T
+        if not np.allclose(orthogonality_check, np.eye(3), atol=1e-6):
+            raise ValueError(
+                f"配置文件中的旋转矩阵不正交！\n"
+                f"R @ R^T =\n{orthogonality_check}\n"
+                f"应该等于单位矩阵"
+            )
+
+        # 2. 检查行列式: det(R) = 1 (右手坐标系)
+        det = np.linalg.det(R)
+        if not np.isclose(det, 1.0, atol=1e-6):
+            raise ValueError(
+                f"旋转矩阵行列式 = {det:.6f}，应该等于 1.0\n"
+                f"det(R) ≠ 1 表示矩阵包含镜像或缩放变换"
+            )
+
+        self.R_vision_to_robot = R
+        print(f"   ✅ 旋转矩阵验证通过 (正交性误差: {np.linalg.norm(orthogonality_check - np.eye(3)):.2e})")
 
         # 滤波参数（从配置文件读取）
         self.alpha = config.filter_alpha
@@ -252,8 +273,6 @@ class ArmMotionMapper:
             filtered_pos = self.alpha * curr_pos + (1.0 - self.alpha) * self.prev_pos
 
             # Rotation filtering: Spherical Linear Interpolation (SLERP)
-            from scipy.spatial.transform import Slerp
-
             # Create Rotation objects from quaternions
             rot_prev = Rotation.from_quat(self.prev_rot)
             rot_curr = Rotation.from_quat(curr_quat)
