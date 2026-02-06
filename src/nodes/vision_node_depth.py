@@ -3,11 +3,13 @@
 Vision Node with RealSense Depth Integration
 使用 MediaPipe Pose 检测姿态 + RealSense 深度数据提高 Z 轴精度
 
-改进点：
-1. 使用 RealSense RGB 流（替代普通摄像头）
-2. 同时获取深度流，提供真实的 Z 坐标
-3. 保持 MediaPipe 的姿态检测能力
-4. 自动对齐 RGB 和深度图
+职责：
+1. 数据采集：MediaPipe 姿态检测 + RealSense 深度
+2. 动态归零：以肩部为原点
+3. 深度融合：用 RealSense 深度替换 MediaPipe 的 Z 坐标
+4. 输出：肩膀坐标系（X=上, Y=右, Z=前）
+
+注意：本节点不做坐标系转换，只输出原始数据
 """
 import cv2
 import mediapipe as mp
@@ -16,21 +18,45 @@ import socket
 import json
 import time
 import pyrealsense2 as rs
+import sys
+import os
+
+# 添加项目根目录到路径
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from src.config import get_config
 
 
 class VisionNodeWithDepth:
-    def __init__(self, udp_ip="127.0.0.1", udp_port=6001, scale=1.0,
-                 width=640, height=480, fps=30):
+    def __init__(self, udp_ip=None, udp_port=None, scale=None,
+                 width=None, height=None, fps=None):
         """
         初始化视觉节点（带深度）
-        :param udp_ip: UDP 目标 IP
-        :param udp_port: UDP 目标端口
-        :param scale: 缩放因子（调整灵敏度）
-        :param width: 图像宽度
-        :param height: 图像高度
-        :param fps: 帧率
+
+        参数可以从配置文件自动加载，也可以手动指定（手动指定优先）
+
+        :param udp_ip: UDP 目标 IP（可选，默认从配置文件读取）
+        :param udp_port: UDP 目标端口（可选，默认从配置文件读取）
+        :param scale: 缩放因子（可选，默认从配置文件读取）
+        :param width: 图像宽度（可选，默认从配置文件读取）
+        :param height: 图像高度（可选，默认从配置文件读取）
+        :param fps: 帧率（可选，默认从配置文件读取）
         """
         print("📷 [VisionNodeDepth] 初始化视觉节点 (MediaPipe + RealSense Depth)...")
+
+        # 加载配置
+        config = get_config()
+
+        # 使用配置文件参数（如果未手动指定）
+        udp_ip = udp_ip if udp_ip is not None else config.udp_ip
+        udp_port = udp_port if udp_port is not None else config.udp_port
+        scale = scale if scale is not None else config.vision_scale
+        width = width if width is not None else config.vision_width
+        height = height if height is not None else config.vision_height
+        fps = fps if fps is not None else config.vision_fps
+
+        print(f"   配置: {width}x{height} @ {fps}fps, scale={scale}")
+        print(f"   UDP: {udp_ip}:{udp_port}")
 
         # ==========================================
         # 1. 初始化 RealSense
@@ -127,9 +153,18 @@ class VisionNodeWithDepth:
         # 返回中位数（比平均值更鲁棒）
         return np.median(depths)
 
-    def mediapipe_to_robot_coords(self, mp_point, real_depth=None):
+    def mediapipe_to_shoulder_coords(self, mp_point, real_depth=None):
         """
-        将 MediaPipe 坐标系转换为肩膀坐标系
+        将 MediaPipe 坐标转换为肩膀坐标系（只做深度融合，不做旋转转换）
+
+        输入：MediaPipe 世界坐标 [x, y, z]
+        输出：肩膀坐标系 [x, y, z]
+            - X: 向上（垂直）
+            - Y: 向右（水平）
+            - Z: 向前（靠近相机）
+            - 原点：肩部（动态归零）
+
+        注意：本方法不做坐标系旋转转换，转换由 motion_mapper 负责
 
         ⚠️ 重要：图像在MediaPipe处理前已被翻转（cv2.flip），所以X轴已经镜像！
 
@@ -161,13 +196,6 @@ class VisionNodeWithDepth:
             # 向前伸手 → wrist_depth < shoulder_depth → real_depth < 0
             # 但我们希望 Z 增大，所以需要取反
             z_mp = -real_depth
-            # 调试输出
-            if hasattr(self, '_debug_counter'):
-                self._debug_counter += 1
-            else:
-                self._debug_counter = 0
-            if self._debug_counter % 30 == 0:  # 每30帧输出一次
-                print(f"[DEBUG] real_depth={real_depth:.4f}, z_mp={z_mp:.4f}, z_final={z_mp * self.scale:.4f}")
 
         return np.array([
             -y_mp * self.scale,  # MediaPipe -Y(上) → 肩膀 X(上，垂直)
@@ -274,10 +302,10 @@ class VisionNodeWithDepth:
             index_local_mp = np.array([left_index_world.x, left_index_world.y, left_index_world.z]) - origin_mp
             pinky_local_mp = np.array([left_pinky_world.x, left_pinky_world.y, left_pinky_world.z]) - origin_mp
 
-            # 4. 坐标系转换（MediaPipe → Robot）
+            # 4. 坐标系转换（MediaPipe → Shoulder Frame）
             # ⚠️ 关键改进：使用 RealSense 深度替换 MediaPipe 的 Z 坐标
             # 计算相对深度（相对于肩部）
-            shoulder_robot = np.array([0.0, 0.0, 0.0])  # 肩部固定在原点
+            shoulder_shoulder = np.array([0.0, 0.0, 0.0])  # 肩部固定在原点
 
             # 如果深度有效，计算相对深度；否则使用 MediaPipe 的估计
             elbow_rel_depth = (elbow_depth - shoulder_depth) if (elbow_depth and shoulder_depth) else None
@@ -285,26 +313,18 @@ class VisionNodeWithDepth:
             index_rel_depth = (index_depth - shoulder_depth) if (index_depth and shoulder_depth) else None
             pinky_rel_depth = (pinky_depth - shoulder_depth) if (pinky_depth and shoulder_depth) else None
 
-            # 调试输出：检查深度数据
-            if hasattr(self, '_depth_debug_counter'):
-                self._depth_debug_counter += 1
-            else:
-                self._depth_debug_counter = 0
-            if self._depth_debug_counter % 30 == 0:  # 每30帧输出一次
-                print(f"[DEPTH] shoulder={shoulder_depth:.4f}m, wrist={wrist_depth:.4f}m, rel={wrist_rel_depth:.4f}m" if wrist_rel_depth else "[DEPTH] wrist_rel_depth is None")
+            elbow_shoulder = self.mediapipe_to_shoulder_coords(elbow_local_mp, elbow_rel_depth)
+            wrist_shoulder = self.mediapipe_to_shoulder_coords(wrist_local_mp, wrist_rel_depth)
+            index_shoulder = self.mediapipe_to_shoulder_coords(index_local_mp, index_rel_depth)
+            pinky_shoulder = self.mediapipe_to_shoulder_coords(pinky_local_mp, pinky_rel_depth)
 
-            elbow_robot = self.mediapipe_to_robot_coords(elbow_local_mp, elbow_rel_depth)
-            wrist_robot = self.mediapipe_to_robot_coords(wrist_local_mp, wrist_rel_depth)
-            index_robot = self.mediapipe_to_robot_coords(index_local_mp, index_rel_depth)
-            pinky_robot = self.mediapipe_to_robot_coords(pinky_local_mp, pinky_rel_depth)
-
-            # 5. 构建关键点字典（发送给 ArmNode）
+            # 5. 构建关键点字典（发送给 Mapper）
             keypoints = {
-                'shoulder': shoulder_robot.tolist(),  # [0, 0, 0]
-                'elbow': elbow_robot.tolist(),
-                'wrist': wrist_robot.tolist(),
-                'index_mcp': index_robot.tolist(),
-                'pinky_mcp': pinky_robot.tolist()
+                'shoulder': shoulder_shoulder.tolist(),  # [0, 0, 0]
+                'elbow': elbow_shoulder.tolist(),
+                'wrist': wrist_shoulder.tolist(),
+                'index_mcp': index_shoulder.tolist(),
+                'pinky_mcp': pinky_shoulder.tolist()
             }
 
             # 绘制姿态骨架（使用屏幕坐标）
