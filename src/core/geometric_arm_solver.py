@@ -45,17 +45,20 @@ class GeometricArmSolver:
         self.controlled_joints = controlled_joints
         self.ee_frame_id = ee_frame_id
 
+        # 使用 DEFAULT_RIGHT_ARM_JOINTS 的顺序构建映射
+        # 这个顺序是固定的，不依赖于 Pinocchio 的内部索引
+        DEFAULT_JOINT_ORDER = [
+            'Right_Shoulder_Pitch_Joint',  # 索引0
+            'Right_Shoulder_Roll_Joint',   # 索引1
+            'Right_Shoulder_Yaw_Joint',    # 索引2
+            'Right_Elbow_Pitch_Joint',     # 索引3
+            'Right_Wrist_Yaw_Joint',       # 索引4
+            'Right_Wrist_Pitch_Joint',     # 索引5
+            'Right_Wrist_Roll_Joint'       # 索引6
+        ]
+
         # 构建关节名称到索引的映射
-        self.joint_name_to_index = {}
-        for i, joint_idx in enumerate(controlled_joints):
-            # 获取关节名称
-            joint_name = None
-            for j in range(len(model.names)):
-                if model.joints[j].id == joint_idx:
-                    joint_name = model.names[j]
-                    break
-            if joint_name:
-                self.joint_name_to_index[joint_name] = i
+        self.joint_name_to_index = {name: i for i, name in enumerate(DEFAULT_JOINT_ORDER)}
 
         # 关节索引映射（假设 controlled_joints 是 7-DOF 右臂）
         # [0:4] 是臂部关节（肩部3个 + 肘部1个）

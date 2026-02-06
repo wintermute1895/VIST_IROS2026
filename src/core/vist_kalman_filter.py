@@ -406,9 +406,9 @@ class VISTKalmanFilter:
         human_elbow_angle = np.arccos(cos_angle)
 
         # 机器人的J4就是肘关节（Right_Elbow_Pitch_Joint）
-        # 根据实际测试，J4在索引4而不是索引3
+        # 根据 DEFAULT_RIGHT_ARM_JOINTS 顺序：索引3 = Right_Elbow_Pitch_Joint
         # 观测值 = 人的角度 - 机器人当前角度
-        robot_elbow_angle = self.state[4]  # J4 = 索引4 (Right_Elbow_Pitch_Joint)
+        robot_elbow_angle = self.state[3]  # J4 = 索引3 (Right_Elbow_Pitch_Joint)
         z_elbow = human_elbow_angle - robot_elbow_angle
 
         # ==========================================
@@ -536,16 +536,16 @@ class VISTKalmanFilter:
                 human_delta_theta = z_hand.copy()
 
                 # 注入肘部角度约束（J4 = Right_Elbow_Pitch_Joint）
-                # 根据实际测试，J4在索引4
+                # 根据 DEFAULT_RIGHT_ARM_JOINTS 顺序：索引3 = Right_Elbow_Pitch_Joint
                 # 权重可配置：elbow_weight控制模仿强度
                 elbow_weight = self.config.vist_biomimetic_elbow_weight if hasattr(self.config, 'vist_biomimetic_elbow_weight') else 0.3
-                human_delta_theta[4] = (1 - elbow_weight) * human_delta_theta[4] + elbow_weight * z_elbow
+                human_delta_theta[3] = (1 - elbow_weight) * human_delta_theta[3] + elbow_weight * z_elbow
 
                 # 注入臂平面约束（J3 = Right_Shoulder_Yaw_Joint）
-                # 根据实际测试，J3在索引3
+                # 根据 DEFAULT_RIGHT_ARM_JOINTS 顺序：索引2 = Right_Shoulder_Yaw_Joint
                 # 权重可配置：swivel_weight控制模仿强度
                 swivel_weight = self.config.vist_biomimetic_swivel_weight if hasattr(self.config, 'vist_biomimetic_swivel_weight') else 0.2
-                human_delta_theta[3] = (1 - swivel_weight) * human_delta_theta[3] + swivel_weight * z_swivel
+                human_delta_theta[2] = (1 - swivel_weight) * human_delta_theta[2] + swivel_weight * z_swivel
 
             elif elbow_pos is not None and shoulder_pos is not None:
                 # 【几何解析模式】：使用完整的几何解耦

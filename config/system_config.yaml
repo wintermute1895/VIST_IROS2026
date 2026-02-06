@@ -27,7 +27,7 @@ robot:
     - [-2.5, 2.5]      # Joint 0: Shoulder_Pitch
     - [-2.5, 2.5]     # Joint 1: Shoulder_Roll
     - [-3.14, 3.14]    # Joint 2: Shoulder_Yaw
-    - [-2.5, 2.5]     # Joint 3: Elbow_Pitch
+    - [-2.5, 3]     # Joint 3: Elbow_Pitch
     - [-3.14, 3.14]    # Joint 4: Wrist_Yaw
     - [-3.14, 3.14]    # Joint 5: Wrist_Pitch
     - [-3.14, 3.14]    # Joint 6: Wrist_Roll
