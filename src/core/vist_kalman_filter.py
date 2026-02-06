@@ -108,7 +108,10 @@ class VISTKalmanFilter:
         """
         构建各向异性过程噪声协方差矩阵 Q
 
-        特点：肘部关节的方差更小，防止 7-DoF 肘部漂移
+        关键修正：
+        - J4 (Elbow Pitch, 索引3) 是任务关节，不应该被阻尼
+        - J3 (Shoulder Yaw/Swivel, 索引2) 是冗余自由度，需要轻微阻尼
+        - J4 应该像伺服电机一样灵活响应人体动作
 
         Returns:
             Q: 过程噪声协方差矩阵 (state_dim x state_dim)
@@ -123,18 +126,22 @@ class VISTKalmanFilter:
         vel_variance = self.config.vist_velocity_variance
         Q[self.n_joints:, self.n_joints:] = vel_variance * np.eye(self.n_joints)
 
-        # 肘部约束：降低肘部关节的方差
-        elbow_indices = self.config.vist_elbow_joint_indices
-        elbow_damping = self.config.vist_elbow_damping_factor
+        # 【关键修正】只对 J3 (Swivel) 施加阻尼，释放 J4
+        # J3 (索引2) 是真正的冗余自由度，需要抑制高频抖动
+        swivel_idx = 2
+        swivel_damping = 0.5  # 轻微阻尼
+        Q[swivel_idx, swivel_idx] *= swivel_damping
+        Q[self.n_joints + swivel_idx, self.n_joints + swivel_idx] *= swivel_damping
 
-        for idx in elbow_indices:
-            if idx < self.n_joints:
-                Q[idx, idx] *= elbow_damping
-                Q[self.n_joints + idx, self.n_joints + idx] *= elbow_damping
+        # J4 (索引3) 是任务关节，给予更大的自由度
+        elbow_idx = 3
+        elbow_boost = 2.0  # 提升 J4 的响应速度
+        Q[elbow_idx, elbow_idx] *= elbow_boost
+        Q[self.n_joints + elbow_idx, self.n_joints + elbow_idx] *= elbow_boost
 
         return Q
 
-    def _build_observation_noise_covariance(self):
+    def _build_observation_noise_covariance(self, use_biomimetic=False):
         """
         构建意图驱动的观测噪声协方差矩阵 R
 
@@ -143,6 +150,12 @@ class VISTKalmanFilter:
 
         - R_human: 人类指令噪声（α → 0 时增大，强力去噪）
         - R_virtual: 虚拟引导噪声（α → 1 时减小，磁吸引导）
+
+        【关键修正】：在仿生观测模式下，J4 的观测来自直接的几何测量（肘部角度），
+        应该和手部位置一样可信，因此大幅降低其观测噪声。
+
+        Args:
+            use_biomimetic: 是否使用仿生观测模型
 
         Returns:
             R: 观测噪声协方差矩阵 (2*n_joints x 2*n_joints)
@@ -156,6 +169,17 @@ class VISTKalmanFilter:
                         (self.config.vist_human_max_variance - self.config.vist_human_base_variance) * \
                         (1.0 - self.alpha_smoothed)
         R[:self.n_joints, :self.n_joints] = human_variance * np.eye(self.n_joints)
+
+        # 【关键修正】在仿生观测模式下，J4 的观测是高置信度的几何测量
+        if use_biomimetic:
+            elbow_idx = 3  # J4 = 索引3
+            # J4 的观测方差应该和手部位置一样小（1e-4）
+            # 这告诉卡尔曼滤波："J4 的观测值不是建议，是命令！"
+            R[elbow_idx, elbow_idx] = 1e-4  # 和虚拟观测一样可信
+
+            # 同样，J1-J3 在仿生模式下也是直接控制肘部位置的，也应该提升权重
+            for i in range(3):  # J1, J2, J3
+                R[i, i] = 1e-3  # 比默认的 1e-2 小 10 倍
 
         # 虚拟引导噪声（意图驱动）
         # α → 0: 增大噪声，降低权重（自由移动）
@@ -659,8 +683,8 @@ class VISTKalmanFilter:
         # 3. 构建观测向量
         z = np.concatenate([human_delta_theta, delta_theta_virtual])
 
-        # 4. 构建观测噪声协方差（意图驱动）
-        R = self._build_observation_noise_covariance()
+        # 4. 构建观测噪声协方差（意图驱动，传递仿生模式标志）
+        R = self._build_observation_noise_covariance(use_biomimetic=use_biomimetic)
 
         # 5. 计算卡尔曼增益
         # K = P @ H^T @ (H @ P @ H^T + R)^(-1)
