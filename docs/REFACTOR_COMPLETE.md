@@ -47,7 +47,7 @@
 - 变更：290 行插入，65 行删除
 
 ### ✅ Phase 4: 控制节点配置化（已完成）
-**提交**: 待提交
+**提交**: `c8e220c` - Refactor: Phase 4 - 控制节点配置化
 
 **主要内容**:
 - 添加配置文件支持到控制节点
@@ -193,7 +193,7 @@ $ python3 -c "from src.config import get_config; c = get_config(); print(f'频�
 ## Git 提交历史
 
 ```
-待提交: Refactor: Phase 4 - 控制节点配置化
+c8e220c Refactor: Phase 4 - 控制节点配置化
 c5238a6 Refactor: Phase 3 - 映射节点职责明确
 abcf903 Refactor: Phase 2 - 视觉节点简化
 3d09f12 Refactor: 架构重构 Phase 1 + 坐标系统修复
@@ -210,39 +210,24 @@ abcf903 Refactor: Phase 2 - 视觉节点简化
 - `docs/REFACTOR_PHASE1_COMPLETE.md` - Phase 1 完成报告
 - `docs/PHASE2_GUIDE.md` - Phase 2 实施指南
 - `docs/PHASE3_GUIDE.md` - Phase 3 实施指南
+- `docs/PHASE4_GUIDE.md` - Phase 4 实施指南
 
 ### 配置文件
 - `config/system_config.yaml` - 统一配置文件
 - `src/config/config_loader.py` - 配置加载器
 - `src/config/__init__.py` - 模块初始化
 
-## 待完成工作（可选）
-
-### Phase 4: 控制节点配置化
-虽然 Phase 1-3 已经完成，但控制节点（`vist_teleoperation.py`）仍然使用硬编码参数。
-
-**建议修改**:
-```python
-from src.config import get_config
-
-def main():
-    config = get_config()
-
-    # 使用配置参数
-    mapper = ArmMotionMapper()  # 自动从配置文件加载
-    safety_monitor = SafetyMonitor(
-        config.robot_joint_limits,
-        max_joint_velocity=config.max_joint_velocity,
-        max_joint_acceleration=config.max_joint_acceleration
-    )
-    frequency = config.control_frequency
-    ik_gain = config.ik_gain
-```
+## 后续优化建议（可选）
 
 ### 代码清理
 - 删除重复的测试脚本
 - 统一日志输出格式
 - 添加单元测试
+
+### 性能优化
+- 调整控制参数（IK 增益、速度限制）
+- 优化滤波算法
+- 提高响应速度
 
 ## 收益总结
 
@@ -274,15 +259,15 @@ def main():
    - 优化滤波算法
    - 提高响应速度
 
-3. **继续重构**（可选）
-   - 实施 Phase 4：控制节点配置化
+3. **代码清理**（可选）
    - 清理冗余测试脚本
    - 添加单元测试
+   - 统一日志格式
 
 ## 结论
 
 本次重构成功实现了：
-- ✅ 配置化管理：所有参数集中管理
+- ✅ 配置化管理：所有参数集中管理（Phase 1-4）
 - ✅ 职责明确：视觉 → 映射 → 控制
 - ✅ 代码简化：移除冗余和废弃代码
 - ✅ 文档完善：完整的实施指南和架构文档
