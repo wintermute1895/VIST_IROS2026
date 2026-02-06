@@ -6,7 +6,7 @@ human keypoints (shoulder, elbow, wrist, index_mcp, pinky_mcp) into robot end-ef
 
 Mathematical Foundation:
 - Vector Extraction: Computes upper arm and forearm direction vectors
-- Coordinate Alignment: Transforms from camera frame to robot base frame
+- Coordinate Alignment: Transforms from shoulder frame to robot base frame
 - Position Mapping: Scales human motion to robot arm dimensions
 - Orientation Mapping: Uses knuckle vector (index→pinky) to avoid singularity when arm is straight
 
@@ -18,6 +18,13 @@ Reference: VIST (Vision-based Intent-aware State Teleoperation), IROS 2026
 
 import numpy as np
 from scipy.spatial.transform import Rotation
+import sys
+import os
+
+# 添加项目根目录到路径
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from src.config import get_config
 
 
 class ArmMotionMapper:
@@ -31,67 +38,51 @@ class ArmMotionMapper:
     Design Principle: Stateless mapping (no internal filtering)
     """
 
-    def __init__(self, robot_shoulder_pos, arm_lengths):
+    def __init__(self, robot_shoulder_pos=None, arm_lengths=None):
         """
         Initialize motion mapper with robot arm parameters.
 
+        参数可以从配置文件自动加载，也可以手动指定（手动指定优先）
+
         Args:
-            robot_shoulder_pos: Robot shoulder position in base frame [x, y, z] (numpy array or list)
-            arm_lengths: Dictionary with keys 'upper' and 'fore' (meters)
-                        Example: {'upper': 0.30, 'fore': 0.25}
+            robot_shoulder_pos: Robot shoulder position in base frame [x, y, z] (可选，默认从配置文件读取)
+            arm_lengths: Dictionary with keys 'upper' and 'forearm' (可选，默认从配置文件读取)
+                        Example: {'upper': 0.30, 'forearm': 0.25}
         """
+        print("🗺️  [ArmMotionMapper] 初始化运动映射器...")
+
+        # 加载配置
+        config = get_config()
+
+        # 使用配置文件参数（如果未手动指定）
+        if robot_shoulder_pos is None:
+            robot_shoulder_pos = config.robot_shoulder_position
+        if arm_lengths is None:
+            arm_lengths = config.robot_arm_lengths
+
         # Robot parameters
         self.P_base_shoulder = np.array(robot_shoulder_pos, dtype=np.float64)
         self.L_upper = arm_lengths['upper']
-        self.L_fore = arm_lengths['fore']
+        self.L_fore = arm_lengths.get('forearm', arm_lengths.get('fore'))  # 兼容两种命名
 
-        # Coordinate transformation matrix: Vision Frame → Robot Base Frame
+        # 坐标转换矩阵（从配置文件读取）
         # Vision Frame (Shoulder Frame): X=up, Y=right, Z=forward
         # Robot Base Frame (body_base_link): X=forward, Y=left, Z=up
-        # 用户和机器人同向放置（不是面对面）
-        # Transformation:
-        #   X_robot = Z_vision (forward = forward, 同向)
-        #   Y_robot = -Y_vision (left = -right)
-        #   Z_robot = X_vision (up = up)
-        self.R_vision_to_robot = np.array([
-            [0,  0,  1],  # X_robot = Z_vision (同向放置)
-            [0,  1,  0],  # Y_robot = -Y_vision
-            [1,  0,  0]   # Z_robot = X_vision
-        ], dtype=np.float64)
+        # 转换矩阵定义在 config/system_config.yaml
+        self.R_vision_to_robot = config.rotation_matrix
 
-        # Legacy: Keep for backward compatibility (deprecated)
-        self.R_cam_to_base = np.eye(3, dtype=np.float64)
+        # 滤波参数（从配置文件读取）
+        self.alpha = config.filter_alpha
 
-        # Filtering parameters (for smoothing)
-        self.alpha = 0.3  # Default smoothing coefficient (0=no smoothing, 1=no filtering)
+        # 初始化滤波状态
         self.prev_pos = None  # Previous position for EMA filtering
         self.prev_rot = None  # Previous rotation (quaternion) for SLERP
 
-        print(f"✅ [ArmMotionMapper] Initialized")
-        print(f"   Upper Arm Length: {self.L_upper:.3f}m")
-        print(f"   Forearm Length: {self.L_fore:.3f}m")
-        print(f"   Base Shoulder Position: {self.P_base_shoulder}")
-
-    def _warn_if_not_identity(self):
-        """检查 R_cam_to_base 是否为单位矩阵，如果不是则警告"""
-        if not np.allclose(self.R_cam_to_base, np.eye(3), atol=1e-6):
-            print(f"⚠️ [ArmMotionMapper] WARNING: R_cam_to_base is NOT identity!")
-            print(f"   VisionNode already transforms to robot frame.")
-            print(f"   This will cause DOUBLE transformation!")
-            print(f"   Current R_cam_to_base:\n{self.R_cam_to_base}")
-
-    def set_calibration_matrix(self, matrix):
-        """
-        Set the calibration rotation matrix from camera frame to robot base frame.
-
-        Args:
-            matrix: 3x3 rotation matrix (numpy array) representing R_cam_to_base
-        """
-        if matrix.shape != (3, 3):
-            raise ValueError(f"Expected 3x3 matrix, got {matrix.shape}")
-
-        self.R_cam_to_base = np.array(matrix, dtype=np.float64)
-        print(f"✅ [ArmMotionMapper] Calibration matrix updated")
+        print(f"✅ [ArmMotionMapper] 初始化完成")
+        print(f"   上臂长度: {self.L_upper:.3f}m")
+        print(f"   前臂长度: {self.L_fore:.3f}m")
+        print(f"   肩部位置: {self.P_base_shoulder}")
+        print(f"   滤波系数: {self.alpha}")
 
     def set_filter_alpha(self, alpha):
         """
@@ -112,22 +103,27 @@ class ArmMotionMapper:
         """
         Map human arm keypoints to robot end-effector pose using Three-Vector Mapping.
 
-        ⚠️ IMPORTANT: Expects input data in ROBOT FRAME, relative to shoulder origin!
-        VisionNode already performs:
+        ⚠️ IMPORTANT: Expects input data in SHOULDER FRAME, relative to shoulder origin!
+        VisionNode performs:
         1. Dynamic zeroing (shoulder at [0,0,0])
-        2. Coordinate transformation (MediaPipe → Robot)
+        2. Depth fusion (RealSense + MediaPipe)
+
+        This method performs:
+        1. Coordinate transformation (Shoulder Frame → Robot Base Frame)
+        2. Position mapping (human arm → robot arm)
+        3. Orientation calculation (three-vector method)
 
         Args:
             human_kps: Dictionary with keys:
-                      - 'shoulder': numpy array [0, 0, 0] (origin, in robot frame)
-                      - 'elbow': numpy array [x, y, z] (relative to shoulder, in robot frame)
-                      - 'wrist': numpy array [x, y, z] (relative to shoulder, in robot frame)
-                      - 'index_mcp': numpy array [x, y, z] - index finger (in robot frame)
-                      - 'pinky_mcp': numpy array [x, y, z] - pinky finger (in robot frame)
+                      - 'shoulder': numpy array [0, 0, 0] (origin, in shoulder frame)
+                      - 'elbow': numpy array [x, y, z] (relative to shoulder, in shoulder frame)
+                      - 'wrist': numpy array [x, y, z] (relative to shoulder, in shoulder frame)
+                      - 'index_mcp': numpy array [x, y, z] - index finger (in shoulder frame)
+                      - 'pinky_mcp': numpy array [x, y, z] - pinky finger (in shoulder frame)
 
         Returns:
             tuple: (target_pos, target_quat, debug_info)
-                - target_pos: 3D position [x, y, z] (numpy array)
+                - target_pos: 3D position [x, y, z] (numpy array, in robot base frame)
                 - target_quat: Quaternion [x, y, z, w] (numpy array)
                 - debug_info: Dictionary with intermediate results for debugging
 
@@ -148,7 +144,7 @@ class ArmMotionMapper:
         except KeyError as e:
             raise ValueError(f"Missing keypoint: {e}")
 
-        # Compute arm vectors (already in robot frame, relative to shoulder)
+        # Compute arm vectors (in shoulder frame, relative to shoulder)
         # Since shoulder is at origin [0,0,0], these ARE the direction vectors
         V_upper = P_E - P_S  # Upper arm vector (shoulder → elbow)
         V_fore = P_W - P_E   # Forearm vector (elbow → wrist)
@@ -175,17 +171,15 @@ class ArmMotionMapper:
             return None
 
         # ==========================================
-        # Step 3: Coordinate Transformation
         # ==========================================
-        # ⚠️ CRITICAL: VisionNode sends data in Shoulder Frame, NOT Robot Frame!
-        # Must transform from Shoulder Frame to Robot Base Frame
-        #
-        # Shoulder Frame (from VisionNode):
+        # Step 3: Coordinate Transformation (Shoulder Frame → Robot Base Frame)
+        # ==========================================
+        # Input (Shoulder Frame from VisionNode):
         #   X = up, Y = right, Z = forward
-        # Robot Base Frame:
+        # Output (Robot Base Frame):
         #   X = forward, Y = left, Z = up
         #
-        # Transformation: R_vision_to_robot @ vector
+        # Transformation matrix from config: R_vision_to_robot @ vector
         V_upper_robot = self.R_vision_to_robot @ V_upper
         V_fore_robot = self.R_vision_to_robot @ V_fore
         V_knuckle_robot = self.R_vision_to_robot @ V_knuckle
