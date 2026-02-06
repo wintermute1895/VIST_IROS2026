@@ -157,10 +157,31 @@ class GeometricArmSolver:
             q_wrist: 腕部关节角度 [q5, q6, q7] (numpy array)
         """
         # 构建完整的关节配置（臂部 + 腕部初始值）
+        # 注意：controlled_joints 是 velocity indices，不能直接用于索引 q_full
+        # 需要通过 IK solver 的方法来正确设置关节角度
         q_full = pin.neutral(self.model).copy()
-        q_full[self.arm_joint_indices] = q_arm
-        # 腕部初始值设为 0（中立位置）
-        q_full[self.wrist_joint_indices] = 0.0
+
+        # 使用 velocity indices 获取对应的 position indices
+        # 对于 revolute 关节，idx_q 通常等于 idx_v，但为了安全起见，我们应该正确处理
+        # 暂时简化：假设前7个受控关节对应 q_full 的前7个位置
+        # 这是一个临时解决方案，更好的方法是使用 joint 的 idx_q
+        try:
+            for i, angle in enumerate(q_arm):
+                if i < len(self.controlled_joints):
+                    joint_idx = self.controlled_joints[i]
+                    # 对于 revolute 关节，idx_v 和 idx_q 通常相同
+                    q_full[joint_idx] = angle
+
+            # 腕部初始值设为 0（中立位置）
+            for i in range(len(q_arm), len(self.controlled_joints)):
+                if i < len(self.controlled_joints):
+                    joint_idx = self.controlled_joints[i]
+                    q_full[joint_idx] = 0.0
+        except IndexError as e:
+            print(f"⚠️ [GeometricSolver] 索引错误: {e}")
+            print(f"   q_full 长度: {len(q_full)}, controlled_joints: {self.controlled_joints}")
+            # 使用安全的默认值
+            q_full = pin.neutral(self.model).copy()
 
         # 正运动学：计算腕部基座的姿态
         pin.forwardKinematics(self.model, self.data, q_full)

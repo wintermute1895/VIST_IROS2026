@@ -365,14 +365,16 @@ class VISTKalmanFilter:
 
     def compute_biomimetic_observation(self, shoulder_pos, elbow_pos, wrist_pos, target_pos):
         """
-        仿生多任务观测模型（3+4解耦）
+        仿生多任务观测模型（3+4解耦 - 分层控制版本）
 
-        将人体臂部运动分解为三个独立的观测任务：
-        1. 手部任务（z_hand）：末端位置追踪
-        2. 肘部角度任务（z_elbow）：J4关节角度模仿
-        3. 臂平面任务（z_swivel）：J1-J3肩部姿态模仿
+        核心思想：满足构型就能满足位置（因为有长度归一化）
 
-        这是VIST的"完全体"形态：不是简单的位置追踪，而是完整的构型复现。
+        运动学链条（分层控制）：
+        1. J1-J3（肩部）→ 控制肘部位置到达目标肘部位置
+        2. J4（肘部）   → 控制肘部角度匹配人体肘部角度
+        3. J5-J7（腕部）→ 控制末端位置到达目标末端位置
+
+        这样可以避免关节冲突，肘部不会被"粘住"。
 
         Args:
             shoulder_pos: 人体肩部位置 [x, y, z]
@@ -381,76 +383,161 @@ class VISTKalmanFilter:
             target_pos: 目标末端位置 [x, y, z]
 
         Returns:
-            z_hand: 手部任务观测增量 (n_joints,)
-            z_elbow: 肘部角度任务观测增量 (scalar)
-            z_swivel: 臂平面任务观测增量 (scalar)
+            z_observation: 完整的观测增量 (n_joints,)
         """
-        # ==========================================
-        # 任务 1: 手部位置追踪（原有逻辑）
-        # ==========================================
-        # 使用微分IK计算末端位置误差对应的关节增量
-        z_hand = self.compute_differential_ik(target_pos)
+        # 初始化观测向量
+        z_observation = np.zeros(self.n_joints)
 
         # ==========================================
-        # 任务 2: 肘部角度模仿（J4直接映射）
+        # 层级 1: 肩部关节（J1-J3）- 控制肘部位置
+        # ==========================================
+        # 计算肘部位置误差
+        current_elbow_pos = self._estimate_current_elbow_position()
+        delta_elbow_pos = elbow_pos - current_elbow_pos
+
+        # 使用微分IK计算肩部关节增量（只用前3个关节）
+        z_shoulder = self._compute_shoulder_joints_for_elbow(delta_elbow_pos)
+        z_observation[:3] = z_shoulder
+
+        # ==========================================
+        # 层级 2: 肘部关节（J4）- 控制肘部角度
         # ==========================================
         # 计算人体肘部角度（余弦定理）
-        vec_upper = elbow_pos - shoulder_pos  # 上臂向量
-        vec_lower = wrist_pos - elbow_pos     # 前臂向量
-
-        # 计算向量夹角
+        vec_upper = elbow_pos - shoulder_pos
+        vec_lower = wrist_pos - elbow_pos
         cos_angle = np.dot(vec_upper, vec_lower) / (
             np.linalg.norm(vec_upper) * np.linalg.norm(vec_lower) + 1e-6
         )
         cos_angle = np.clip(cos_angle, -1.0, 1.0)
         human_elbow_angle = np.arccos(cos_angle)
 
-        # 机器人的J4就是肘关节（Right_Elbow_Pitch_Joint）
-        # 根据 DEFAULT_RIGHT_ARM_JOINTS 顺序：索引3 = Right_Elbow_Pitch_Joint
-        # 观测值 = 人的角度 - 机器人当前角度
+        # 机器人当前肘部角度
         robot_elbow_angle = self.state[3]  # J4 = 索引3 (Right_Elbow_Pitch_Joint)
-        z_elbow = human_elbow_angle - robot_elbow_angle
+
+        # 肘部角度增量
+        z_observation[3] = human_elbow_angle - robot_elbow_angle
 
         # ==========================================
-        # 任务 3: 臂平面模仿（Swivel角度）
+        # 层级 3: 腕部关节（J5-J7）- 控制末端位置
         # ==========================================
-        # 计算人体臂平面的法向量
-        n_human = np.cross(vec_upper, vec_lower)
-        n_human_norm = np.linalg.norm(n_human)
-        if n_human_norm > 1e-6:
-            n_human = n_human / n_human_norm
-        else:
-            n_human = np.array([0, 0, 1])  # 默认法向量
+        # 计算末端位置误差
+        current_wrist_pos = self._get_current_end_effector_position()
+        delta_wrist_pos = target_pos - current_wrist_pos
 
-        # 获取机器人当前的臂平面法向量
-        n_robot = self._get_robot_arm_plane_normal()
+        # 使用微分IK计算腕部关节增量（只用后3个关节）
+        z_wrist = self._compute_wrist_joints_for_endeffector(delta_wrist_pos)
+        z_observation[4:7] = z_wrist
 
-        # 计算两个法向量之间的角度差
-        # 使用点积计算角度：θ = arccos(n_robot · n_human)
-        cos_angle = np.dot(n_robot, n_human)
-        cos_angle = np.clip(cos_angle, -1.0, 1.0)
-        angle_diff = np.arccos(cos_angle)
+        return z_observation
 
-        # 计算旋转方向（使用叉乘）
-        # rotation_axis = n_robot × n_human
-        rotation_axis = np.cross(n_robot, n_human)
-        rotation_axis_norm = np.linalg.norm(rotation_axis)
+    def _estimate_current_elbow_position(self):
+        """估算当前机器人肘部位置"""
+        q_controlled = self.state[:self.n_joints]
+        q_full = self._get_full_q_from_controlled(q_controlled)
 
-        if rotation_axis_norm > 1e-6:
-            rotation_axis = rotation_axis / rotation_axis_norm
+        # 正运动学
+        pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+        pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
 
-            # 确定旋转方向：将旋转轴投影到上臂方向
-            # 如果旋转轴与上臂方向同向，则为正旋转；反向则为负旋转
-            vec_upper_norm = vec_upper / (np.linalg.norm(vec_upper) + 1e-6)
-            direction = np.dot(rotation_axis, vec_upper_norm)
+        # 尝试获取肘部frame
+        try:
+            elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
+            elbow_pos = self.ik_solver.data.oMf[elbow_frame_id].translation
+        except Exception:
+            # 回退：使用配置参数估算
+            shoulder_pos = np.array(self.config.robot_shoulder_position)
+            upper_arm_length = self.config.robot_arm_lengths['upper']
+            q1, q2 = q_controlled[:2]
+            elbow_pos = shoulder_pos + upper_arm_length * np.array([
+                np.cos(q1) * np.cos(q2),
+                np.sin(q2),
+                np.sin(q1) * np.cos(q2)
+            ])
 
-            # Swivel 角度修正量 = 角度差 × 方向
-            z_swivel = angle_diff * np.sign(direction)
-        else:
-            # 法向量几乎平行，无需修正
-            z_swivel = 0.0
+        return elbow_pos
 
-        return z_hand, z_elbow, z_swivel
+    def _compute_shoulder_joints_for_elbow(self, delta_elbow_pos):
+        """
+        计算肩部关节增量以控制肘部位置
+
+        使用肩部关节（J1-J3）的雅可比矩阵
+        """
+        q_controlled = self.state[:self.n_joints]
+        q_full = self._get_full_q_from_controlled(q_controlled)
+
+        # 计算肘部frame的雅可比矩阵
+        try:
+            elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+
+            J_full = pin.computeFrameJacobian(
+                self.ik_solver.model,
+                self.ik_solver.data,
+                q_full,
+                elbow_frame_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+            )
+
+            # 只使用位置部分（前3行）和肩部关节的列
+            # controlled_indices = [7, 8, 9, 10, 11, 12, 13]
+            # 肩部关节索引：[7, 8, 9]
+            shoulder_indices = self.ik_solver.controlled_indices[:3]
+            J_shoulder = J_full[:3, shoulder_indices]
+
+            # 阻尼伪逆
+            damping = self.config.vist_differential_ik_damping
+            JJT = J_shoulder @ J_shoulder.T
+            damping_matrix = damping**2 * np.eye(3)
+            J_pinv = J_shoulder.T @ inv(JJT + damping_matrix)
+
+            # 计算肩部关节增量
+            z_shoulder = J_pinv @ delta_elbow_pos
+
+        except Exception as e:
+            # 回退：简化的几何估算
+            print(f"⚠️ 肩部雅可比计算失败: {e}，使用简化估算")
+            z_shoulder = np.zeros(3)
+            # 简化：假设主要由J1和J2控制
+            z_shoulder[0] = delta_elbow_pos[0] * 0.5  # Pitch
+            z_shoulder[1] = delta_elbow_pos[1] * 0.5  # Roll
+
+        return z_shoulder
+
+    def _compute_wrist_joints_for_endeffector(self, delta_wrist_pos):
+        """
+        计算腕部关节增量以控制末端位置
+
+        使用腕部关节（J5-J7）的雅可比矩阵
+        """
+        q_controlled = self.state[:self.n_joints]
+        q_full = self._get_full_q_from_controlled(q_controlled)
+
+        # 计算末端执行器的雅可比矩阵
+        pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+        pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+
+        J_full = pin.computeFrameJacobian(
+            self.ik_solver.model,
+            self.ik_solver.data,
+            q_full,
+            self.ik_solver.ee_frame_id,
+            pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        )
+
+        # 只使用位置部分（前3行）和腕部关节（后3列）
+        J_wrist = J_full[:3, self.ik_solver.controlled_indices[4:7]]
+
+        # 阻尼伪逆
+        damping = self.config.vist_differential_ik_damping
+        JJT = J_wrist @ J_wrist.T
+        damping_matrix = damping**2 * np.eye(3)
+        J_pinv = J_wrist.T @ inv(JJT + damping_matrix)
+
+        # 计算腕部关节增量
+        z_wrist = J_pinv @ delta_wrist_pos
+
+        return z_wrist
 
     def _get_robot_arm_plane_normal(self):
         """
@@ -550,27 +637,12 @@ class VISTKalmanFilter:
             # 模式选择：仿生多任务 vs 单一观测
             # ==========================================
             if use_biomimetic and elbow_pos is not None and shoulder_pos is not None:
-                # 【仿生模式】：使用3+4解耦的多任务观测
-                z_hand, z_elbow, z_swivel = self.compute_biomimetic_observation(
-                    shoulder_pos, elbow_pos, target_pos, target_pos
+                # 【仿生模式】：使用3+4解耦的分层控制观测
+                wrist_pos = target_pos  # 腕部位置就是目标位置
+                human_delta_theta = self.compute_biomimetic_observation(
+                    shoulder_pos, elbow_pos, wrist_pos, target_pos
                 )
-
-                # 融合三个任务的观测
-                # 这里使用加权融合（简化版本）
-                # 更严格的做法是扩展H矩阵和R矩阵
-                human_delta_theta = z_hand.copy()
-
-                # 注入肘部角度约束（J4 = Right_Elbow_Pitch_Joint）
-                # 根据 DEFAULT_RIGHT_ARM_JOINTS 顺序：索引3 = Right_Elbow_Pitch_Joint
-                # 权重可配置：elbow_weight控制模仿强度
-                elbow_weight = self.config.vist_biomimetic_elbow_weight if hasattr(self.config, 'vist_biomimetic_elbow_weight') else 0.3
-                human_delta_theta[3] = (1 - elbow_weight) * human_delta_theta[3] + elbow_weight * z_elbow
-
-                # 注入臂平面约束（J3 = Right_Shoulder_Yaw_Joint）
-                # 根据 DEFAULT_RIGHT_ARM_JOINTS 顺序：索引2 = Right_Shoulder_Yaw_Joint
-                # 权重可配置：swivel_weight控制模仿强度
-                swivel_weight = self.config.vist_biomimetic_swivel_weight if hasattr(self.config, 'vist_biomimetic_swivel_weight') else 0.2
-                human_delta_theta[2] = (1 - swivel_weight) * human_delta_theta[2] + swivel_weight * z_swivel
+                # 注意：新版本直接返回完整的观测向量，不需要额外融合
 
             elif elbow_pos is not None and shoulder_pos is not None:
                 # 【几何解析模式】：使用完整的几何解耦
