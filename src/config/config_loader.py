@@ -235,6 +235,37 @@ class VISTConfig:
         return float(self._config.get('vist_kalman', {}).get('initialization', {}).get('initial_velocity_variance', 1e-3))
 
     # ==========================================
+    # VIST 几何解析求解器参数
+    # ==========================================
+    @property
+    def vist_geometric_solver_enabled(self):
+        """是否启用几何解析求解器"""
+        return self._config.get('vist_kalman', {}).get('geometric_solver', {}).get('enabled', False)
+
+    @property
+    def vist_geometric_solver_trust_weight(self):
+        """几何解析解的信任权重"""
+        return float(self._config.get('vist_kalman', {}).get('geometric_solver', {}).get('trust_weight', 2.0))
+
+    # ==========================================
+    # VIST 仿生多任务观测参数
+    # ==========================================
+    @property
+    def vist_biomimetic_enabled(self):
+        """是否启用仿生多任务观测"""
+        return self._config.get('vist_kalman', {}).get('biomimetic_observation', {}).get('enabled', False)
+
+    @property
+    def vist_biomimetic_elbow_weight(self):
+        """肘部角度任务权重"""
+        return float(self._config.get('vist_kalman', {}).get('biomimetic_observation', {}).get('elbow_weight', 0.3))
+
+    @property
+    def vist_biomimetic_swivel_weight(self):
+        """臂平面任务权重"""
+        return float(self._config.get('vist_kalman', {}).get('biomimetic_observation', {}).get('swivel_weight', 0.2))
+
+    # ==========================================
     # 滤波参数
     # ==========================================
     @property

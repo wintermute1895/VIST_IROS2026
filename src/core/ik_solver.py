@@ -43,14 +43,14 @@ class PinocchioIKSolver:
         "Right_Wrist_Roll_Joint"
     ]
 
-    def __init__(self, urdf_path=None, end_effector_frame="hand_base_link",
+    def __init__(self, urdf_path=None, end_effector_frame="Right_Wrist_Roll_Link",
                  controlled_joints=None):
         """
         初始化 IK 求解器
 
         Args:
             urdf_path: URDF 文件路径（默认使用项目配置）
-            end_effector_frame: 末端执行器 frame 名称（默认 hand_base_link）
+            end_effector_frame: 末端执行器 frame 名称（默认 Right_Wrist_Roll_Link）
             controlled_joints: 需要控制的关节名称列表（默认使用右臂 7-DoF）
                              如果为 None，使用 DEFAULT_RIGHT_ARM_JOINTS
                              如果为空列表 []，则控制所有关节
@@ -61,7 +61,7 @@ class PinocchioIKSolver:
         if urdf_path is None:
             current_dir = os.path.dirname(os.path.abspath(__file__))
             project_root = os.path.dirname(os.path.dirname(current_dir))
-            urdf_path = os.path.join(project_root, "config", "robot.urdf")
+            urdf_path = os.path.join(project_root, "config", "lkls73_o2_dual_arm_description.urdf")
 
         print(f"📁 [IKSolver] 加载 URDF: {urdf_path}")
 
