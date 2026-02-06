@@ -425,13 +425,30 @@ class VISTKalmanFilter:
         # 获取机器人当前的臂平面法向量
         n_robot = self._get_robot_arm_plane_normal()
 
-        # 计算法向量偏差（叉乘得到旋转轴和角度）
-        swivel_error_vec = np.cross(n_robot, n_human)
+        # 计算两个法向量之间的角度差
+        # 使用点积计算角度：θ = arccos(n_robot · n_human)
+        cos_angle = np.dot(n_robot, n_human)
+        cos_angle = np.clip(cos_angle, -1.0, 1.0)
+        angle_diff = np.arccos(cos_angle)
 
-        # 将误差投影到肩部旋转轴上（简化：假设主要由J3承担）
-        # J3是Shoulder Yaw，控制臂平面的旋转
-        # 这里做简化：取误差向量的Z分量作为J3的修正量
-        z_swivel = swivel_error_vec[2] if len(swivel_error_vec) > 2 else 0.0
+        # 计算旋转方向（使用叉乘）
+        # rotation_axis = n_robot × n_human
+        rotation_axis = np.cross(n_robot, n_human)
+        rotation_axis_norm = np.linalg.norm(rotation_axis)
+
+        if rotation_axis_norm > 1e-6:
+            rotation_axis = rotation_axis / rotation_axis_norm
+
+            # 确定旋转方向：将旋转轴投影到上臂方向
+            # 如果旋转轴与上臂方向同向，则为正旋转；反向则为负旋转
+            vec_upper_norm = vec_upper / (np.linalg.norm(vec_upper) + 1e-6)
+            direction = np.dot(rotation_axis, vec_upper_norm)
+
+            # Swivel 角度修正量 = 角度差 × 方向
+            z_swivel = angle_diff * np.sign(direction)
+        else:
+            # 法向量几乎平行，无需修正
+            z_swivel = 0.0
 
         return z_hand, z_elbow, z_swivel
 
@@ -452,33 +469,41 @@ class VISTKalmanFilter:
         pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
         pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
 
-        # 获取关键点位置（需要知道肩、肘、腕的frame ID）
-        # 简化处理：假设肩部在原点，通过关节位置计算
-        # 这里需要根据实际URDF结构调整
+        # 方法1：尝试使用URDF中定义的frame（如果存在）
+        try:
+            shoulder_frame_id = self.ik_solver.model.getFrameId("Right_Shoulder_Link")
+            elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
+            wrist_frame_id = self.ik_solver.ee_frame_id
 
-        # 临时简化：使用关节角度估算
-        # 更严格的实现需要查询URDF中肩、肘关节的frame
-        shoulder_pos = np.array([0, 0, 0])  # 假设肩部在原点
+            shoulder_pos = self.ik_solver.data.oMf[shoulder_frame_id].translation
+            elbow_pos = self.ik_solver.data.oMf[elbow_frame_id].translation
+            wrist_pos = self.ik_solver.data.oMf[wrist_frame_id].translation
 
-        # 通过J1-J4的角度估算肘部位置（简化的几何模型）
-        # 这里应该用正运动学，但为了快速实现先用简化版
-        q1, q2, q3, q4 = q_controlled[:4]
+        except Exception:
+            # 方法2：使用配置文件中的臂长参数和关节角度估算
+            # 这是回退方案，当URDF中没有定义相应frame时使用
+            shoulder_pos = np.array(self.config.robot_shoulder_position)
 
-        # 简化的肘部位置估算（假设上臂长度为0.3m）
-        upper_arm_length = 0.3
-        elbow_pos = shoulder_pos + upper_arm_length * np.array([
-            np.cos(q1) * np.cos(q2),
-            np.sin(q2),
-            np.sin(q1) * np.cos(q2)
-        ])
+            # 从配置文件读取臂长参数
+            upper_arm_length = self.config.robot_arm_lengths['upper']
+            forearm_length = self.config.robot_arm_lengths['forearm']
 
-        # 简化的腕部位置估算（假设前臂长度为0.25m）
-        forearm_length = 0.25
-        wrist_pos = elbow_pos + forearm_length * np.array([
-            np.cos(q1 + q4) * np.cos(q2),
-            np.sin(q2),
-            np.sin(q1 + q4) * np.cos(q2)
-        ])
+            # 使用关节角度估算（简化的几何模型）
+            q1, q2, q3, q4 = q_controlled[:4]
+
+            # 肘部位置估算（基于球坐标系）
+            elbow_pos = shoulder_pos + upper_arm_length * np.array([
+                np.cos(q1) * np.cos(q2),
+                np.sin(q2),
+                np.sin(q1) * np.cos(q2)
+            ])
+
+            # 腕部位置估算
+            wrist_pos = elbow_pos + forearm_length * np.array([
+                np.cos(q1 + q4) * np.cos(q2),
+                np.sin(q2),
+                np.sin(q1 + q4) * np.cos(q2)
+            ])
 
         # 计算臂平面法向量
         vec_upper = elbow_pos - shoulder_pos

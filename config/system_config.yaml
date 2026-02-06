@@ -98,7 +98,7 @@ control:
 # ==========================================
 vist_kalman:
   # 启用 VIST 卡尔曼滤波（当 ik_strategy="vist" 时生效）
-  enabled: false
+  enabled: true
 
   # 几何解析求解器（肘部约束集成）
   geometric_solver:
