@@ -24,10 +24,10 @@ robot:
 
   # 关节限位
   joint_limits:
-    - [-2.0, 2.0]      # Joint 0: Shoulder_Pitch
-    - [-2.0, 3.14]     # Joint 1: Shoulder_Roll
+    - [-2.5, 2.5]      # Joint 0: Shoulder_Pitch
+    - [-2.5, 2.5]     # Joint 1: Shoulder_Roll
     - [-3.14, 3.14]    # Joint 2: Shoulder_Yaw
-    - [-2.35, 2.0]     # Joint 3: Elbow_Pitch
+    - [-2.5, 2.5]     # Joint 3: Elbow_Pitch
     - [-3.14, 3.14]    # Joint 4: Wrist_Yaw
     - [-3.14, 3.14]    # Joint 5: Wrist_Pitch
     - [-3.14, 3.14]    # Joint 6: Wrist_Roll
@@ -63,8 +63,20 @@ coordinate_transform:
 # 控制参数
 # ==========================================
 control:
+  # IK 策略选择
+  # 可选值: "differential" (微分IK), "pink" (Pink优化器), "vist" (VIST卡尔曼滤波)
+  ik_strategy: "vist"
+
   # 微分 IK 参数
-  ik_gain: 0.9  # 增益系数 (0-1)
+  ik_gain: 0.5  # 增益系数 (0-1)，降低以获得更平滑的运动
+  ik_damping: 5e-3  # 阻尼系数（避免奇异点，增加以减少跳变）
+  ik_max_iter: 100  # 最大迭代次数
+  ik_tolerance: 2e-3  # 收敛阈值（米）= 2mm（平衡精度和稳定性）
+
+  # Pink IK 参数（当 ik_strategy="pink" 时使用）
+  pink_dt: 0.02  # Pink 求解器时间步长
+  pink_wrist_priority: 1.0  # 手腕任务优先级（高）
+  pink_elbow_priority: 0.5  # 肘部任务优先级（中）
 
   # 速度和加速度限制
   max_joint_velocity: 0.8      # rad/s
@@ -77,16 +89,91 @@ control:
   # 遥操作时长
   duration: 300.0  # seconds (5 minutes)
 
-  # 运动映射参数
-  filter_alpha: 0.5  # EMA 滤波系数 (0=最大平滑, 1=无滤波)
-
-  # One Euro Filter 参数
-  filter_min_cutoff: 0.3  # 最小截止频率
-  filter_beta: 0.005      # 速度系数
-
-  # 双目标 IK 权重
+  # 双目标 IK 权重（用于 differential IK）
   wrist_weight: 1.0   # 手腕权重
   elbow_weight: 0.5   # 肘部权重
+
+# ==========================================
+# VIST 卡尔曼滤波参数
+# ==========================================
+vist_kalman:
+  # 启用 VIST 卡尔曼滤波（当 ik_strategy="vist" 时生效）
+  enabled: false
+
+  # 状态空间维度
+  n_joints: 7  # 关节数量
+  state_dim: 14  # 状态维度 = 2 * n_joints (位置 + 速度)
+
+  # 过程模型参数（恒速模型）
+  process_model:
+    dt: 0.02  # 时间步长（秒）
+
+    # 过程噪声协方差 Q（各向异性）
+    position_variance: 1e-4  # 关节角度方差
+    velocity_variance: 1e-3  # 关节速度方差
+
+    # 肘部约束（防止 7-DoF 肘部漂移）
+    elbow_joint_indices: [3]  # 肘部关节索引
+    elbow_damping_factor: 0.1  # 肘部方差衰减因子（0-1，越小越稳定）
+
+  # 观测模型参数
+  observation_model:
+    # 人类指令观测噪声 R_human（意图驱动）
+    human_base_variance: 1e-2  # 基础噪声水平
+    human_max_variance: 1e-1   # 最大噪声（自由移动时）
+
+    # 虚拟引导观测噪声 R_virtual（微分 IK）
+    virtual_base_variance: 1e-4  # 基础噪声水平
+    virtual_min_variance: 1e-5   # 最小噪声（精密操作时）
+
+    # 微分 IK 参数
+    differential_ik_damping: 5e-3  # 雅可比伪逆阻尼
+
+  # 意图检测参数
+  intent_detection:
+    # 意图因子 α ∈ [0, 1]
+    # α → 0: 自由移动模式（强力去噪）
+    # α → 1: 精密操作模式（磁吸引导）
+
+    distance_threshold: 0.1  # 精密模式触发距离（米）
+    velocity_threshold: 0.05  # 速度阈值（m/s）
+
+    # Sigmoid 函数参数
+    sigmoid_k: 10.0  # 陡峭度（越大越陡）
+
+    # 意图平滑
+    intent_smoothing: 0.9  # EMA 平滑系数（0-1）
+
+  # 初始化参数
+  initialization:
+    initial_state_variance: 1e-2  # 初始状态不确定性
+    initial_velocity_variance: 1e-3  # 初始速度不确定性
+
+# ==========================================
+# 滤波参数
+# ==========================================
+filtering:
+  # Mapper 层滤波开关
+  # true: 在 Mapper 中应用滤波（调试模式，方便可视化）
+  # false: 透传原始数据给控制节点（生产模式，由 VIST 核心算法处理）
+  enable_mapper_filter: true
+
+  # Mapper 滤波器类型
+  # 可选值: "ema" (指数移动平均) 或 "oneeuro" (One Euro Filter)
+  mapper_filter_type: "oneeuro"
+
+  # EMA 滤波参数
+  ema_alpha: 0.5  # 滤波系数 (0=最大平滑, 1=无滤波)
+
+  # One Euro Filter 参数
+  oneeuro_min_cutoff: 0.2  # 最小截止频率
+  oneeuro_beta: 0.003      # 速度系数
+  oneeuro_d_cutoff: 1.0    # 导数截止频率
+
+  # 控制节点滤波（VIST 核心算法）
+  # 这里可以配置 Kalman Filter 或其他状态估计器参数
+  enable_control_filter: true
+  control_filter_type: "oneeuro"  # 控制节点使用的滤波器
 
 # ==========================================
 # 网络参数

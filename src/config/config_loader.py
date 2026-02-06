@@ -62,9 +62,44 @@ class VISTConfig:
     # 控制参数
     # ==========================================
     @property
+    def ik_strategy(self):
+        """IK 策略类型 ('differential' 或 'pink')"""
+        return self._config['control'].get('ik_strategy', 'differential')
+
+    @property
     def ik_gain(self):
         """IK 增益系数"""
         return self._config['control']['ik_gain']
+
+    @property
+    def ik_damping(self):
+        """IK 阻尼系数"""
+        return float(self._config['control'].get('ik_damping', 1e-3))
+
+    @property
+    def ik_max_iter(self):
+        """IK 最大迭代次数"""
+        return int(self._config['control'].get('ik_max_iter', 50))
+
+    @property
+    def ik_tolerance(self):
+        """IK 收敛阈值（米）"""
+        return float(self._config['control'].get('ik_tolerance', 1e-3))
+
+    @property
+    def pink_dt(self):
+        """Pink 求解器时间步长"""
+        return self._config['control'].get('pink_dt', 0.02)
+
+    @property
+    def pink_wrist_priority(self):
+        """Pink 手腕任务优先级"""
+        return self._config['control'].get('pink_wrist_priority', 1.0)
+
+    @property
+    def pink_elbow_priority(self):
+        """Pink 肘部任务优先级"""
+        return self._config['control'].get('pink_elbow_priority', 0.5)
 
     @property
     def max_joint_velocity(self):
@@ -87,21 +122,6 @@ class VISTConfig:
         return self._config['control']['dt']
 
     @property
-    def filter_alpha(self):
-        """滤波系数"""
-        return self._config['control']['filter_alpha']
-
-    @property
-    def filter_min_cutoff(self):
-        """One Euro Filter 最小截止频率"""
-        return self._config['control']['filter_min_cutoff']
-
-    @property
-    def filter_beta(self):
-        """One Euro Filter 速度系数"""
-        return self._config['control']['filter_beta']
-
-    @property
     def control_duration(self):
         """遥操作时长 (seconds)"""
         return self._config['control']['duration']
@@ -115,6 +135,170 @@ class VISTConfig:
     def elbow_weight(self):
         """肘部权重"""
         return self._config['control']['elbow_weight']
+
+    # ==========================================
+    # VIST Kalman Filter 参数
+    # ==========================================
+    @property
+    def vist_enabled(self):
+        """VIST 卡尔曼滤波是否启用"""
+        return self._config.get('vist_kalman', {}).get('enabled', False)
+
+    @property
+    def vist_n_joints(self):
+        """VIST 关节数量"""
+        return self._config.get('vist_kalman', {}).get('n_joints', 7)
+
+    @property
+    def vist_state_dim(self):
+        """VIST 状态维度"""
+        return self._config.get('vist_kalman', {}).get('state_dim', 14)
+
+    @property
+    def vist_process_dt(self):
+        """VIST 过程模型时间步长"""
+        return float(self._config.get('vist_kalman', {}).get('process_model', {}).get('dt', 0.02))
+
+    @property
+    def vist_position_variance(self):
+        """VIST 位置方差"""
+        return float(self._config.get('vist_kalman', {}).get('process_model', {}).get('position_variance', 1e-4))
+
+    @property
+    def vist_velocity_variance(self):
+        """VIST 速度方差"""
+        return float(self._config.get('vist_kalman', {}).get('process_model', {}).get('velocity_variance', 1e-3))
+
+    @property
+    def vist_elbow_joint_indices(self):
+        """VIST 肘部关节索引"""
+        return self._config.get('vist_kalman', {}).get('process_model', {}).get('elbow_joint_indices', [3])
+
+    @property
+    def vist_elbow_damping_factor(self):
+        """VIST 肘部阻尼因子"""
+        return float(self._config.get('vist_kalman', {}).get('process_model', {}).get('elbow_damping_factor', 0.1))
+
+    @property
+    def vist_human_base_variance(self):
+        """VIST 人类指令基础方差"""
+        return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('human_base_variance', 1e-2))
+
+    @property
+    def vist_human_max_variance(self):
+        """VIST 人类指令最大方差"""
+        return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('human_max_variance', 1e-1))
+
+    @property
+    def vist_virtual_base_variance(self):
+        """VIST 虚拟引导基础方差"""
+        return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('virtual_base_variance', 1e-4))
+
+    @property
+    def vist_virtual_min_variance(self):
+        """VIST 虚拟引导最小方差"""
+        return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('virtual_min_variance', 1e-5))
+
+    @property
+    def vist_differential_ik_damping(self):
+        """VIST 微分 IK 阻尼"""
+        return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('differential_ik_damping', 5e-3))
+
+    @property
+    def vist_distance_threshold(self):
+        """VIST 意图检测距离阈值"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('distance_threshold', 0.1))
+
+    @property
+    def vist_velocity_threshold(self):
+        """VIST 意图检测速度阈值"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('velocity_threshold', 0.05))
+
+    @property
+    def vist_sigmoid_k(self):
+        """VIST 意图检测 Sigmoid 陡峭度"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('sigmoid_k', 10.0))
+
+    @property
+    def vist_intent_smoothing(self):
+        """VIST 意图平滑系数"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('intent_smoothing', 0.9))
+
+    @property
+    def vist_initial_state_variance(self):
+        """VIST 初始状态方差"""
+        return float(self._config.get('vist_kalman', {}).get('initialization', {}).get('initial_state_variance', 1e-2))
+
+    @property
+    def vist_initial_velocity_variance(self):
+        """VIST 初始速度方差"""
+        return float(self._config.get('vist_kalman', {}).get('initialization', {}).get('initial_velocity_variance', 1e-3))
+
+    # ==========================================
+    # 滤波参数
+    # ==========================================
+    @property
+    def enable_mapper_filter(self):
+        """是否在 Mapper 层启用滤波"""
+        return self._config.get('filtering', {}).get('enable_mapper_filter', True)
+
+    @property
+    def mapper_filter_type(self):
+        """Mapper 滤波器类型 ('ema' 或 'oneeuro')"""
+        return self._config.get('filtering', {}).get('mapper_filter_type', 'oneeuro')
+
+    @property
+    def ema_alpha(self):
+        """EMA 滤波系数"""
+        return self._config.get('filtering', {}).get('ema_alpha', 0.5)
+
+    @property
+    def oneeuro_min_cutoff(self):
+        """One Euro Filter 最小截止频率"""
+        return self._config.get('filtering', {}).get('oneeuro_min_cutoff', 0.3)
+
+    @property
+    def oneeuro_beta(self):
+        """One Euro Filter 速度系数"""
+        return self._config.get('filtering', {}).get('oneeuro_beta', 0.005)
+
+    @property
+    def oneeuro_d_cutoff(self):
+        """One Euro Filter 导数截止频率"""
+        return self._config.get('filtering', {}).get('oneeuro_d_cutoff', 1.0)
+
+    @property
+    def enable_control_filter(self):
+        """是否在控制节点启用滤波"""
+        return self._config.get('filtering', {}).get('enable_control_filter', True)
+
+    @property
+    def control_filter_type(self):
+        """控制节点滤波器类型"""
+        return self._config.get('filtering', {}).get('control_filter_type', 'oneeuro')
+
+    # 兼容旧配置（向后兼容）
+    @property
+    def filter_alpha(self):
+        """滤波系数（兼容旧配置）"""
+        # 优先使用新配置，如果不存在则使用旧配置
+        if 'filtering' in self._config:
+            return self.ema_alpha
+        return self._config['control'].get('filter_alpha', 0.5)
+
+    @property
+    def filter_min_cutoff(self):
+        """One Euro Filter 最小截止频率（兼容旧配置）"""
+        if 'filtering' in self._config:
+            return self.oneeuro_min_cutoff
+        return self._config['control'].get('filter_min_cutoff', 0.3)
+
+    @property
+    def filter_beta(self):
+        """One Euro Filter 速度系数（兼容旧配置）"""
+        if 'filtering' in self._config:
+            return self.oneeuro_beta
+        return self._config['control'].get('filter_beta', 0.005)
 
     # ==========================================
     # 网络参数

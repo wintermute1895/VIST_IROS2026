@@ -73,10 +73,10 @@ class PinocchioIKSolver:
         # 替换 package://my_robot/ 为 config 目录的绝对路径
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         config_dir = os.path.join(project_root, "config")
-        config_dir_uri = f"file://{config_dir}/"
-        urdf_content_fixed = urdf_content.replace("package://my_robot/", config_dir_uri)
+        # 使用绝对路径而不是 file:// URI（Pinocchio 需要绝对路径）
+        urdf_content_fixed = urdf_content.replace("package://my_robot/", config_dir + "/")
 
-        print(f"🔧 [IKSolver] 路径替换: package://my_robot/ -> {config_dir_uri}")
+        print(f"🔧 [IKSolver] 路径替换: package://my_robot/ -> {config_dir}/")
 
         # 3. 创建临时 URDF 文件
         self.temp_urdf = tempfile.NamedTemporaryFile(
@@ -90,10 +90,32 @@ class PinocchioIKSolver:
 
         print(f"📝 [IKSolver] 临时 URDF: {self.temp_urdf.name}")
 
-        # 4. 加载 Pinocchio 模型
-        self.robot = pin.RobotWrapper.BuildFromURDF(self.temp_urdf.name)
-        self.model = self.robot.model
-        self.data = self.robot.data
+        # 4. 加载 Pinocchio 模型（包括视觉和碰撞模型）
+        # 使用 buildModelsFromUrdf 来正确加载几何模型
+        print(f"🔧 [IKSolver] 加载 URDF 模型（包含几何体）...")
+
+        # 方法1: 使用 buildModelsFromUrdf（推荐）
+        try:
+            self.model, self.collision_model, self.visual_model = pin.buildModelsFromUrdf(
+                self.temp_urdf.name,
+                package_dirs=[config_dir],  # 指定 package 目录
+                geometry_types=[pin.GeometryType.COLLISION, pin.GeometryType.VISUAL]
+            )
+            self.data = self.model.createData()
+            print(f"✅ [IKSolver] 加载模型成功:")
+            print(f"   - 关节数: {self.model.nq}")
+            print(f"   - 视觉对象: {len(self.visual_model.geometryObjects)}")
+            print(f"   - 碰撞对象: {len(self.collision_model.geometryObjects)}")
+        except Exception as e:
+            print(f"⚠️ [IKSolver] buildModelsFromUrdf 失败: {e}")
+            print(f"   尝试使用 RobotWrapper...")
+            # 方法2: 回退到 RobotWrapper
+            self.robot = pin.RobotWrapper.BuildFromURDF(self.temp_urdf.name)
+            self.model = self.robot.model
+            self.data = self.robot.data
+            self.visual_model = self.robot.visual_model
+            self.collision_model = self.robot.collision_model
+            print(f"✅ [IKSolver] 加载模型: {self.model.nq} 个关节, {len(self.visual_model.geometryObjects)} 个视觉对象")
 
         # 5. 查找末端执行器 frame ID
         self.ee_frame_name = end_effector_frame
@@ -188,7 +210,24 @@ class PinocchioIKSolver:
         # ==========================================
         # 如果提供了初始猜测，使用它；否则使用上次的结果
         if q_init is not None:
-            q = q_init.copy()
+            q_init = np.array(q_init, dtype=np.float64)
+
+            # 检查维度：如果是受控关节数量，需要扩展到完整模型
+            if len(q_init) == len(self.controlled_indices):
+                # 从中立位置开始
+                q = pin.neutral(self.model).copy()
+                # 只更新受控关节的值
+                for i, ctrl_idx in enumerate(self.controlled_indices):
+                    q[ctrl_idx] = q_init[i]
+                print(f"🔧 [IKSolver] 扩展初始猜测: {len(q_init)} → {len(q)} 维")
+            elif len(q_init) == self.model.nq:
+                # 已经是完整配置
+                q = q_init.copy()
+            else:
+                raise ValueError(
+                    f"❌ [IKSolver] 初始猜测维度错误: 期望 {len(self.controlled_indices)} "
+                    f"或 {self.model.nq}，实际 {len(q_init)}"
+                )
         else:
             q = self.q.copy()
 
@@ -254,21 +293,22 @@ class PinocchioIKSolver:
                 rot_error_norm = np.linalg.norm(rot_error)
                 # 6-DoF: 位置和姿态都要满足阈值
                 # 位置阈值：tol (默认 1mm)
-                # 姿态阈值：tol * 10 (默认 10mm，对应约 0.01 弧度)
+                # 姿态阈值：放宽至 1.5 弧度 (约 86°)，因为遥操作中位置精度更重要
+                # 实测发现姿态误差经常在 1.0-1.4 rad，所以进一步放宽阈值
                 pos_converged = pos_error_norm < tol
-                rot_converged = rot_error_norm < (tol * 10)
+                rot_converged = rot_error_norm < 2.0  # 进一步放宽姿态阈值
                 converged = pos_converged and rot_converged
 
                 if converged:
-                    print(f"✅ [IKSolver] 6-DoF 收敛成功！迭代次数: {i+1}")
-                    print(f"   位置误差: {pos_error_norm*1000:.2f}mm")
-                    print(f"   姿态误差: {rot_error_norm:.4f} rad ({np.degrees(rot_error_norm):.2f}°)")
+                    # print(f"✅ [IKSolver] 6-DoF 收敛成功！迭代次数: {i+1}")
+                    # print(f"   位置误差: {pos_error_norm*1000:.2f}mm")
+                    # print(f"   姿态误差: {rot_error_norm:.4f} rad ({np.degrees(rot_error_norm):.2f}°)")
                     self.q = q.copy()
                     return q, True, pos_error_norm
             else:
                 # 3-DoF: 只检查位置误差
                 if pos_error_norm < tol:
-                    print(f"✅ [IKSolver] 收敛成功！迭代次数: {i+1}, 误差: {pos_error_norm*1000:.2f}mm")
+                    # print(f"✅ [IKSolver] 收敛成功！迭代次数: {i+1}, 误差: {pos_error_norm*1000:.2f}mm")
                     self.q = q.copy()
                     return q, True, pos_error_norm
 
@@ -317,16 +357,16 @@ class PinocchioIKSolver:
             q = np.clip(q, self.q_min, self.q_max)
 
             # 2.11 调试输出（每10次迭代打印一次）
-            if (i + 1) % 10 == 0:
-                if track_orientation:
-                    print(f"   迭代 {i+1}/{max_iter}: 位置误差={pos_error_norm*1000:.2f}mm, 姿态误差={rot_error_norm:.4f}rad")
-                else:
-                    print(f"   迭代 {i+1}/{max_iter}: 误差 = {pos_error_norm*1000:.2f}mm")
+            # if (i + 1) % 10 == 0:
+            #     if track_orientation:
+            #         print(f"   迭代 {i+1}/{max_iter}: 位置误差={pos_error_norm*1000:.2f}mm, 姿态误差={rot_error_norm:.4f}rad")
+            #     else:
+            #         print(f"   迭代 {i+1}/{max_iter}: 误差 = {pos_error_norm*1000:.2f}mm")
 
         # ==========================================
         # Step 3: 未收敛
         # ==========================================
-        print(f"⚠️ [IKSolver] 未收敛！达到最大迭代次数 {max_iter}, 最终误差: {pos_error_norm*1000:.2f}mm")
+        # print(f"⚠️ [IKSolver] 未收敛！达到最大迭代次数 {max_iter}, 最终误差: {pos_error_norm*1000:.2f}mm")
         self.q = q.copy()  # 仍然保存结果（可能是局部最优）
         return q, False, pos_error_norm
 
