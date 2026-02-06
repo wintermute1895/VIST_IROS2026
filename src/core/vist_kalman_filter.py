@@ -409,50 +409,58 @@ class VISTKalmanFilter:
         Returns:
             z_observation: 完整的观测增量 (n_joints,)
         """
-        # 初始化观测向量
-        z_observation = np.zeros(self.n_joints)
+        try:
+            # 初始化观测向量
+            z_observation = np.zeros(self.n_joints)
 
-        # ==========================================
-        # 层级 1: 肩部关节（J1-J3）- 控制肘部位置
-        # ==========================================
-        # 计算肘部位置误差
-        current_elbow_pos = self._estimate_current_elbow_position()
-        delta_elbow_pos = elbow_pos - current_elbow_pos
+            # ==========================================
+            # 层级 1: 肩部关节（J1-J3）- 控制肘部位置
+            # ==========================================
+            # 计算肘部位置误差
+            current_elbow_pos = self._estimate_current_elbow_position()
+            delta_elbow_pos = elbow_pos - current_elbow_pos
 
-        # 使用微分IK计算肩部关节增量（只用前3个关节）
-        z_shoulder = self._compute_shoulder_joints_for_elbow(delta_elbow_pos)
-        z_observation[:3] = z_shoulder
+            # 使用微分IK计算肩部关节增量（只用前3个关节）
+            z_shoulder = self._compute_shoulder_joints_for_elbow(delta_elbow_pos)
+            z_observation[:3] = z_shoulder
 
-        # ==========================================
-        # 层级 2: 肘部关节（J4）- 控制肘部角度
-        # ==========================================
-        # 计算人体肘部角度（余弦定理）
-        vec_upper = elbow_pos - shoulder_pos
-        vec_lower = wrist_pos - elbow_pos
-        cos_angle = np.dot(vec_upper, vec_lower) / (
-            np.linalg.norm(vec_upper) * np.linalg.norm(vec_lower) + 1e-6
-        )
-        cos_angle = np.clip(cos_angle, -1.0, 1.0)
-        human_elbow_angle = np.arccos(cos_angle)
+            # ==========================================
+            # 层级 2: 肘部关节（J4）- 控制肘部角度
+            # ==========================================
+            # 计算人体肘部角度（余弦定理）
+            vec_upper = elbow_pos - shoulder_pos
+            vec_lower = wrist_pos - elbow_pos
+            cos_angle = np.dot(vec_upper, vec_lower) / (
+                np.linalg.norm(vec_upper) * np.linalg.norm(vec_lower) + 1e-6
+            )
+            cos_angle = np.clip(cos_angle, -1.0, 1.0)
+            human_elbow_angle = np.arccos(cos_angle)
 
-        # 机器人当前肘部角度
-        robot_elbow_angle = self.state[3]  # J4 = 索引3 (Right_Elbow_Pitch_Joint)
+            # 机器人当前肘部角度
+            robot_elbow_angle = self.state[3]  # J4 = 索引3 (Right_Elbow_Pitch_Joint)
 
-        # 肘部角度增量
-        z_observation[3] = human_elbow_angle - robot_elbow_angle
+            # 肘部角度增量
+            z_observation[3] = human_elbow_angle - robot_elbow_angle
 
-        # ==========================================
-        # 层级 3: 腕部关节（J5-J7）- 控制末端位置
-        # ==========================================
-        # 计算末端位置误差
-        current_wrist_pos = self._get_current_end_effector_position()
-        delta_wrist_pos = target_pos - current_wrist_pos
+            # ==========================================
+            # 层级 3: 腕部关节（J5-J7）- 控制末端位置
+            # ==========================================
+            # 计算末端位置误差
+            current_wrist_pos = self._get_current_end_effector_position()
+            delta_wrist_pos = target_pos - current_wrist_pos
 
-        # 使用微分IK计算腕部关节增量（只用后3个关节）
-        z_wrist = self._compute_wrist_joints_for_endeffector(delta_wrist_pos)
-        z_observation[4:7] = z_wrist
+            # 使用微分IK计算腕部关节增量（只用后3个关节）
+            z_wrist = self._compute_wrist_joints_for_endeffector(delta_wrist_pos)
+            z_observation[4:7] = z_wrist
 
-        return z_observation
+            return z_observation
+
+        except Exception as e:
+            print(f"⚠️ [VIST] compute_biomimetic_observation 错误: {e}")
+            import traceback
+            traceback.print_exc()
+            # 返回零向量作为安全回退
+            return np.zeros(self.n_joints)
 
     def _estimate_current_elbow_position(self):
         """估算当前机器人肘部位置"""
@@ -486,47 +494,54 @@ class VISTKalmanFilter:
 
         使用肩部关节（J1-J3）的雅可比矩阵
         """
-        q_controlled = self.state[:self.n_joints]
-        q_full = self._get_full_q_from_controlled(q_controlled)
-
-        # 计算肘部frame的雅可比矩阵
         try:
-            elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
-            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
-            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+            q_controlled = self.state[:self.n_joints]
+            q_full = self._get_full_q_from_controlled(q_controlled)
 
-            J_full = pin.computeFrameJacobian(
-                self.ik_solver.model,
-                self.ik_solver.data,
-                q_full,
-                elbow_frame_id,
-                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
-            )
+            # 计算肘部frame的雅可比矩阵
+            try:
+                elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
+                pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+                pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
 
-            # 只使用位置部分（前3行）和肩部关节的列
-            # controlled_indices = [7, 8, 9, 10, 11, 12, 13]
-            # 肩部关节索引：[7, 8, 9]
-            shoulder_indices = self.ik_solver.controlled_indices[:3]
-            J_shoulder = J_full[:3, shoulder_indices]
+                J_full = pin.computeFrameJacobian(
+                    self.ik_solver.model,
+                    self.ik_solver.data,
+                    q_full,
+                    elbow_frame_id,
+                    pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+                )
 
-            # 阻尼伪逆
-            damping = self.config.vist_differential_ik_damping
-            JJT = J_shoulder @ J_shoulder.T
-            damping_matrix = damping**2 * np.eye(3)
-            J_pinv = J_shoulder.T @ inv(JJT + damping_matrix)
+                # 只使用位置部分（前3行）和肩部关节的列
+                # controlled_indices = [7, 8, 9, 10, 11, 12, 13]
+                # 肩部关节索引：[7, 8, 9]
+                shoulder_indices = self.ik_solver.controlled_indices[:3]
+                J_shoulder = J_full[:3, shoulder_indices]
 
-            # 计算肩部关节增量
-            z_shoulder = J_pinv @ delta_elbow_pos
+                # 阻尼伪逆
+                damping = self.config.vist_differential_ik_damping
+                JJT = J_shoulder @ J_shoulder.T
+                damping_matrix = damping**2 * np.eye(3)
+                J_pinv = J_shoulder.T @ inv(JJT + damping_matrix)
+
+                # 计算肩部关节增量
+                z_shoulder = J_pinv @ delta_elbow_pos
+
+            except Exception as e:
+                # 回退：简化的几何估算
+                print(f"⚠️ 肩部雅可比计算失败: {e}，使用简化估算")
+                z_shoulder = np.zeros(3)
+                # 简化：假设主要由J1和J2控制
+                z_shoulder[0] = delta_elbow_pos[0] * 0.5  # Pitch
+                z_shoulder[1] = delta_elbow_pos[1] * 0.5  # Roll
+
+            return z_shoulder
 
         except Exception as e:
-            # 回退：简化的几何估算
-            print(f"⚠️ 肩部雅可比计算失败: {e}，使用简化估算")
-            z_shoulder = np.zeros(3)
-            # 简化：假设主要由J1和J2控制
-            z_shoulder[0] = delta_elbow_pos[0] * 0.5  # Pitch
-            z_shoulder[1] = delta_elbow_pos[1] * 0.5  # Roll
-
-        return z_shoulder
+            print(f"⚠️ [VIST] _compute_shoulder_joints_for_elbow 严重错误: {e}")
+            import traceback
+            traceback.print_exc()
+            return np.zeros(3)
 
     def _compute_wrist_joints_for_endeffector(self, delta_wrist_pos):
         """
@@ -534,34 +549,52 @@ class VISTKalmanFilter:
 
         使用腕部关节（J5-J7）的雅可比矩阵
         """
-        q_controlled = self.state[:self.n_joints]
-        q_full = self._get_full_q_from_controlled(q_controlled)
+        try:
+            q_controlled = self.state[:self.n_joints]
+            q_full = self._get_full_q_from_controlled(q_controlled)
 
-        # 计算末端执行器的雅可比矩阵
-        pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
-        pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+            # 计算末端执行器的雅可比矩阵
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
 
-        J_full = pin.computeFrameJacobian(
-            self.ik_solver.model,
-            self.ik_solver.data,
-            q_full,
-            self.ik_solver.ee_frame_id,
-            pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
-        )
+            J_full = pin.computeFrameJacobian(
+                self.ik_solver.model,
+                self.ik_solver.data,
+                q_full,
+                self.ik_solver.ee_frame_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+            )
 
-        # 只使用位置部分（前3行）和腕部关节（后3列）
-        J_wrist = J_full[:3, self.ik_solver.controlled_indices[4:7]]
+            # 只使用位置部分（前3行）和腕部关节（后3列）
+            wrist_indices = self.ik_solver.controlled_indices[4:7]
 
-        # 阻尼伪逆
-        damping = self.config.vist_differential_ik_damping
-        JJT = J_wrist @ J_wrist.T
-        damping_matrix = damping**2 * np.eye(3)
-        J_pinv = J_wrist.T @ inv(JJT + damping_matrix)
+            # 调试：检查维度
+            if J_full.shape[1] <= max(wrist_indices):
+                print(f"⚠️ [VIST] Jacobian 维度不匹配!")
+                print(f"   J_full.shape: {J_full.shape}")
+                print(f"   wrist_indices: {wrist_indices}")
+                print(f"   controlled_indices: {self.ik_solver.controlled_indices}")
+                # 使用安全的索引
+                wrist_indices = list(range(4, min(7, J_full.shape[1])))
 
-        # 计算腕部关节增量
-        z_wrist = J_pinv @ delta_wrist_pos
+            J_wrist = J_full[:3, wrist_indices]
 
-        return z_wrist
+            # 阻尼伪逆
+            damping = self.config.vist_differential_ik_damping
+            JJT = J_wrist @ J_wrist.T
+            damping_matrix = damping**2 * np.eye(3)
+            J_pinv = J_wrist.T @ inv(JJT + damping_matrix)
+
+            # 计算腕部关节增量
+            z_wrist = J_pinv @ delta_wrist_pos
+
+            return z_wrist
+
+        except Exception as e:
+            print(f"⚠️ [VIST] _compute_wrist_joints_for_endeffector 错误: {e}")
+            import traceback
+            traceback.print_exc()
+            return np.zeros(3)
 
     def _get_robot_arm_plane_normal(self):
         """
