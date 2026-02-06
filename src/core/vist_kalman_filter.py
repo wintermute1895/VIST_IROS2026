@@ -636,19 +636,35 @@ class VISTKalmanFilter:
         velocity = self.state[self.n_joints:self.n_joints+3]  # 前3个速度分量
         self.detect_intent(target_pos, current_pos, velocity)
 
-        # 3. 更新步骤（传递肘部和肩部位置）
+        # 3. 从配置读取几何求解器和仿生观测的启用状态
+        use_geometric_solver = self.config.vist_geometric_solver_enabled
+        use_biomimetic = self.config.vist_biomimetic_enabled
+
+        # 4. 如果启用几何求解器且提供了肘部和肩部位置，计算人类指令
+        human_delta_theta = None
+        if use_geometric_solver and self.geometric_solver is not None and \
+           elbow_pos is not None and shoulder_pos is not None:
+            # 使用几何解析解计算臂部配置
+            wrist_pos = target_pos  # 腕部位置就是目标位置
+            human_delta_theta = self.compute_human_delta_theta_from_elbow(
+                shoulder_pos, elbow_pos, wrist_pos, target_quat
+            )
+
+        # 5. 更新步骤（传递肘部和肩部位置以及配置参数）
         q_solution, success = self.update(
             target_pos,
             target_quat,
+            human_delta_theta=human_delta_theta,
             previous_target_pos=self.previous_target_pos,
             elbow_pos=elbow_pos,
-            shoulder_pos=shoulder_pos
+            shoulder_pos=shoulder_pos,
+            use_biomimetic=use_biomimetic
         )
 
-        # 4. 保存当前目标位置作为下一帧的历史
+        # 6. 保存当前目标位置作为下一帧的历史
         self.previous_target_pos = target_pos.copy()
 
-        # 5. 计算误差（用于统计）
+        # 7. 计算误差（用于统计）
         q_full = self._get_full_q_from_controlled(q_solution)
         pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
         pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)

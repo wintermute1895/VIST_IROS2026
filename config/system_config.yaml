@@ -102,7 +102,7 @@ vist_kalman:
 
   # 几何解析求解器（肘部约束集成）
   geometric_solver:
-    enabled: false  # 是否启用几何解析解
+    enabled: true  # 是否启用几何解析解
     # 当启用时，VIST 将使用几何解析解计算臂部配置（q1-q4）
     # 优势：
     # - 解析解速度快（10-100x）

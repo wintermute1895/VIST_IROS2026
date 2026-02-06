@@ -74,11 +74,35 @@ class FullFlowSimulator:
             # 使用 VIST 卡尔曼滤波
             print("🔬 初始化 VIST Kalman Filter...")
             from src.core.vist_kalman_filter import VISTKalmanFilter
-            self.solver = VISTKalmanFilter(self.ik_solver, self.config)
+            from src.core.geometric_arm_solver import GeometricArmSolver
+
+            # 初始化几何求解器（如果配置启用）
+            geometric_solver = None
+            if self.config.vist_geometric_solver_enabled:
+                print("   🧮 启用几何解析求解器...")
+                geometric_solver = GeometricArmSolver(
+                    model=self.ik_solver.model,
+                    data=self.ik_solver.data,
+                    controlled_joints=self.ik_solver.controlled_indices,
+                    ee_frame_id=self.ik_solver.ee_frame_id
+                )
+                print(f"   ✅ 几何求解器初始化完成 (trust_weight={self.config.vist_geometric_solver_trust_weight})")
+
+            # 初始化 VIST 滤波器
+            self.solver = VISTKalmanFilter(
+                self.ik_solver,
+                self.config,
+                geometric_solver=geometric_solver
+            )
             print("✅ VIST Kalman Filter 初始化完成")
             print(f"   意图检测: 启用")
             print(f"   微分 IK: 启用")
             print(f"   肘部约束: 启用")
+            print(f"   几何求解器: {'启用' if self.config.vist_geometric_solver_enabled else '禁用'}")
+            print(f"   仿生观测: {'启用' if self.config.vist_biomimetic_enabled else '禁用'}")
+            if self.config.vist_biomimetic_enabled:
+                print(f"      肘部权重: {self.config.vist_biomimetic_elbow_weight}")
+                print(f"      臂平面权重: {self.config.vist_biomimetic_swivel_weight}")
         else:
             # 使用传统 IK 求解器
             self.solver = self.ik_solver
@@ -329,10 +353,13 @@ class FullFlowSimulator:
                     # Step 2: IK 求解（使用配置的求解器）
                     if self.config.ik_strategy == "vist":
                         # VIST Kalman Filter 求解
+                        # 传递肘部和肩部位置以支持几何求解器
                         q_solution, success, error = self.solver.solve(
                             target_pos=target_pos,
                             target_quat=target_quat,
-                            q_init=self.q_current
+                            q_init=self.q_current,
+                            elbow_pos=target_elbow,
+                            shoulder_pos=shoulder_pos
                         )
                     else:
                         # 传统 IK 求解
