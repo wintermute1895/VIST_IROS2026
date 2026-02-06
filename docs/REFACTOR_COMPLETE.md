@@ -1,276 +1,231 @@
 # VIST 架构重构完成报告
 
-## 概述
+## 📋 重构概览
 
-本次重构成功完成了 VIST 系统的架构优化，实现了配置化管理、职责明确划分和代码简化。
+本次重构完成了三个核心层面的优化：
 
-## 完成的阶段
+### 1. 滤波架构重构 ✅
 
-### ✅ Phase 1: 配置化（已完成）
-**提交**: `3d09f12` - Refactor: 架构重构 Phase 1 + 坐标系统修复
+**目标**：实现可配置的滤波架构，支持调试模式和生产模式切换
 
-**主要内容**:
-- 创建统一配置文件 `config/system_config.yaml`
-- 实现配置加载器 `src/config/config_loader.py`（单例模式）
-- 修复坐标系统：深度符号和旋转矩阵
-- 创建完整的架构文档
+**实现**：
+- 在 `config/system_config.yaml` 中添加了 `filtering` 配置节
+- 支持两种滤波器：
+  - `ema`: 指数移动平均（Exponential Moving Average）
+  - `oneeuro`: One Euro Filter（自适应低通滤波）
+- 通过 `enable_mapper_filter` 开关控制：
+  - `true`: 调试模式，在 Mapper 层应用滤波，方便可视化
+  - `false`: 生产模式，透传原始数据给控制节点，由 VIST 核心算法处理
 
-**文件变更**:
-- 新增：15 个文件
-- 修改：3178 行代码
-
-### ✅ Phase 2: 视觉节点简化（已完成）
-**提交**: `abcf903` - Refactor: Phase 2 - 视觉节点简化
-
-**主要内容**:
-- 添加配置文件支持
-- 方法改名：`mediapipe_to_robot_coords` → `mediapipe_to_shoulder_coords`
-- 职责明确：只输出肩膀坐标系，不做旋转转换
-- 移除调试代码
-- 更新注释
-
-**文件变更**:
-- 修改：2 个文件
-- 变更：270 行插入，42 行删除
-
-### ✅ Phase 3: 映射节点职责明确（已完成）
-**提交**: `c5238a6` - Refactor: Phase 3 - 映射节点职责明确
-
-**主要内容**:
-- 添加配置文件支持
-- 删除废弃方法和代码
-- 更新注释：明确输入输出格式
-- 兼容性改进
-
-**文件变更**:
-- 修改：2 个文件
-- 变更：290 行插入，65 行删除
-
-### ✅ Phase 4: 控制节点配置化（已完成）
-**提交**: `c8e220c` - Refactor: Phase 4 - 控制节点配置化
-
-**主要内容**:
-- 添加配置文件支持到控制节点
-- 替换所有硬编码参数为配置参数
-- 添加新的配置参数（滤波器、时长等）
-- 保持硬件配置文件的独立性
-
-**文件变更**:
-- 修改：3 个文件
-  - `scripts/vist_teleoperation.py` - 使用配置系统
-  - `config/system_config.yaml` - 添加新参数
-  - `src/config/config_loader.py` - 添加新属性
-
-**配置化参数**:
-- 运动映射器：自动从配置加载（肩部位置、臂长）
-- 安全监控器：关节限位、速度/加速度限制
-- 控制参数：频率、IK增益、时长
-- 网络参数：UDP主机、端口、缓冲区大小
-- 滤波器参数：min_cutoff、beta
-
-## 架构改进
-
-### 数据流（重构后）
-
-```
-MediaPipe 原始数据
-    ↓
-[视觉节点] vision_node_depth.py
-    职责：数据采集 + 深度融合
-    输出：肩膀坐标系（X=上, Y=右, Z=前）
-    ↓
-UDP 传输
-    ↓
-[映射节点] motion_mapper.py
-    职责：坐标转换 + 运动映射
-    输出：机器人基座坐标系（X=前, Y=左, Z=上）
-    ↓
-[控制节点] vist_teleoperation.py
-    职责：IK 求解 + 安全监控 + 电机控制
-    输出：关节角度指令
-```
-
-### 坐标系定义
-
-**肩膀坐标系（Shoulder Frame）** - 视觉节点输出
-- X: 向上（垂直）
-- Y: 向右（水平）
-- Z: 向前（靠近相机）
-- 原点：肩部（动态归零）
-
-**机器人基座坐标系（Robot Base Frame）** - 映射节点输出
-- X: 向前
-- Y: 向左
-- Z: 向上
-- 原点：body_base_link
-
-**转换矩阵（同向放置）**
-```python
-R = [
-    [0,  0,  1],  # X_robot = Z_shoulder
-    [0, -1,  0],  # Y_robot = -Y_shoulder
-    [1,  0,  0]   # Z_robot = X_shoulder
-]
-```
-
-## 配置管理
-
-### 配置文件结构
+**配置示例**：
 ```yaml
-robot:                  # 机器人参数（肩部位置、臂长、关节限位）
-coordinate_transform:   # 坐标转换矩阵和说明
-control:                # 控制参数（IK、速度、频率）
-network:                # UDP 通信参数
-vision:                 # 相机参数
-safety:                 # 安全参数和调试选项
+filtering:
+  enable_mapper_filter: true  # 调试模式
+  mapper_filter_type: "oneeuro"  # 使用 One Euro Filter
+  oneeuro_min_cutoff: 0.3
+  oneeuro_beta: 0.005
+  oneeuro_d_cutoff: 1.0
 ```
 
-### 使用方法
-```python
-from src.config import get_config
+**修改的文件**：
+- `config/system_config.yaml`: 添加滤波配置
+- `src/config/config_loader.py`: 添加配置属性访问器
+- `src/core/motion_mapper.py`: 实现可配置滤波逻辑
 
-config = get_config()
+---
 
-# 访问参数
-shoulder_pos = config.robot_shoulder_position  # numpy array
-rotation_matrix = config.rotation_matrix       # 3x3 numpy array
-ik_gain = config.ik_gain                       # float
+### 2. 控制策略解耦 🚧
+
+**目标**：使用策略模式支持多种 IK 算法
+
+**设计**：
+- 创建 `IKStrategy` 抽象基类
+- 实现两种策略：
+  - `DifferentialIKStrategy`: 基于 Pinocchio 的微分 IK（已有）
+  - `PinkIKStrategy`: 基于 Pink 的多任务优化 IK（待实现）
+
+**配置示例**：
+```yaml
+control:
+  ik_strategy: "differential"  # 或 "pink"
+  ik_damping: 1e-3
+  ik_max_iter: 50
+  ik_tolerance: 1e-3
 ```
 
-## 代码改进
+**状态**：
+- ✅ 配置文件已更新
+- ✅ Config loader 已更新
+- 🚧 策略模式框架已创建（`src/core/ik_strategies.py`）
+- ⏳ 具体实现待完善
 
-### 1. 参数管理
-- ✅ 所有参数集中在配置文件
-- ✅ 修改参数不需要改代码
-- ✅ 便于版本控制和团队协作
+---
 
-### 2. 职责清晰
-- ✅ 视觉节点：只负责数据采集和预处理
-- ✅ 映射节点：只负责坐标转换和运动映射
-- ✅ 控制节点：只负责 IK 求解和电机控制
+### 3. 全流程可视化仿真 ✅
 
-### 3. 代码质量
-- ✅ 移除废弃代码（R_cam_to_base 等）
-- ✅ 移除调试代码（_debug_counter 等）
-- ✅ 更新注释，明确输入输出格式
-- ✅ 向后兼容，保留手动指定参数的接口
+**目标**：创建数字孪生仿真，验证完整控制流程
 
-### 4. 可维护性
-- ✅ 代码结构清晰
-- ✅ 易于调试和测试
-- ✅ 减少重复代码
-- ✅ 文档完善
+**实现**：`scripts/simulate_full_flow.py`
 
-## 测试验证
+**功能**：
+1. 接收视觉节点的 UDP 数据
+2. 通过 `motion_mapper` 进行坐标转换
+3. 使用 `ik_solver` 计算关节角度
+4. 使用 MeshCat 进行实时 3D 可视化
 
-### 配置加载器测试
+**可视化元素**：
+- 🤖 机器人本体：实时显示 IK 解算后的关节状态
+- 🔴 红色球：目标末端（手腕）位置
+- 🟢 绿色球：目标肘部位置
+- 📐 坐标系：机器人基座坐标系（X=红, Y=绿, Z=蓝）
+- 🌊 轨迹线：末端运动轨迹（青色）
+
+---
+
+## 🚀 使用方法
+
+### 步骤 1：启动视觉节点
+
 ```bash
-$ python3 src/config/config_loader.py
-✅ 配置加载成功
+cd /home/ilex/Dev/VIST
+python3 scripts/run_vision.py
 ```
 
-### 视觉节点测试
+### 步骤 2：启动全流程仿真
+
 ```bash
-$ python3 -c "from src.nodes.vision_node_depth import VisionNodeWithDepth; print('✅ 导入成功')"
-✅ 导入成功
+python3 scripts/simulate_full_flow.py
 ```
 
-### 控制节点测试
-```bash
-$ python3 -c "from scripts.vist_teleoperation import main; print('✅ 导入成功')"
-正在加载库: /home/ilex/Dev/VIST/src/robot/sdk/linkerarm/lbot/libs/linux/linux_x64/liblbot_api.so
-库加载成功
-✅ 导入成功
+### 步骤 3：打开浏览器
+
+仿真器会输出 MeshCat URL，例如：
+```
+✅ MeshCat 服务器启动: http://127.0.0.1:7000/static/
+   请在浏览器中打开: http://127.0.0.1:7000/static/
 ```
 
-### 配置参数测试
-```bash
-$ python3 -c "from src.config import get_config; c = get_config(); print(f'频率: {c.control_frequency} Hz, IK增益: {c.ik_gain}, UDP: {c.udp_host}:{c.udp_port}')"
-✅ [Config] 配置文件加载成功
-频率: 50 Hz, IK增益: 0.9, UDP: 0.0.0.0:6001
+在浏览器中打开该 URL，即可看到实时 3D 可视化。
+
+---
+
+## 🎯 测试要点
+
+### 1. 滤波效果对比
+
+**测试 A：启用 One Euro Filter**
+```yaml
+filtering:
+  enable_mapper_filter: true
+  mapper_filter_type: "oneeuro"
 ```
 
-## Git 提交历史
-
-```
-c8e220c Refactor: Phase 4 - 控制节点配置化
-c5238a6 Refactor: Phase 3 - 映射节点职责明确
-abcf903 Refactor: Phase 2 - 视觉节点简化
-3d09f12 Refactor: 架构重构 Phase 1 + 坐标系统修复
+**测试 B：禁用滤波（透传模式）**
+```yaml
+filtering:
+  enable_mapper_filter: false
 ```
 
-## 文档清单
+**观察**：
+- 红色球（目标手腕）的运动是否平滑？
+- 是否存在抖动或跳变？
+- 滤波是否引入了明显的延迟？
 
-### 架构文档
-- `docs/ARCHITECTURE_REFACTOR.md` - 完整的架构重构方案
-- `docs/REFACTOR_STATUS.md` - 重构状态和实施指南
-- `docs/SESSION_SUMMARY.md` - 会话总结
+### 2. 坐标系验证
 
-### 实施指南
-- `docs/REFACTOR_PHASE1_COMPLETE.md` - Phase 1 完成报告
-- `docs/PHASE2_GUIDE.md` - Phase 2 实施指南
-- `docs/PHASE3_GUIDE.md` - Phase 3 实施指南
-- `docs/PHASE4_GUIDE.md` - Phase 4 实施指南
+**测试动作**：
+1. 向前伸手 → 红色球应沿 X 轴（红色）移动
+2. 向左移动 → 红色球应沿 Y 轴（绿色）移动
+3. 向上抬手 → 红色球应沿 Z 轴（蓝色）移动
 
-### 配置文件
-- `config/system_config.yaml` - 统一配置文件
-- `src/config/config_loader.py` - 配置加载器
-- `src/config/__init__.py` - 模块初始化
+**验证**：坐标系是否正交？方向是否正确？
 
-## 后续优化建议（可选）
+### 3. IK 求解性能
 
-### 代码清理
-- 删除重复的测试脚本
-- 统一日志输出格式
-- 添加单元测试
+**观察指标**：
+- IK 成功率（应 > 95%）
+- 平均帧率（应 > 20 fps）
+- 目标位置与实际末端位置的误差
 
-### 性能优化
-- 调整控制参数（IK 增益、速度限制）
-- 优化滤波算法
-- 提高响应速度
+---
 
-## 收益总结
+## 📊 预期效果
 
-### 开发效率
-- 参数调整：从修改代码 → 修改配置文件
-- 调试时间：减少 50%（职责清晰，易于定位问题）
-- 代码复用：配置加载器可用于所有模块
+### 正常情况
 
-### 代码质量
-- 代码行数：减少约 200 行冗余代码
-- 注释覆盖：100%（所有关键方法都有清晰注释）
-- 架构清晰度：从模糊 → 明确（单一职责原则）
+```
+✅ 帧数: 1234 | IK成功率: 98.5% | 目标位置: [0.350, -0.120, 0.850]
+```
 
-### 可维护性
-- 新人上手时间：从 2 天 → 半天（文档完善）
-- Bug 修复时间：减少 40%（职责明确）
-- 功能扩展：更容易（配置化 + 模块化）
+### 异常情况
 
-## 下一步建议
+**IK 失败**：
+- 目标位置超出工作空间
+- 奇异点附近
+- 关节限位冲突
 
-1. **测试完整流程**
-   ```bash
-   python3 scripts/test_coordinate_display.py
-   python3 scripts/vist_teleoperation.py
-   ```
+**解决方案**：
+- 调整 `ik_damping` 参数（增大阻尼）
+- 增加 `ik_max_iter`（更多迭代次数）
+- 检查目标位置是否合理
 
-2. **性能优化**（可选）
-   - 调整控制参数（IK 增益、速度限制）
-   - 优化滤波算法
-   - 提高响应速度
+---
 
-3. **代码清理**（可选）
-   - 清理冗余测试脚本
-   - 添加单元测试
-   - 统一日志格式
+## 🔧 配置调优
 
-## 结论
+### 滤波参数
 
-本次重构成功实现了：
-- ✅ 配置化管理：所有参数集中管理（Phase 1-4）
-- ✅ 职责明确：视觉 → 映射 → 控制
-- ✅ 代码简化：移除冗余和废弃代码
-- ✅ 文档完善：完整的实施指南和架构文档
-- ✅ 向后兼容：保留旧的参数接口
+**One Euro Filter**：
+- `min_cutoff`: 降低 → 更平滑，但延迟增加
+- `beta`: 增大 → 对快速运动更敏感
+- `d_cutoff`: 降低 → 速度估计更平滑
 
-系统架构更加清晰，代码更易维护，为后续开发奠定了良好基础。
+**推荐值**：
+```yaml
+oneeuro_min_cutoff: 0.3  # 平衡平滑度和响应性
+oneeuro_beta: 0.005      # 适度响应快速运动
+oneeuro_d_cutoff: 1.0    # 标准速度平滑
+```
+
+### IK 参数
+
+**收敛性调优**：
+```yaml
+ik_damping: 1e-3    # 奇异点附近增大到 1e-2
+ik_max_iter: 50     # 复杂姿态增加到 100
+ik_tolerance: 1e-3  # 1mm 精度
+```
+
+---
+
+## 📝 下一步工作
+
+1. ✅ 测试全流程仿真，验证坐标系和滤波效果
+2. ⏳ 完善 Pink IK 策略实现
+3. ⏳ 实现 VIST 核心算法（Kalman Filter / State Estimator）
+4. ⏳ 对比不同 IK 策略的性能
+5. ⏳ 真机测试和参数调优
+
+---
+
+## 🎓 技术亮点
+
+1. **可配置架构**：通过配置文件动态切换滤波器和 IK 策略
+2. **策略模式**：解耦 IK 算法，便于扩展和对比
+3. **数字孪生**：MeshCat 可视化，无需真机即可验证逻辑
+4. **模块化设计**：视觉、映射、IK、控制各层职责清晰
+
+---
+
+## 📚 参考文档
+
+- [One Euro Filter 论文](https://hal.inria.fr/hal-00670496/document)
+- [Pinocchio 文档](https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/)
+- [Pink IK 库](https://github.com/stephane-caron/pink)
+- [MeshCat 可视化](https://github.com/rdeits/meshcat-python)
+
+---
+
+**创建时间**: 2026-02-06
+**作者**: Claude Sonnet 4.5
+**项目**: VIST (Vision-based Intent-aware State Teleoperation)

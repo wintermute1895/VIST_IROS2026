@@ -78,10 +78,73 @@ class MockArmDriver(BaseArmDriver):
         # 在仿真里，我们直接更新内部状态
         self.q = np.array(q_cmd_rad)
 
+    def disconnect(self):
+        print("🛠️ [MockDriver] Virtual Connection Closed.")
+
 # ==========================================
 # 4. 真机驱动 (LinkerArm)
 # ==========================================
 class RealArmDriver(BaseArmDriver):
+    """
+    LinkerArm真机驱动
+
+    SDK关节顺序（硬编码，基于LinkerArm lkls73_o2）：
+    SDK[0]: Shoulder Roll  (肩部侧摆)
+    SDK[1]: Shoulder Pitch (肩部俯仰)
+    SDK[2]: Shoulder Yaw   (肩部旋转)
+    SDK[3]: Elbow Pitch    (肘部俯仰)
+    SDK[4]: Wrist Yaw      (腕部旋转)
+    SDK[5]: Wrist Pitch    (腕部俯仰)
+    SDK[6]: Wrist Roll     (腕部翻转)
+
+    URDF关节顺序：
+    URDF[0]: Shoulder Pitch (肩部俯仰)
+    URDF[1]: Shoulder Roll  (肩部侧摆)
+    URDF[2]: Shoulder Yaw   (肩部旋转)
+    URDF[3]: Elbow Pitch    (肘部俯仰)
+    URDF[4]: Wrist Yaw      (腕部旋转)
+    URDF[5]: Wrist Pitch    (腕部俯仰)
+    URDF[6]: Wrist Roll     (腕部翻转)
+    """
+
+    # 映射关系：URDF索引 → SDK索引（硬编码）
+    URDF_TO_SDK = [
+        0,  # URDF[0] Shoulder_Pitch → SDK[0]
+        1,  # URDF[1] Shoulder_Roll  → SDK[1]
+        2,  # URDF[2] Shoulder_Yaw   → SDK[2]
+        3,  # URDF[3] Elbow_Pitch    → SDK[3]
+        4,  # URDF[4] Wrist_Yaw      → SDK[4]
+        5,  # URDF[5] Wrist_Pitch    → SDK[5]
+        6   # URDF[6] Wrist_Roll     → SDK[6]
+    ]
+
+    # 映射关系：SDK索引 → URDF索引（硬编码）
+    SDK_TO_URDF = [
+        0,  # SDK[0] Shoulder_Pitch → URDF[0]
+        1,  # SDK[1] Shoulder_Roll  → URDF[1]
+        2,  # SDK[2] Shoulder_Yaw   → URDF[2]
+        3,  # SDK[3] Elbow_Pitch    → URDF[3]
+        4,  # SDK[4] Wrist_Yaw      → URDF[4]
+        5,  # SDK[5] Wrist_Pitch    → URDF[5]
+        6   # SDK[6] Wrist_Roll     → URDF[6]
+    ]
+
+    # 关节符号翻转（按URDF顺序）
+    # 根据实际测试结果修正：
+    # - URDF[0] Shoulder_Pitch: 不需要翻转
+    # - URDF[1] Shoulder_Roll: 不需要翻转（映射已经交换了）
+    # - URDF[2] Shoulder_Yaw: 需要翻转
+    # - URDF[4] Wrist_Yaw: 需要翻转
+    JOINT_SIGN_FLIP = [
+        False,  # URDF[0] Shoulder_Pitch - 不需要翻转
+        True,  # URDF[1] Shoulder_Roll - 不需要翻转
+        True,   # URDF[2] Shoulder_Yaw - 需要翻转
+        False,  # URDF[3] Elbow_Pitch
+        True,   # URDF[4] Wrist_Yaw - 需要翻转
+        False,  # URDF[5] Wrist_Pitch
+        False   # URDF[6] Wrist_Roll
+    ]
+
     def __init__(self, ip="192.168.1.183", dof=7, arm_side="left"):
         """
         初始化真机驱动
@@ -122,44 +185,208 @@ class RealArmDriver(BaseArmDriver):
         print("✅ Connected. Enabling Robot...")
         # 使能机械臂（需要指定左臂或右臂）
         self.robot.enable_arm(self.arm_enum, enable=True)
-        time.sleep(1)  # 等待就绪
-        return True
+
+        # 等待机器人就绪并开始发送状态数据
+        print("⏳ Waiting for robot to be ready...")
+        time.sleep(2)  # 增加等待时间
+
+        # 验证能否读取状态
+        for attempt in range(5):
+            joint_pos = self.robot.get_joint_positions(self.arm_enum)
+            if joint_pos is not None and len(joint_pos) >= self.dof:
+                print(f"✅ Robot ready! Joint positions: {joint_pos[:self.dof]}")
+                return True
+            print(f"   尝试 {attempt+1}/5: 等待状态数据...")
+            time.sleep(0.5)
+
+        print("⚠️ Warning: Robot enabled but state data not available yet")
+        return True  # 仍然返回成功，可能数据会稍后到达
 
     def get_state(self):
         """
         获取机器人状态
         注意：SDK 返回的已经是弧度制，无需转换
+
+        使用两种方法尝试读取状态：
+        1. 通过回调机制的缓存状态（robot.get_joint_positions）
+        2. 直接调用底层API（api.get_current_state）
         """
-        # SDK 方法：get_joint_positions(arm) 返回 List[float] 弧度制
+        # 方法1：尝试从回调缓存读取（快速但可能为空）
         joint_positions = self.robot.get_joint_positions(self.arm_enum)
 
-        if joint_positions is None or len(joint_positions) < self.dof:
-            # 读取失败时返回空状态
-            print("⚠️ [RealDriver] Failed to get joint positions")
+        # 方法2：如果回调缓存为空，直接调用底层API
+        if joint_positions is None:
+            # 局部导入api（避免模块级导入影响SDK初始化）
+            from lbot import api as lbot_api
+            state = lbot_api.get_current_state()
+            if state:
+                if self.arm_enum.value == 0:  # LEFT_ARM
+                    joint_positions = state.left_arm.get_joints_list()
+                else:  # RIGHT_ARM
+                    joint_positions = state.right_arm.get_joints_list()
+
+        # 检查是否成功获取数据
+        if joint_positions is None:
+            print("⚠️ [RealDriver] Failed to get joint positions (both methods)")
+            return time.time(), np.zeros(self.dof), np.zeros(self.dof)
+
+        if len(joint_positions) < self.dof:
+            print(f"⚠️ [RealDriver] Incomplete joint data: got {len(joint_positions)}, expected {self.dof}")
             return time.time(), np.zeros(self.dof), np.zeros(self.dof)
 
         # SDK 返回的已经是弧度，直接使用
-        q_pos = np.array(joint_positions[:self.dof])
+        q_sdk = np.array(joint_positions[:self.dof])
+
+        # ==========================================
+        # 应用SDK→URDF映射和符号翻转
+        # ==========================================
+        q_urdf = np.zeros(self.dof)
+        for sdk_idx in range(self.dof):
+            urdf_idx = self.SDK_TO_URDF[sdk_idx]
+            value = q_sdk[sdk_idx]
+            # 应用符号翻转（按URDF索引）
+            if self.JOINT_SIGN_FLIP[urdf_idx]:
+                value = -value
+            q_urdf[urdf_idx] = value
+
+        q_pos = q_urdf
+
+        # 检查是否全为零（可能表示数据未就绪）
+        if np.allclose(q_pos, 0.0, atol=1e-6):
+            print("⚠️ [RealDriver] Warning: All joint positions are zero (robot may not be ready)")
+
         q_vel = np.zeros(self.dof)  # SDK 暂不提供速度，给 0
 
         return time.time(), q_pos, q_vel
 
-    def send_command(self, q_cmd_rad):
+    def send_command(self, q_cmd_rad, use_smooth_mode=True):
         """
-        发送关节控制指令
+        发送关节控制指令（遥操作模式）
         注意：SDK 的 joint_follow 接受弧度制参数，无需转换
+
+        Args:
+            q_cmd_rad: 目标关节角度（弧度）
+            use_smooth_mode: True=平滑模式（慢速，有轨迹平滑），False=高速模式（快速响应）
+
+        支持多种输入格式：
+        1. 7维数组：直接发送（手臂关节）
+        2. 更多维度：取前7个（假设是手臂关节）
         """
+        q_cmd_rad = np.array(q_cmd_rad)
+
         # 1. 安全检查：NaN 检查
         if np.isnan(q_cmd_rad).any():
             print("🚨 ERROR: NaN detected in command! Stopping.")
             return
 
-        # 2. 转换为列表格式
-        q_cmd_list = q_cmd_rad.tolist()
+        # 2. 维度处理：提取手臂关节
+        if len(q_cmd_rad) == self.dof:
+            # 直接手臂指令（7维）
+            q_urdf = q_cmd_rad.copy()
+        elif len(q_cmd_rad) > self.dof:
+            # 如果维度更多，取前7个（假设是手臂关节）
+            q_urdf = q_cmd_rad[:self.dof].copy()
+            print(f"🔧 [RealDriver] 提取前{self.dof}个关节: {len(q_cmd_rad)}维 → {self.dof}维")
+        else:
+            print(f"❌ [RealDriver] 无效的指令维度: {len(q_cmd_rad)} (期望至少{self.dof})")
+            return
 
-        # 3. 发送指令（SDK 的 joint_follow 用于遥操作，参数是弧度制）
-        # follow=True 表示高跟随模式（低延迟，实时映射）
-        success = self.robot.joint_follow(self.arm_enum, q_cmd_list, follow=True)
+        # ==========================================
+        # 应用URDF→SDK映射和符号翻转
+        # ==========================================
+        q_sdk = np.zeros(self.dof)
+        for urdf_idx in range(self.dof):
+            sdk_idx = self.URDF_TO_SDK[urdf_idx]
+            value = q_urdf[urdf_idx]
+            # 应用符号翻转（按URDF索引）
+            if self.JOINT_SIGN_FLIP[urdf_idx]:
+                value = -value
+            q_sdk[sdk_idx] = value
+
+        # 3. 转换为列表格式
+        q_cmd_list = q_sdk.tolist()
+
+        # 4. 发送指令
+        # ⚠️ 重要：使用 move_joint 而不是 joint_follow
+        # 原因：joint_follow API 有严重的控制错乱bug（详见 docs/SDK_BUG_REPORT_joint_follow.md）
+        # move_joint 经过测试，控制精度 ±0.03°，完全可靠
+        from lbot import api as lbot_api
+        success = lbot_api.move_joint(
+            self.arm_enum,
+            q_cmd_list,
+            speed=0.1,  # 速度 (rad/s)
+            accel=0.5,  # 加速度 (rad/s^2)
+            block=False  # 非阻塞模式（遥操作需要高频率控制）
+        )
 
         if not success:
             print("⚠️ [RealDriver] Failed to send command")
+
+    def move_joint_controlled(self, q_target_rad, speed=0.1, accel=0.1, block=True):
+        """
+        受控关节运动（带速度和加速度限制）
+        适用于测试和安全运动
+
+        Args:
+            q_target_rad: 目标关节角度（弧度）
+            speed: 运动速度 (rad/s)，默认0.1（非常慢，安全）
+            accel: 加速度 (rad/s²)，默认0.1
+            block: 是否阻塞等待运动完成
+
+        Returns:
+            bool: 运动是否成功启动
+        """
+        q_target_rad = np.array(q_target_rad)
+
+        # 安全检查
+        if np.isnan(q_target_rad).any():
+            print("🚨 ERROR: NaN detected in command!")
+            return False
+
+        # 维度处理
+        if len(q_target_rad) == self.dof:
+            q_arm = q_target_rad
+        elif len(q_target_rad) > self.dof:
+            q_arm = q_target_rad[:self.dof]
+            print(f"🔧 [RealDriver] 提取前{self.dof}个关节")
+        else:
+            print(f"❌ [RealDriver] 无效的指令维度: {len(q_target_rad)}")
+            return False
+
+        # 转换为列表
+        q_cmd_list = q_arm.tolist()
+
+        # 使用SDK的move_joint方法（带速度控制）
+        from lbot import api as lbot_api
+        success = lbot_api.move_joint(self.arm_enum, q_cmd_list, speed, accel, block)
+
+        if not success:
+            print("⚠️ [RealDriver] Controlled movement failed")
+            return False
+
+        return True
+
+    def disconnect(self):
+        """
+        断开与机器人的连接
+        """
+        try:
+            print("🦾 [RealDriver] Disconnecting from robot...")
+
+            # 重要：先发送停止指令（当前位置），避免机器人继续运动
+            try:
+                current_pos = self.robot.get_joint_positions(self.arm_enum)
+                if current_pos is not None and len(current_pos) >= self.dof:
+                    print("   发送停止指令（保持当前位置）...")
+                    self.robot.set_joint_positions(self.arm_enum, current_pos[:self.dof])
+                    import time
+                    time.sleep(0.1)  # 等待指令发送
+            except Exception as e:
+                print(f"   ⚠️ 发送停止指令失败: {e}")
+
+            # SDK 的 disconnect 方法
+            if hasattr(self.robot, 'disconnect'):
+                self.robot.disconnect()
+            print("✅ [RealDriver] Disconnected successfully")
+        except Exception as e:
+            print(f"⚠️ [RealDriver] Disconnect error: {e}")

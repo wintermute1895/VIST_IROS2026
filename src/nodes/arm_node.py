@@ -7,7 +7,8 @@ import json
 from src.core.estimator import IntentAdaptiveEstimator
 from src.core.intent import IntentInference
 from src.core.motion_mapper import ArmMotionMapper
-from src.core.ik_solver import PinocchioIKSolver
+from src.core.pink_ik_solver import PinkIKSolver  # 使用 Pink IK 求解器
+from src.core.one_euro_filter import VectorOneEuroFilter, QuaternionOneEuroFilter  # One Euro 滤波器
 
 # 引用 driver (手脚)
 from src.robot.arm_driver import MockArmDriver
@@ -37,19 +38,41 @@ class ArmNode:
         # 3. 初始化运动映射器
         print("🧠 [ArmNode] 初始化运动映射器...")
         self.mapper = ArmMotionMapper(
-            robot_shoulder_pos=[0.0, 0.0, 0.0],  # 机器人肩部位置
-            arm_lengths={'upper': 0.30, 'fore': 0.25}  # 臂长（米）
+            robot_shoulder_pos=[0.0, -0.096, 1.217],  # 右臂肩部在基座坐标系中的位置（从URDF提取）
+            arm_lengths={'upper': 0.2908, 'fore': 0.2366}  # 臂长（米，从URDF提取）
         )
         # 设置滤波器参数（可选）
         self.mapper.set_filter_alpha(0.5)  # 中等平滑
 
-        # 4. 初始化逆运动学求解器
-        print("🧠 [ArmNode] 初始化逆运动学求解器...")
-        self.ik_solver = PinocchioIKSolver()
+        # 4. 初始化逆运动学求解器（使用 Pink 分层优化）
+        print("🧠 [ArmNode] 初始化逆运动学求解器（Pink）...")
+        self.ik_solver = PinkIKSolver()
 
         # 初始化关节命令（从 IK 求解器获取中立位置）
         self.q_cmd = self.ik_solver.q.copy()
+        self.q_cmd_prev = self.q_cmd.copy()  # 用于速度限制
         print(f"✅ [ArmNode] IK 求解器初始化完成，关节数: {len(self.q_cmd)}")
+
+        # 4.5 初始化 One Euro 滤波器（用于平滑目标位姿）
+        print("🧠 [ArmNode] 初始化 One Euro 滤波器...")
+        # 位置滤波器：较强的平滑（min_cutoff=0.5Hz）
+        self.pos_filter = VectorOneEuroFilter(
+            min_cutoff=0.5,  # 低速时强平滑
+            beta=0.01,       # 对速度变化的响应
+            d_cutoff=1.0     # 速度估计的平滑
+        )
+        # 姿态滤波器：中等平滑
+        self.quat_filter = QuaternionOneEuroFilter(
+            min_cutoff=0.8,  # 姿态可以稍微响应快一点
+            beta=0.01,
+            d_cutoff=1.0
+        )
+        print("✅ [ArmNode] One Euro 滤波器初始化完成")
+
+        # 速度限制参数（安全保护）
+        self.max_joint_velocity = 0.1  # rad/s（降低到0.1以确保安全）
+        self.max_joint_acceleration = 1.0  # rad/s²
+        print(f"⚠️  [ArmNode] 安全限制: 最大关节速度 = {self.max_joint_velocity} rad/s")
 
         # 5. 初始化 UDP 接收器（用于接收人体关键点数据）
         self.udp_port = udp_port
@@ -278,40 +301,87 @@ class ArmNode:
                     self._display_target_frame(target_pos, target_quat)
 
                 # ==========================================
-                # 逆运动学求解（IK）- 6-DoF 姿态追踪
+                # One Euro 滤波（平滑目标位姿）
+                # ==========================================
+                # 应用 One Euro Filter 到目标位姿
+                target_pos_filtered = self.pos_filter(target_pos, time.time())
+                target_quat_filtered = self.quat_filter(target_quat, time.time())
+
+                # 同样滤波肘部位置
+                elbow_pos = debug_info.get('elbow_pos', None)
+                if elbow_pos is not None:
+                    if not hasattr(self, 'elbow_filter'):
+                        self.elbow_filter = VectorOneEuroFilter(
+                            min_cutoff=0.5, beta=0.01, d_cutoff=1.0
+                        )
+                    elbow_pos_filtered = self.elbow_filter(elbow_pos, time.time())
+                else:
+                    elbow_pos_filtered = None
+
+                # ==========================================
+                # 逆运动学求解（IK）- 分层优化（手腕 + 肘部）
                 # ==========================================
                 # 使用 Warm Start：上一帧的 q_cmd 作为初始猜测
-                # 这样能极大减少迭代次数，保证平滑
+                # Pink 分层优化：
+                #   Task 1（高优先级）：手腕位姿（6-DoF）
+                #   Task 2（低优先级）：肘部位置（3-DoF）
                 ik_start_time = time.time()
 
                 q_solution, success, ik_error = self.ik_solver.solve(
-                    target_pos,
-                    target_quat=target_quat,  # 传入目标四元数（6-DoF）
+                    target_pos_filtered,      # 使用滤波后的位置
+                    target_quat=target_quat_filtered,  # 使用滤波后的姿态
+                    elbow_pos=elbow_pos_filtered,      # 使用滤波后的肘部位置
                     q_init=self.q_cmd,
-                    max_iter=30,  # 减少迭代次数以保证实时性
-                    tol=5e-3,     # 放宽收敛阈值到 5mm（实时性优先）
-                    pos_weight=1.0,  # 位置权重
-                    rot_weight=0.5   # 旋转权重（姿态次于位置）
+                    max_iter=50,  # 统一使用50轮迭代，保证收敛精度
+                    dt=0.1        # Pink 的时间步长
                 )
 
                 ik_elapsed = (time.time() - ik_start_time) * 1000  # 转换为毫秒
 
-                # 处理 IK 求解结果
+                # ==========================================
+                # 速度限制（安全保护）
+                # ==========================================
                 if success:
-                    # 成功收敛，更新命令
-                    self.q_cmd = q_solution
+                    # 计算关节速度（rad/s）
+                    dt_control = 1.0 / 50.0  # 50 Hz 控制频率
+                    q_velocity = (q_solution - self.q_cmd_prev) / dt_control
+
+                    # 限制速度
+                    q_velocity_limited = np.clip(
+                        q_velocity,
+                        -self.max_joint_velocity,
+                        self.max_joint_velocity
+                    )
+
+                    # 应用速度限制后的命令
+                    q_cmd_safe = self.q_cmd_prev + q_velocity_limited * dt_control
+
+                    # 检查是否有速度限制生效
+                    if not np.allclose(q_velocity, q_velocity_limited, atol=1e-6):
+                        if self._debug_counter % 30 == 0:
+                            max_vel = np.max(np.abs(q_velocity))
+                            print(f"⚠️  [Safety] 速度限制生效: {max_vel:.3f} → {self.max_joint_velocity:.3f} rad/s")
+
+                    # 更新命令
+                    self.q_cmd = q_cmd_safe
+                    self.q_cmd_prev = q_cmd_safe.copy()
                     self.ik_failure_count = 0  # 重置失败计数器
 
                     # 每 60 帧打印一次调试信息
                     if self._debug_counter % 60 == 0:
-                        print(f"\n✅ [IK] 6-DoF 求解成功")
-                        print(f"   目标位置: {target_pos}")
+                        print(f"\n✅ [IK] 分层优化求解成功（Pink）")
+                        print(f"   手腕位置: {target_pos_filtered}")
+                        if elbow_pos_filtered is not None:
+                            print(f"   肘部位置: {elbow_pos_filtered}")
                         print(f"   IK 误差: {ik_error*1000:.2f}mm")
                         print(f"   计算耗时: {ik_elapsed:.2f}ms")
-                else:
+                        print(f"   最大关节速度: {np.max(np.abs(q_velocity_limited)):.3f} rad/s")
+
+                # 处理 IK 求解结果
+                if not success:
                     # 未收敛，增加失败计数
                     self.ik_failure_count += 1
-                    print(f"⚠️ [IK] 6-DoF 姿态追踪失败 (误差={ik_error*1000:.2f}mm, 耗时={ik_elapsed:.2f}ms)")
+                    print(f"⚠️ [IK] 分层优化失败 (误差={ik_error*1000:.2f}mm, 耗时={ik_elapsed:.2f}ms)")
                     print(f"   失败计数: {self.ik_failure_count}/{self.max_ik_failures}")
 
                     # 检查是否超过失败阈值

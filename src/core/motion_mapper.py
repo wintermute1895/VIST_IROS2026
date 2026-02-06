@@ -20,11 +20,14 @@ import numpy as np
 from scipy.spatial.transform import Rotation, Slerp
 import sys
 import os
+import time
 
 # 添加项目根目录到路径
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, project_root)
 
 from src.config import get_config
+from src.core.one_euro_filter import VectorOneEuroFilter, QuaternionOneEuroFilter
 
 
 class ArmMotionMapper:
@@ -92,18 +95,51 @@ class ArmMotionMapper:
         self.R_vision_to_robot = R
         print(f"   ✅ 旋转矩阵验证通过 (正交性误差: {np.linalg.norm(orthogonality_check - np.eye(3)):.2e})")
 
-        # 滤波参数（从配置文件读取）
-        self.alpha = config.filter_alpha
+        # ==========================================
+        # 滤波器配置（可配置架构）
+        # ==========================================
+        self.enable_filter = config.enable_mapper_filter
+        self.filter_type = config.mapper_filter_type
 
-        # 初始化滤波状态
-        self.prev_pos = None  # Previous position for EMA filtering
-        self.prev_rot = None  # Previous rotation (quaternion) for SLERP
+        if self.enable_filter:
+            if self.filter_type == "oneeuro":
+                # One Euro Filter for wrist position
+                self.pos_filter = VectorOneEuroFilter(
+                    min_cutoff=config.oneeuro_min_cutoff,
+                    beta=config.oneeuro_beta,
+                    d_cutoff=config.oneeuro_d_cutoff
+                )
+                # One Euro Filter for wrist orientation
+                self.quat_filter = QuaternionOneEuroFilter(
+                    min_cutoff=config.oneeuro_min_cutoff,
+                    beta=config.oneeuro_beta,
+                    d_cutoff=config.oneeuro_d_cutoff
+                )
+                # One Euro Filter for elbow position (stronger filtering)
+                self.elbow_filter = VectorOneEuroFilter(
+                    min_cutoff=config.oneeuro_min_cutoff * 0.7,  # 更强的滤波
+                    beta=config.oneeuro_beta * 0.6,
+                    d_cutoff=config.oneeuro_d_cutoff
+                )
+                print(f"   ✅ 滤波器: One Euro Filter (min_cutoff={config.oneeuro_min_cutoff}, beta={config.oneeuro_beta})")
+                print(f"   ✅ 手肘滤波器: 增强模式 (min_cutoff={config.oneeuro_min_cutoff * 0.7:.3f})")
+            elif self.filter_type == "ema":
+                # EMA 滤波（保留旧实现）
+                self.alpha = config.ema_alpha
+                self.prev_pos = None
+                self.prev_rot = None
+                self.prev_elbow = None
+                print(f"   ✅ 滤波器: EMA (alpha={self.alpha})")
+            else:
+                raise ValueError(f"未知的滤波器类型: {self.filter_type}")
+        else:
+            print(f"   ⚠️  滤波器已禁用（透传模式）")
 
         print(f"✅ [ArmMotionMapper] 初始化完成")
         print(f"   上臂长度: {self.L_upper:.3f}m")
         print(f"   前臂长度: {self.L_fore:.3f}m")
         print(f"   肩部位置: {self.P_base_shoulder}")
-        print(f"   滤波系数: {self.alpha}")
+        print(f"   滤波模式: {'启用' if self.enable_filter else '禁用'} ({self.filter_type if self.enable_filter else 'N/A'})")
 
     def set_filter_alpha(self, alpha):
         """
@@ -157,13 +193,16 @@ class ArmMotionMapper:
         # Step 1: Vector Extraction
         # ==========================================
         try:
-            P_S = np.array(human_kps['shoulder'], dtype=np.float64)
-            P_E = np.array(human_kps['elbow'], dtype=np.float64)
-            P_W = np.array(human_kps['wrist'], dtype=np.float64)
-            P_index = np.array(human_kps['index_mcp'], dtype=np.float64)
-            P_pinky = np.array(human_kps['pinky_mcp'], dtype=np.float64)
+            # Convert to float explicitly to handle string inputs from JSON
+            P_S = np.array([float(x) for x in human_kps['shoulder']], dtype=np.float64)
+            P_E = np.array([float(x) for x in human_kps['elbow']], dtype=np.float64)
+            P_W = np.array([float(x) for x in human_kps['wrist']], dtype=np.float64)
+            P_index = np.array([float(x) for x in human_kps['index_mcp']], dtype=np.float64)
+            P_pinky = np.array([float(x) for x in human_kps['pinky_mcp']], dtype=np.float64)
         except KeyError as e:
             raise ValueError(f"Missing keypoint: {e}")
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Invalid keypoint data type: {e}")
 
         # Compute arm vectors (in shoulder frame, relative to shoulder)
         # Since shoulder is at origin [0,0,0], these ARE the direction vectors
@@ -263,43 +302,59 @@ class ArmMotionMapper:
         target_quat = rot_obj.as_quat()  # Returns [x, y, z, w]
 
         # ==========================================
-        # Step 6: Apply EMA Filtering (Smoothing)
+        # Step 6: Apply Filtering (可配置)
         # ==========================================
         curr_pos = T_wrist.copy()
         curr_quat = target_quat.copy()
+        curr_elbow = T_elbow.copy()
 
-        if self.prev_pos is not None and self.prev_rot is not None:
-            # Position filtering: Exponential Moving Average (EMA)
-            filtered_pos = self.alpha * curr_pos + (1.0 - self.alpha) * self.prev_pos
+        if self.enable_filter:
+            if self.filter_type == "oneeuro":
+                # One Euro Filter for wrist and elbow
+                filtered_pos = self.pos_filter(curr_pos, time.time())
+                filtered_quat = self.quat_filter(curr_quat, time.time())
+                filtered_elbow = self.elbow_filter(curr_elbow, time.time())
+            elif self.filter_type == "ema":
+                # EMA 滤波（保留旧实现）
+                if self.prev_pos is not None and self.prev_rot is not None and self.prev_elbow is not None:
+                    # Position filtering: Exponential Moving Average (EMA)
+                    filtered_pos = self.alpha * curr_pos + (1.0 - self.alpha) * self.prev_pos
 
-            # Rotation filtering: Spherical Linear Interpolation (SLERP)
-            # Create Rotation objects from quaternions
-            rot_prev = Rotation.from_quat(self.prev_rot)
-            rot_curr = Rotation.from_quat(curr_quat)
+                    # Elbow filtering: EMA
+                    filtered_elbow = self.alpha * curr_elbow + (1.0 - self.alpha) * self.prev_elbow
 
-            # SLERP interpolation: t=alpha means blend from prev to curr
-            # We want: output = (1-alpha)*prev + alpha*curr
-            # So we use t=alpha
-            key_times = [0, 1]
-            key_rots = Rotation.concatenate([rot_prev, rot_curr])
-            slerp = Slerp(key_times, key_rots)
-            filtered_rot_obj = slerp(self.alpha)
-            filtered_quat = filtered_rot_obj.as_quat()
+                    # Rotation filtering: Spherical Linear Interpolation (SLERP)
+                    rot_prev = Rotation.from_quat(self.prev_rot)
+                    rot_curr = Rotation.from_quat(curr_quat)
+
+                    key_times = [0, 1]
+                    key_rots = Rotation.concatenate([rot_prev, rot_curr])
+                    slerp = Slerp(key_times, key_rots)
+                    filtered_rot_obj = slerp(self.alpha)
+                    filtered_quat = filtered_rot_obj.as_quat()
+                else:
+                    # First frame: no filtering
+                    filtered_pos = curr_pos
+                    filtered_quat = curr_quat
+                    filtered_elbow = curr_elbow
+
+                # Update previous values for next iteration
+                self.prev_pos = filtered_pos.copy()
+                self.prev_rot = filtered_quat.copy()
+                self.prev_elbow = filtered_elbow.copy()
         else:
-            # First frame: no filtering
+            # 滤波禁用：透传原始数据
             filtered_pos = curr_pos
             filtered_quat = curr_quat
-
-        # Update previous values for next iteration
-        self.prev_pos = filtered_pos.copy()
-        self.prev_rot = filtered_quat.copy()
+            filtered_elbow = curr_elbow
 
         # ==========================================
         # Step 7: Debug Information
         # ==========================================
         debug_info = {
-            'elbow_pos': T_elbow,
+            'elbow_pos': filtered_elbow,  # 使用滤波后的手肘位置
             'wrist_pos': T_wrist,
+            'raw_elbow_pos': T_elbow,  # 保存原始手肘位置用于调试
             'upper_arm_vector': V_upper_robot,
             'forearm_vector': V_fore_robot,
             'knuckle_vector': V_knuckle_robot,

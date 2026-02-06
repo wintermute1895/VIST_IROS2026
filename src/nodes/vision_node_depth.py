@@ -243,8 +243,9 @@ class VisionNodeWithDepth:
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.pose.process(rgb_frame)
 
-        # 初始化关键点字典
+        # 初始化关键点字典和深度变量
         keypoints = None
+        wrist_depth = None
 
         if results.pose_world_landmarks and results.pose_landmarks:
             # 获取世界坐标（单位：米）
@@ -364,16 +365,51 @@ class VisionNodeWithDepth:
             self.frame_count = 0
             self.fps_start_time = time.time()
 
-        # 显示 FPS 和深度统计
-        cv2.putText(frame, f"FPS: {self.fps:.1f}", (10, frame.shape[0] - 40),
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        # ==========================================
+        # 实时数据叠加显示（左上角）
+        # ==========================================
+        y_offset = 30
+        line_height = 25
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.6
+        font_color = (0, 255, 0)  # 绿色
+        font_thickness = 2
 
+        # 1. FPS
+        cv2.putText(frame, f"FPS: {self.fps:.1f}", (10, y_offset),
+                   font, font_scale, font_color, font_thickness)
+        y_offset += line_height
+
+        # 2. 手部检测状态
+        if keypoints is not None:
+            status_text = "Status: DETECTED"
+            status_color = (0, 255, 0)  # 绿色
+        else:
+            status_text = "Status: NO HAND"
+            status_color = (0, 0, 255)  # 红色
+        cv2.putText(frame, status_text, (10, y_offset),
+                   font, font_scale, status_color, font_thickness)
+        y_offset += line_height
+
+        # 3. 手腕深度（如果检测到）
+        if keypoints is not None and wrist_depth is not None:
+            cv2.putText(frame, f"Wrist Depth: {wrist_depth*1000:.0f}mm", (10, y_offset),
+                       font, font_scale, font_color, font_thickness)
+            y_offset += line_height
+
+            # 4. 手腕坐标（肩膀坐标系）
+            wrist_coord = keypoints['wrist']
+            cv2.putText(frame, f"Coord: X={wrist_coord[0]:.3f} Y={wrist_coord[1]:.3f} Z={wrist_coord[2]:.3f}",
+                       (10, y_offset), font, font_scale, font_color, font_thickness)
+            y_offset += line_height
+
+        # 5. 深度有效率（底部显示）
         total = self.depth_stats['valid_count'] + self.depth_stats['invalid_count']
         if total > 0:
             valid_rate = self.depth_stats['valid_count'] / total * 100
-            cv2.putText(frame, f"Depth: {self.depth_stats['avg_depth']*1000:.0f}mm ({valid_rate:.0f}%)",
+            cv2.putText(frame, f"Depth Valid: {valid_rate:.0f}%",
                        (10, frame.shape[0] - 10),
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                       font, font_scale, font_color, font_thickness)
 
         return frame, keypoints
 
