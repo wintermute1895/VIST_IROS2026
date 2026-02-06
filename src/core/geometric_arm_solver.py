@@ -45,6 +45,18 @@ class GeometricArmSolver:
         self.controlled_joints = controlled_joints
         self.ee_frame_id = ee_frame_id
 
+        # 构建关节名称到索引的映射
+        self.joint_name_to_index = {}
+        for i, joint_idx in enumerate(controlled_joints):
+            # 获取关节名称
+            joint_name = None
+            for j in range(len(model.names)):
+                if model.joints[j].id == joint_idx:
+                    joint_name = model.names[j]
+                    break
+            if joint_name:
+                self.joint_name_to_index[joint_name] = i
+
         # 关节索引映射（假设 controlled_joints 是 7-DOF 右臂）
         # [0:4] 是臂部关节（肩部3个 + 肘部1个）
         # [4:7] 是腕部关节（腕部3个）
@@ -54,6 +66,7 @@ class GeometricArmSolver:
         print(f"✅ [GeometricSolver] 初始化完成")
         print(f"   臂部关节索引: {self.arm_joint_indices}")
         print(f"   腕部关节索引: {self.wrist_joint_indices}")
+        print(f"   关节名称映射: {self.joint_name_to_index}")
 
     def solve_arm_configuration(self, shoulder_pos, elbow_pos, wrist_pos):
         """
@@ -195,17 +208,24 @@ class GeometricArmSolver:
             # 如果没有指定目标姿态，腕部保持中立位置
             q_wrist = np.zeros(3)
 
-        # 修复映射：根据实际测试，肘部角度需要放在索引5 (J6位置)
-        # 这是因为实际的运动学链中，肘部弯曲对应的是 Wrist Pitch 的位置
-        q_solution = np.array([
-            q_arm[0],    # 索引0 -> J1: Shoulder Pitch
-            q_arm[1],    # 索引1 -> J2: Shoulder Roll
-            q_arm[2],    # 索引2 -> J3: Shoulder Yaw
-            0.0,         # 索引3 -> J4: Elbow Pitch (暂时设为0)
-            q_wrist[0],  # 索引4 -> J5: Wrist Yaw
-            q_arm[3],    # 索引5 -> J6: 肘部弯曲角度 (实际映射位置)
-            q_wrist[2]   # 索引6 -> J7: Wrist Roll
-        ])
+        # 使用关节名来明确映射，避免索引混淆
+        # 创建关节角度字典
+        joint_angles = {
+            'Right_Shoulder_Pitch_Joint': q_arm[0],
+            'Right_Shoulder_Roll_Joint': q_arm[1],
+            'Right_Shoulder_Yaw_Joint': q_arm[2],
+            'Right_Elbow_Pitch_Joint': q_arm[3],  # 肘部弯曲
+            'Right_Wrist_Yaw_Joint': q_wrist[0],
+            'Right_Wrist_Pitch_Joint': q_wrist[1],
+            'Right_Wrist_Roll_Joint': q_wrist[2]
+        }
+
+        # 根据 controlled_joints 的顺序构建 q_solution
+        q_solution = np.zeros(len(self.controlled_joints))
+        for joint_name, angle in joint_angles.items():
+            if joint_name in self.joint_name_to_index:
+                idx = self.joint_name_to_index[joint_name]
+                q_solution[idx] = angle
 
         return q_solution
 
