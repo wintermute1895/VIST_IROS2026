@@ -102,7 +102,7 @@ vist_kalman:
 
   # 几何解析求解器（肘部约束集成）
   geometric_solver:
-    enabled: true  # 是否启用几何解析解
+    enabled: false  # 暂时禁用几何解析求解器
     # 当启用时，VIST 将使用几何解析解计算臂部配置（q1-q4）
     # 优势：
     # - 解析解速度快（10-100x）
@@ -113,7 +113,7 @@ vist_kalman:
 
   # 仿生多任务观测模型（3+4解耦）
   biomimetic_observation:
-    enabled: false  # 是否启用仿生多任务观测
+    enabled: true  # 启用仿生多任务观测（完整版集成）
     # 当启用时，VIST 将人体运动分解为三个独立任务：
     # 1. 手部任务：末端位置追踪
     # 2. 肘部任务：J4角度模仿
