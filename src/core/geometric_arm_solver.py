@@ -195,17 +195,16 @@ class GeometricArmSolver:
             # 如果没有指定目标姿态，腕部保持中立位置
             q_wrist = np.zeros(3)
 
-        # 修复映射：J6 (Wrist Pitch) 不应该包含肘部角度
-        # 肘部弯曲角度在 q_arm[3] (J4)，腕部Pitch在 q_wrist[1] (J6)
-        # 暂时将 J6 设为0，避免干扰肘部运动
+        # 修复映射：根据实际测试，肘部角度需要放在索引5 (J6位置)
+        # 这是因为实际的运动学链中，肘部弯曲对应的是 Wrist Pitch 的位置
         q_solution = np.array([
-            q_arm[0],    # J1: Shoulder Pitch
-            q_arm[1],    # J2: Shoulder Roll
-            q_arm[2],    # J3: Shoulder Yaw
-            q_arm[3],    # J4: Elbow Pitch (肘部弯曲)
-            q_wrist[0],  # J5: Wrist Yaw
-            0.0,         # J6: Wrist Pitch (暂时设为0)
-            q_wrist[2]   # J7: Wrist Roll
+            q_arm[0],    # 索引0 -> J1: Shoulder Pitch
+            q_arm[1],    # 索引1 -> J2: Shoulder Roll
+            q_arm[2],    # 索引2 -> J3: Shoulder Yaw
+            0.0,         # 索引3 -> J4: Elbow Pitch (暂时设为0)
+            q_wrist[0],  # 索引4 -> J5: Wrist Yaw
+            q_arm[3],    # 索引5 -> J6: 肘部弯曲角度 (实际映射位置)
+            q_wrist[2]   # 索引6 -> J7: Wrist Roll
         ])
 
         return q_solution
