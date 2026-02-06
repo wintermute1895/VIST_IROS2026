@@ -74,8 +74,15 @@ control:
   frequency: 50  # Hz
   dt: 0.02       # 1/frequency (seconds)
 
+  # 遥操作时长
+  duration: 300.0  # seconds (5 minutes)
+
   # 运动映射参数
   filter_alpha: 0.5  # EMA 滤波系数 (0=最大平滑, 1=无滤波)
+
+  # One Euro Filter 参数
+  filter_min_cutoff: 0.3  # 最小截止频率
+  filter_beta: 0.005      # 速度系数
 
   # 双目标 IK 权重
   wrist_weight: 1.0   # 手腕权重
@@ -85,7 +92,8 @@ control:
 # 网络参数
 # ==========================================
 network:
-  udp_ip: "127.0.0.1"
+  udp_host: "0.0.0.0"  # 绑定地址（0.0.0.0 = 所有接口）
+  udp_ip: "127.0.0.1"  # 发送地址
   udp_port: 6001
   buffer_size: 65536
 

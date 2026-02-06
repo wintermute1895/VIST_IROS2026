@@ -92,6 +92,21 @@ class VISTConfig:
         return self._config['control']['filter_alpha']
 
     @property
+    def filter_min_cutoff(self):
+        """One Euro Filter 最小截止频率"""
+        return self._config['control']['filter_min_cutoff']
+
+    @property
+    def filter_beta(self):
+        """One Euro Filter 速度系数"""
+        return self._config['control']['filter_beta']
+
+    @property
+    def control_duration(self):
+        """遥操作时长 (seconds)"""
+        return self._config['control']['duration']
+
+    @property
     def wrist_weight(self):
         """手腕权重"""
         return self._config['control']['wrist_weight']
@@ -104,6 +119,11 @@ class VISTConfig:
     # ==========================================
     # 网络参数
     # ==========================================
+    @property
+    def udp_host(self):
+        """UDP 绑定地址"""
+        return self._config['network']['udp_host']
+
     @property
     def udp_ip(self):
         """UDP IP 地址"""

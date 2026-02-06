@@ -27,6 +27,7 @@ from src.core.differential_ik_solver import DifferentialIKSolver
 from src.core.motion_mapper import ArmMotionMapper
 from src.core.one_euro_filter import OneEuroFilter
 from src.core.safety_monitor import SafetyMonitor
+from src.config import get_config
 
 
 def countdown(seconds):
@@ -43,9 +44,14 @@ def main():
     print("🎮 VIST框架遥操作 (Differential IK)")
     print("="*80)
 
-    # 1. 加载配置
+    # 1. 加载统一配置
+    print("\n📁 加载系统配置...")
+    config = get_config()
+    print("✅ 系统配置加载完成")
+
+    # 2. 加载硬件配置（设备特定参数）
     config_path = os.path.join(project_root, "config", "hardware.yaml")
-    print(f"\n📁 加载配置: {config_path}")
+    print(f"\n📁 加载硬件配置: {config_path}")
 
     with open(config_path, 'r') as f:
         hw_config = yaml.safe_load(f)
@@ -55,7 +61,7 @@ def main():
     print(f"  Side: {arm_config['side']}")
     print(f"  DoF: {arm_config['dof']}")
 
-    # 2. 初始化真机驱动器
+    # 3. 初始化真机驱动器
     print("\n🦾 初始化真机驱动器...")
     driver = RealArmDriver(
         ip=arm_config['ip'],
@@ -63,78 +69,65 @@ def main():
         arm_side=arm_config['side']
     )
 
-    # 3. 初始化微分IK求解器
+    # 4. 初始化微分IK求解器
     print("\n🧠 初始化微分IK求解器...")
     ik_solver = DifferentialIKSolver()
     print("✅ 微分IK求解器初始化完成")
 
-    # 4. 初始化运动映射器
+    # 5. 初始化运动映射器（从配置文件自动加载参数）
     print("\n🗺️  初始化运动映射器...")
-    mapper = ArmMotionMapper(
-        robot_shoulder_pos=[0.0, -0.096, 1.217],
-        arm_lengths={'upper': 0.2908, 'fore': 0.2366}
-    )
-    mapper.set_filter_alpha(0.5)
+    mapper = ArmMotionMapper()  # 自动从配置文件加载
+    mapper.set_filter_alpha(config.filter_alpha)
     print("✅ 运动映射器初始化完成")
 
-    # 5. 初始化安全监控器
+    # 6. 初始化安全监控器（使用配置参数）
     print("\n🛡️  初始化安全监控器...")
-    joint_limits = np.array([
-        [-2.0, 2.0],      # Shoulder_Pitch: [-166.2°, 68.8°]
-        [-2.0, 3.14],     # Shoulder_Roll: [-68.8°, 179.9°]
-        [-3.14, 3.14],    # Shoulder_Yaw: [-179.9°, 179.9°]
-        [-2.35, 2.0],     # Elbow_Pitch: [-134.6°, 57.3°] (放宽上限)
-        [-3.14, 3.14],    # Wrist_Yaw: [-179.9°, 179.9°]
-        [-3.14, 3.14],    # Wrist_Pitch: [-179.9°, 179.9°]
-        [-3.14, 3.14]     # Wrist_Roll: [-179.9°, 179.9°]
-    ])
     safety_monitor = SafetyMonitor(
-        joint_limits,
-        max_joint_velocity=0.8,  # 放宽速度限制（避免误报）
-        max_joint_acceleration=2.0
+        config.robot_joint_limits,
+        max_joint_velocity=config.max_joint_velocity,
+        max_joint_acceleration=config.max_joint_acceleration
     )
     print("✅ 安全监控器初始化完成")
 
     try:
-        # 6. 连接机器人
+        # 7. 连接机器人
         print("\n🔌 连接机器人...")
         driver.connect()
         print("✅ 连接成功")
 
-        # 7. 获取当前状态
+        # 8. 获取当前状态
         print("\n📊 读取当前关节状态...")
         timestamp, q_current, _ = driver.get_state()
         print(f"当前关节角度: {np.round(np.rad2deg(q_current), 2)}°")
 
-        # 8. 设置 UDP 接收
+        # 9. 设置 UDP 接收（使用配置参数）
         print("\n📡 设置 UDP 接收...")
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', 6001))
+        sock.bind((config.udp_host, config.udp_port))
         sock.setblocking(False)
-        print("✅ UDP 接收器就绪 (端口 6001)")
+        print(f"✅ UDP 接收器就绪 ({config.udp_host}:{config.udp_port})")
 
-        # 9. 初始化滤波器（增强平滑度）
-        pos_filter = OneEuroFilter(min_cutoff=0.3, beta=0.005)  # 降低 min_cutoff 和 beta
-        quat_filter = OneEuroFilter(min_cutoff=0.3, beta=0.005)
+        # 10. 初始化滤波器（使用配置参数）
+        pos_filter = OneEuroFilter(min_cutoff=config.filter_min_cutoff, beta=config.filter_beta)
+        quat_filter = OneEuroFilter(min_cutoff=config.filter_min_cutoff, beta=config.filter_beta)
 
-        # 10. 倒计时
+        # 11. 倒计时
         countdown(10)
 
-        # 11. 遥操作循环
+        # 12. 遥操作循环
         q_cmd = q_current.copy()
         q_cmd_prev = q_cmd.copy()
 
-        frequency = 50  # 50Hz
-        dt = 1.0 / frequency
-        max_joint_velocity = 0.8  # rad/s (提高响应速度)
-        duration = 300.0  # 5分钟
-
-        # VIST参数
-        ik_gain = 0.9  # 增益系数（提高响应速度）
+        # 使用配置参数
+        frequency = config.control_frequency
+        dt = config.control_dt
+        max_joint_velocity = config.max_joint_velocity
+        duration = config.control_duration
+        ik_gain = config.ik_gain
+        max_data_timeout = config.max_data_timeout
+        joint_limits = config.robot_joint_limits  # 用于后续的 clip 操作
 
         data_timeout_count = 0
-        max_data_timeout = 50  # 1秒无数据则停止
-
         success_count = 0
         total_count = 0
 
@@ -153,7 +146,7 @@ def main():
 
             # 接收人体关键点数据
             try:
-                data, _ = sock.recvfrom(65536)
+                data, _ = sock.recvfrom(config.udp_buffer_size)
                 packet = json.loads(data.decode('utf-8'))
 
                 if 'keypoints' in packet:
