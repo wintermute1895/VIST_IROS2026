@@ -149,10 +149,6 @@ class GeometricArmSolver:
         # 正运动学：计算腕部基座的姿态
         pin.forwardKinematics(self.model, self.data, q_full)
         pin.updateFramePlacements(self.model, self.data)
-
-        # 获取腕部基座的姿态（这里假设腕部基座是第4个关节的输出）
-        # 实际上应该获取 Right_Wrist_Yaw_Joint 的父 frame
-        # 简化处理：使用末端执行器的姿态作为参考
         wrist_base_placement = self.data.oMf[self.ee_frame_id]
         wrist_base_rot = wrist_base_placement.rotation
 
@@ -199,8 +195,19 @@ class GeometricArmSolver:
             # 如果没有指定目标姿态，腕部保持中立位置
             q_wrist = np.zeros(3)
 
-        # 合并结果
-        q_solution = np.concatenate([q_arm, q_wrist])
+        # 修复映射：J6 (Wrist Pitch) 不应该包含肘部角度
+        # 肘部弯曲角度在 q_arm[3] (J4)，腕部Pitch在 q_wrist[1] (J6)
+        # 暂时将 J6 设为0，避免干扰肘部运动
+        q_solution = np.array([
+            q_arm[0],    # J1: Shoulder Pitch
+            q_arm[1],    # J2: Shoulder Roll
+            q_arm[2],    # J3: Shoulder Yaw
+            q_arm[3],    # J4: Elbow Pitch (肘部弯曲)
+            q_wrist[0],  # J5: Wrist Yaw
+            0.0,         # J6: Wrist Pitch (暂时设为0)
+            q_wrist[2]   # J7: Wrist Roll
+        ])
+
         return q_solution
 
 
@@ -242,7 +249,7 @@ if __name__ == "__main__":
     q_solution = geo_solver.solve(shoulder_pos, elbow_pos, wrist_pos)
 
     print(f"\n📊 求解结果:")
-    print(f"   关节角度: {np.degrees(q_solution)} (度)")
-    print(f"   关节角度: {q_solution} (弧度)")
+    print(f"   关节角度 (度): {np.degrees(q_solution)}")
+    print(f"   关节角度 (弧度): {q_solution}")
 
     print("\n✅ 测试完成！")
