@@ -134,8 +134,9 @@ class VISTKalmanFilter:
         Q[self.n_joints + swivel_idx, self.n_joints + swivel_idx] *= swivel_damping
 
         # J4 (索引3) 是任务关节，给予更大的自由度
+        # 但不要过度提升，否则会放大抖动
         elbow_idx = 3
-        elbow_boost = 2.0  # 提升 J4 的响应速度
+        elbow_boost = 1.5  # 从 2.0 降低到 1.5，减少对抖动的敏感度
         Q[elbow_idx, elbow_idx] *= elbow_boost
         Q[self.n_joints + elbow_idx, self.n_joints + elbow_idx] *= elbow_boost
 
@@ -171,15 +172,18 @@ class VISTKalmanFilter:
         R[:self.n_joints, :self.n_joints] = human_variance * np.eye(self.n_joints)
 
         # 【关键修正】在仿生观测模式下，J4 的观测是高置信度的几何测量
+        # 但仍需要适当的滤波来处理原始数据的抖动
         if use_biomimetic:
             elbow_idx = 3  # J4 = 索引3
-            # J4 的观测方差应该和手部位置一样小（1e-4）
-            # 这告诉卡尔曼滤波："J4 的观测值不是建议，是命令！"
-            R[elbow_idx, elbow_idx] = 1e-4  # 和虚拟观测一样可信
+            # J4 的观测方差：平衡响应性和平滑性
+            # 1e-4 太小（不滤波，抖动大）
+            # 1e-2 太大（响应慢）
+            # 5e-3 是一个平衡点：既能快速响应，又能平滑抖动
+            R[elbow_idx, elbow_idx] = 5e-3  # 适度滤波
 
-            # 同样，J1-J3 在仿生模式下也是直接控制肘部位置的，也应该提升权重
+            # J1-J3 在仿生模式下控制肘部位置，也需要适度滤波
             for i in range(3):  # J1, J2, J3
-                R[i, i] = 1e-3  # 比默认的 1e-2 小 10 倍
+                R[i, i] = 5e-3  # 适度滤波，比默认的 1e-2 小一半
 
         # 虚拟引导噪声（意图驱动）
         # α → 0: 增大噪声，降低权重（自由移动）
