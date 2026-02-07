@@ -146,18 +146,31 @@ class RealArmDriver(BaseArmDriver):
         False   # URDF[6] Wrist_Roll
     ]
 
-    def __init__(self, ip="192.168.1.183", dof=7, arm_side="left"):
+    def __init__(self, ip="192.168.1.183", dof=7, arm_side="left", config=None):
         """
         初始化真机驱动
         :param ip: 机器人控制器 IP 地址
         :param dof: 自由度数量（默认7）
         :param arm_side: 使用哪个手臂，"left" 或 "right"
+        :param config: VISTConfig 配置对象（可选，用于读取映射关系）
         """
         if not SDK_LOADED:
             raise RuntimeError("Cannot initialize RealArmDriver: SDK not loaded!")
 
         self.ip = ip
         self.dof = dof
+        self.config = config
+
+        # 从配置读取映射关系（如果提供了配置）
+        if config is not None:
+            self.URDF_TO_SDK = config.hardware_urdf_to_sdk_mapping
+            self.SDK_TO_URDF = config.hardware_sdk_to_urdf_mapping
+            self.JOINT_SIGN_FLIP = config.hardware_joint_sign_flip
+        else:
+            # 使用类默认值
+            self.URDF_TO_SDK = RealArmDriver.URDF_TO_SDK
+            self.SDK_TO_URDF = RealArmDriver.SDK_TO_URDF
+            self.JOINT_SIGN_FLIP = RealArmDriver.JOINT_SIGN_FLIP
 
         # 确定使用左臂还是右臂
         if arm_side.lower() == "left":

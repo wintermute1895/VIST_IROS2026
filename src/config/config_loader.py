@@ -33,6 +33,28 @@ class VISTConfig:
         print(f"✅ [Config] 配置文件加载成功: {config_path}")
 
     # ==========================================
+    # 机器人模型参数
+    # ==========================================
+    @property
+    def robot_model_urdf_file(self):
+        """URDF 文件名"""
+        return self._config.get('robot_model', {}).get('urdf_file', 'lkls73_o2_dual_arm_description.urdf')
+
+    @property
+    def robot_model_end_effector_frame(self):
+        """末端执行器名称（根据 arm_side 自动选择）"""
+        arm_side = self.hardware_arm_side
+        frames = self._config.get('robot_model', {}).get('end_effector_frames', {})
+        return frames.get(arm_side, 'Right_Wrist_Roll_Link')
+
+    @property
+    def robot_model_elbow_frame(self):
+        """肘部关节名称（根据 arm_side 自动选择）"""
+        arm_side = self.hardware_arm_side
+        frames = self._config.get('robot_model', {}).get('elbow_frames', {})
+        return frames.get(arm_side, 'Right_Elbow_Pitch_Link')
+
+    # ==========================================
     # 机器人参数
     # ==========================================
     @property
@@ -409,6 +431,77 @@ class VISTConfig:
     def debug_print_interval(self):
         """调试输出间隔（帧数）"""
         return self._config['safety']['debug_print_interval']
+
+    # ==========================================
+    # 硬件参数
+    # ==========================================
+    @property
+    def hardware_robot_ip(self):
+        """机器人控制器 IP 地址"""
+        return self._config.get('hardware', {}).get('robot_ip', '192.168.1.183')
+
+    @property
+    def hardware_arm_side(self):
+        """使用哪个手臂 ('left' 或 'right')"""
+        return self._config.get('hardware', {}).get('arm_side', 'right')
+
+    @property
+    def hardware_urdf_to_sdk_mapping(self):
+        """URDF → SDK 关节映射"""
+        return self._config.get('hardware', {}).get('joint_mapping', {}).get('urdf_to_sdk', [0, 1, 2, 3, 4, 5, 6])
+
+    @property
+    def hardware_sdk_to_urdf_mapping(self):
+        """SDK → URDF 关节映射"""
+        return self._config.get('hardware', {}).get('joint_mapping', {}).get('sdk_to_urdf', [0, 1, 2, 3, 4, 5, 6])
+
+    @property
+    def hardware_joint_sign_flip(self):
+        """关节符号翻转配置"""
+        return self._config.get('hardware', {}).get('joint_sign_flip', [False, True, True, False, True, False, False])
+
+    @property
+    def hardware_move_joint_speed(self):
+        """SDK 运动速度 (rad/s)"""
+        return self._config.get('hardware', {}).get('move_joint_speed', 0.1)
+
+    @property
+    def hardware_move_joint_accel(self):
+        """SDK 运动加速度 (rad/s²)"""
+        return self._config.get('hardware', {}).get('move_joint_accel', 0.5)
+
+    @property
+    def hardware_move_joint_block(self):
+        """是否阻塞等待运动完成"""
+        return self._config.get('hardware', {}).get('move_joint_block', False)
+
+    @property
+    def hardware_connection_timeout(self):
+        """连接超时时间（秒）"""
+        return self._config.get('hardware', {}).get('connection_timeout', 10.0)
+
+    # ==========================================
+    # 可视化参数
+    # ==========================================
+    @property
+    def visualization_enable(self):
+        """是否启用可视化"""
+        return self._config.get('visualization', {}).get('enable', False)
+
+    @property
+    def visualization_meshcat_url(self):
+        """MeshCat 服务器地址"""
+        return self._config.get('visualization', {}).get('meshcat_url', 'tcp://127.0.0.1:7000')
+
+    @property
+    def visualization_update_rate(self):
+        """可视化更新频率 (Hz)"""
+        return self._config.get('visualization', {}).get('update_rate', 30)
+
+    @property
+    def visualization_max_trajectory_points(self):
+        """最大轨迹点数量"""
+        return self._config.get('visualization', {}).get('max_trajectory_points', 100)
 
     # ==========================================
     # 辅助方法

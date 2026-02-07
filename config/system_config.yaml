@@ -2,6 +2,23 @@
 # 系统配置文件 - 统一管理所有参数
 
 # ==========================================
+# 机器人模型参数
+# ==========================================
+robot_model:
+  # URDF 文件名
+  urdf_file: "lkls73_o2_dual_arm_description.urdf"
+
+  # 末端执行器名称
+  end_effector_frames:
+    left: "Left_Wrist_Roll_Link"
+    right: "Right_Wrist_Roll_Link"
+
+  # 肘部关节名称（用于几何求解器）
+  elbow_frames:
+    left: "Left_Elbow_Pitch_Link"
+    right: "Right_Elbow_Pitch_Link"
+
+# ==========================================
 # 机器人参数
 # ==========================================
 robot:
@@ -271,6 +288,14 @@ hardware:
   # 使用哪个手臂
   arm_side: "right"  # "left" 或 "right"
 
+  # 关节映射关系（URDF ↔ SDK）
+  joint_mapping:
+    urdf_to_sdk: [0, 1, 2, 3, 4, 5, 6]
+    sdk_to_urdf: [0, 1, 2, 3, 4, 5, 6]
+
+  # 关节符号翻转（按 URDF 顺序）
+  joint_sign_flip: [false, true, true, false, true, false, false]
+
   # SDK 运动控制参数
   move_joint_speed: 0.1      # 关节运动速度 (rad/s)，默认0.1（安全）
   move_joint_accel: 0.5      # 关节运动加速度 (rad/s²)，默认0.5
@@ -285,3 +310,19 @@ hardware:
   # 状态读取重试次数
   state_read_retries: 5
   state_read_interval: 0.5   # 秒
+
+# ==========================================
+# 可视化参数
+# ==========================================
+visualization:
+  # 是否启用可视化
+  enable: false
+
+  # MeshCat 服务器地址
+  meshcat_url: "tcp://127.0.0.1:7000"
+
+  # 更新频率
+  update_rate: 30  # Hz
+
+  # 轨迹点数量
+  max_trajectory_points: 100
