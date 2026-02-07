@@ -485,10 +485,16 @@ class VISTKalmanFilter:
 
         # 尝试获取肘部frame
         try:
-            elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
-            elbow_pos = self.ik_solver.data.oMf[elbow_frame_id].translation
-        except Exception:
+            # 检查 frame 是否存在
+            if self.ik_solver.model.existFrame("Right_Elbow_Link"):
+                elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
+                elbow_pos = self.ik_solver.data.oMf[elbow_frame_id].translation
+            else:
+                # Frame 不存在，使用配置参数估算
+                raise ValueError("Right_Elbow_Link frame not found")
+        except Exception as e:
             # 回退：使用配置参数估算
+            print(f"⚠️ [VIST] 肘部 frame 不存在，使用几何估算: {e}")
             shoulder_pos = np.array(self.config.robot_shoulder_position)
             upper_arm_length = self.config.robot_arm_lengths['upper']
             q1, q2 = q_controlled[:2]
@@ -512,6 +518,10 @@ class VISTKalmanFilter:
 
             # 计算肘部frame的雅可比矩阵
             try:
+                # 检查 frame 是否存在
+                if not self.ik_solver.model.existFrame("Right_Elbow_Link"):
+                    raise ValueError("Right_Elbow_Link frame not found in URDF")
+
                 elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
                 pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
                 pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
