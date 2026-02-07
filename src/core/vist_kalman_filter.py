@@ -252,44 +252,56 @@ class VISTKalmanFilter:
         Returns:
             delta_theta: 关节角度增量 (n_joints,)
         """
-        # 获取当前关节角度（受控关节）
-        q_controlled = self.state[:self.n_joints]
+        try:
+            # 获取当前关节角度（受控关节）
+            q_controlled = self.state[:self.n_joints]
 
-        # 扩展到完整模型
-        q_full = self._get_full_q_from_controlled(q_controlled)
+            # 扩展到完整模型
+            q_full = self._get_full_q_from_controlled(q_controlled)
 
-        # 正运动学：计算当前末端位置
-        pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
-        pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+            # 确保 q_full 是有效的配置
+            if not np.all(np.isfinite(q_full)):
+                print(f"⚠️ [VIST] compute_differential_ik: q_full 包含无效值")
+                return np.zeros(self.n_joints)
 
-        ee_placement = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
-        current_pos = ee_placement.translation
+            # 正运动学：计算当前末端位置
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
 
-        # 计算位置误差
-        delta_x = target_pos - current_pos
+            ee_placement = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
+            current_pos = ee_placement.translation
 
-        # 计算雅可比矩阵
-        J_full = pin.computeFrameJacobian(
-            self.ik_solver.model,
-            self.ik_solver.data,
-            q_full,
-            self.ik_solver.ee_frame_id,
-            pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
-        )
+            # 计算位置误差
+            delta_x = target_pos - current_pos
 
-        # 只使用位置部分（前3行）和受控关节
-        J = J_full[:3, self.ik_solver.controlled_indices]
+            # 计算雅可比矩阵
+            J_full = pin.computeFrameJacobian(
+                self.ik_solver.model,
+                self.ik_solver.data,
+                q_full,
+                self.ik_solver.ee_frame_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+            )
 
-        # 阻尼伪逆：J† = J^T @ (J @ J^T + λ^2 * I)^(-1)
-        damping = self.config.vist_differential_ik_damping
-        JJT = J @ J.T
-        damping_matrix = damping**2 * np.eye(3)
-        J_pinv = J.T @ inv(JJT + damping_matrix)
+            # 只使用位置部分（前3行）和受控关节
+            J = J_full[:3, self.ik_solver.controlled_indices]
 
-        # 微分观测：Δθ = J†·Δx
-        delta_theta = J_pinv @ delta_x
+            # 阻尼伪逆：J† = J^T @ (J @ J^T + λ^2 * I)^(-1)
+            damping = self.config.vist_differential_ik_damping
+            JJT = J @ J.T
+            damping_matrix = damping**2 * np.eye(3)
+            J_pinv = J.T @ inv(JJT + damping_matrix)
 
-        return delta_theta
+            # 微分观测：Δθ = J†·Δx
+            delta_theta = J_pinv @ delta_x
+
+            return delta_theta
+
+        except Exception as e:
+            print(f"⚠️ [VIST] compute_differential_ik 错误: {e}")
+            import traceback
+            traceback.print_exc()
+            return np.zeros(self.n_joints)
 
     def predict(self):
         """
@@ -764,72 +776,91 @@ class VISTKalmanFilter:
             success: 是否成功
             error: 位置误差（用于兼容性）
         """
-        # 如果提供了初始猜测，初始化状态
-        if q_init is not None and self.iteration_count == 0:
-            q_init = np.array(q_init, dtype=np.float64)
+        try:
+            print(f"🔍 [VIST] solve() 开始 (iteration={self.iteration_count})")
 
-            # 检查维度并提取受控关节
-            if len(q_init) == self.ik_solver.model.nq:
-                # 完整模型维度，提取受控关节
-                q_controlled = np.zeros(self.n_joints)
-                for i, ctrl_idx in enumerate(self.ik_solver.controlled_indices):
-                    if ctrl_idx < len(q_init):
-                        q_controlled[i] = q_init[ctrl_idx]
-                self.state[:self.n_joints] = q_controlled
-            elif len(q_init) == self.n_joints:
-                # 已经是受控关节维度
-                self.state[:self.n_joints] = q_init
-            else:
-                # 维度不匹配，使用零初始化
-                self.state[:self.n_joints] = np.zeros(self.n_joints)
+            # 如果提供了初始猜测，初始化状态
+            if q_init is not None and self.iteration_count == 0:
+                print(f"   初始化状态: q_init shape={np.array(q_init).shape}")
+                q_init = np.array(q_init, dtype=np.float64)
 
-            self.state[self.n_joints:] = 0.0  # 初始速度为零
+                # 检查维度并提取受控关节
+                if len(q_init) == self.ik_solver.model.nq:
+                    # 完整模型维度，提取受控关节
+                    q_controlled = np.zeros(self.n_joints)
+                    for i, ctrl_idx in enumerate(self.ik_solver.controlled_indices):
+                        if ctrl_idx < len(q_init):
+                            q_controlled[i] = q_init[ctrl_idx]
+                    self.state[:self.n_joints] = q_controlled
+                elif len(q_init) == self.n_joints:
+                    # 已经是受控关节维度
+                    self.state[:self.n_joints] = q_init
+                else:
+                    # 维度不匹配，使用零初始化
+                    self.state[:self.n_joints] = np.zeros(self.n_joints)
 
-        # 1. 预测步骤
-        self.predict()
+                self.state[self.n_joints:] = 0.0  # 初始速度为零
+                print(f"   状态初始化完成: state[:7]={self.state[:7]}")
 
-        # 2. 意图检测
-        current_pos = self._get_current_end_effector_position()
-        velocity = self.state[self.n_joints:self.n_joints+3]  # 前3个速度分量
-        self.detect_intent(target_pos, current_pos, velocity)
+            # 1. 预测步骤
+            print(f"   步骤 1: 预测")
+            self.predict()
 
-        # 3. 从配置读取几何求解器和仿生观测的启用状态
-        use_geometric_solver = self.config.vist_geometric_solver_enabled
-        use_biomimetic = self.config.vist_biomimetic_enabled
+            # 2. 意图检测
+            print(f"   步骤 2: 意图检测")
+            current_pos = self._get_current_end_effector_position()
+            print(f"   当前末端位置: {current_pos}")
+            velocity = self.state[self.n_joints:self.n_joints+3]  # 前3个速度分量
+            self.detect_intent(target_pos, current_pos, velocity)
 
-        # 4. 如果启用几何求解器且提供了肘部和肩部位置，计算人类指令
-        human_delta_theta = None
-        if use_geometric_solver and self.geometric_solver is not None and \
-           elbow_pos is not None and shoulder_pos is not None:
-            # 使用几何解析解计算臂部配置
-            wrist_pos = target_pos  # 腕部位置就是目标位置
-            human_delta_theta = self.compute_human_delta_theta_from_elbow(
-                shoulder_pos, elbow_pos, wrist_pos, target_quat
+            # 3. 从配置读取几何求解器和仿生观测的启用状态
+            use_geometric_solver = self.config.vist_geometric_solver_enabled
+            use_biomimetic = self.config.vist_biomimetic_enabled
+            print(f"   几何求解器: {use_geometric_solver}, 仿生观测: {use_biomimetic}")
+
+            # 4. 如果启用几何求解器且提供了肘部和肩部位置，计算人类指令
+            human_delta_theta = None
+            if use_geometric_solver and self.geometric_solver is not None and \
+               elbow_pos is not None and shoulder_pos is not None:
+                # 使用几何解析解计算臂部配置
+                wrist_pos = target_pos  # 腕部位置就是目标位置
+                human_delta_theta = self.compute_human_delta_theta_from_elbow(
+                    shoulder_pos, elbow_pos, wrist_pos, target_quat
+                )
+
+            # 5. 更新步骤（传递肘部和肩部位置以及配置参数）
+            print(f"   步骤 3: 更新")
+            q_solution, success = self.update(
+                target_pos,
+                target_quat,
+                human_delta_theta=human_delta_theta,
+                previous_target_pos=self.previous_target_pos,
+                elbow_pos=elbow_pos,
+                shoulder_pos=shoulder_pos,
+                use_biomimetic=use_biomimetic
             )
 
-        # 5. 更新步骤（传递肘部和肩部位置以及配置参数）
-        q_solution, success = self.update(
-            target_pos,
-            target_quat,
-            human_delta_theta=human_delta_theta,
-            previous_target_pos=self.previous_target_pos,
-            elbow_pos=elbow_pos,
-            shoulder_pos=shoulder_pos,
-            use_biomimetic=use_biomimetic
-        )
+            # 6. 保存当前目标位置作为下一帧的历史
+            self.previous_target_pos = target_pos.copy()
 
-        # 6. 保存当前目标位置作为下一帧的历史
-        self.previous_target_pos = target_pos.copy()
+            # 7. 计算误差（用于统计）
+            print(f"   步骤 4: 计算误差")
+            q_full = self._get_full_q_from_controlled(q_solution)
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+            ee_placement = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
+            current_pos = ee_placement.translation
+            error = np.linalg.norm(target_pos - current_pos)
 
-        # 7. 计算误差（用于统计）
-        q_full = self._get_full_q_from_controlled(q_solution)
-        pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
-        pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
-        ee_placement = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
-        current_pos = ee_placement.translation
-        error = np.linalg.norm(target_pos - current_pos)
+            print(f"✅ [VIST] solve() 完成 (error={error:.4f}m)")
+            return q_solution, success, error
 
-        return q_solution, success, error
+        except Exception as e:
+            print(f"❌ [VIST] solve() 严重错误: {e}")
+            import traceback
+            traceback.print_exc()
+            # 返回当前状态作为安全回退
+            return self.state[:self.n_joints].copy(), False, 999.0
 
     def _get_full_q_from_controlled(self, q_controlled):
         """
@@ -841,21 +872,46 @@ class VISTKalmanFilter:
         Returns:
             q_full: 完整模型关节角度 (model.nq,)
         """
-        q_full = pin.neutral(self.ik_solver.model).copy()
-        for i, ctrl_idx in enumerate(self.ik_solver.controlled_indices):
-            if i < len(q_controlled) and ctrl_idx < len(q_full):
-                q_full[ctrl_idx] = q_controlled[i]
-        return q_full
+        try:
+            q_full = pin.neutral(self.ik_solver.model).copy()
+
+            # 确保 q_controlled 是有效的
+            if not np.all(np.isfinite(q_controlled)):
+                print(f"⚠️ [VIST] q_controlled 包含无效值: {q_controlled}")
+                return q_full  # 返回中立配置
+
+            for i, ctrl_idx in enumerate(self.ik_solver.controlled_indices):
+                if i < len(q_controlled) and ctrl_idx < len(q_full):
+                    q_full[ctrl_idx] = q_controlled[i]
+
+            return q_full
+        except Exception as e:
+            print(f"⚠️ [VIST] _get_full_q_from_controlled 错误: {e}")
+            import traceback
+            traceback.print_exc()
+            return pin.neutral(self.ik_solver.model)
 
     def _get_current_end_effector_position(self):
         """获取当前末端执行器位置"""
-        q_controlled = self.state[:self.n_joints]
-        q_full = self._get_full_q_from_controlled(q_controlled)
+        try:
+            q_controlled = self.state[:self.n_joints]
+            q_full = self._get_full_q_from_controlled(q_controlled)
 
-        pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
-        pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
-        ee_placement = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
-        return ee_placement.translation
+            # 确保 q_full 是有效的配置
+            if not np.all(np.isfinite(q_full)):
+                print(f"⚠️ [VIST] q_full 包含无效值，使用中立配置")
+                q_full = pin.neutral(self.ik_solver.model)
+
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+            ee_placement = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
+            return ee_placement.translation
+        except Exception as e:
+            print(f"⚠️ [VIST] _get_current_end_effector_position 错误: {e}")
+            import traceback
+            traceback.print_exc()
+            # 返回肩部位置作为安全回退
+            return np.array(self.config.robot_shoulder_position)
 
     def reset(self):
         """重置滤波器状态"""
