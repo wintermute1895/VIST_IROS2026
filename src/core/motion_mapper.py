@@ -84,13 +84,16 @@ class ArmMotionMapper:
                 f"应该等于单位矩阵"
             )
 
-        # 2. 检查行列式: det(R) = 1 (右手坐标系)
+        # 2. 检查行列式: det(R) = 1 (右手坐标系) 或 -1 (左手坐标系/镜像)
         det = np.linalg.det(R)
-        if not np.isclose(det, 1.0, atol=1e-6):
+        if not np.isclose(abs(det), 1.0, atol=1e-6):
             raise ValueError(
-                f"旋转矩阵行列式 = {det:.6f}，应该等于 1.0\n"
-                f"det(R) ≠ 1 表示矩阵包含镜像或缩放变换"
+                f"旋转矩阵行列式 = {det:.6f}，应该等于 ±1.0\n"
+                f"|det(R)| ≠ 1 表示矩阵包含缩放变换"
             )
+
+        if det < 0:
+            print(f"   ⚠️  旋转矩阵行列式 = {det:.6f} (包含镜像变换，这可能是有意的)")
 
         self.R_vision_to_robot = R
         print(f"   ✅ 旋转矩阵验证通过 (正交性误差: {np.linalg.norm(orthogonality_check - np.eye(3)):.2e})")

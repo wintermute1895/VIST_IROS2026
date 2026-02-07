@@ -84,7 +84,8 @@ class FullFlowSimulator:
                     model=self.ik_solver.model,
                     data=self.ik_solver.data,
                     controlled_joints=self.ik_solver.controlled_indices,
-                    ee_frame_id=self.ik_solver.ee_frame_id
+                    ee_frame_id=self.ik_solver.ee_frame_id,
+                    config=self.config  # 传递配置以读取关节方向
                 )
                 print(f"   ✅ 几何求解器初始化完成 (trust_weight={self.config.vist_geometric_solver_trust_weight})")
 
@@ -314,6 +315,28 @@ class FullFlowSimulator:
                     if 'wrist' not in human_kps or 'elbow' not in human_kps:
                         time.sleep(0.01)
                         continue
+
+                    # 【调试】打印原始关键点数据（每30帧一次）
+                    if frame_count % 30 == 0:
+                        print(f"\n🔍 原始关键点数据（Shoulder Frame）:")
+                        for key in ['shoulder', 'elbow', 'wrist']:
+                            if key in human_kps:
+                                kp = np.array(human_kps[key])
+                                print(f"   {key:8s}: [{kp[0]:7.4f}, {kp[1]:7.4f}, {kp[2]:7.4f}]")
+
+                        # 计算臂长
+                        if 'shoulder' in human_kps and 'elbow' in human_kps and 'wrist' in human_kps:
+                            shoulder = np.array(human_kps['shoulder'])
+                            elbow = np.array(human_kps['elbow'])
+                            wrist = np.array(human_kps['wrist'])
+                            upper_len = np.linalg.norm(elbow - shoulder)
+                            fore_len = np.linalg.norm(wrist - elbow)
+                            total_len = upper_len + fore_len
+                            print(f"   上臂长度: {upper_len:.4f}m")
+                            print(f"   前臂长度: {fore_len:.4f}m")
+                            print(f"   总臂长: {total_len:.4f}m")
+                            print(f"   机器人上臂: {self.config.robot_arm_lengths['upper']:.4f}m")
+                            print(f"   机器人前臂: {self.config.robot_arm_lengths['forearm']:.4f}m")
 
                     # ==========================================
                     # 核心流程：视觉 → 映射 → IK → 可视化

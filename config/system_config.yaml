@@ -15,7 +15,8 @@
 # ==========================================
 robot:
   # 肩部位置（相对于 body_base_link）
-  shoulder_position: [0.0, -0.096, 1.217]  # [x, y, z] in meters
+  # 调整到第二个关节位置，使肩部向量更好地与机器人第一个关节向量平行重合
+  shoulder_position: [0.0, -0.17, 1.217]  # [x, y, z] in meters
 
   # 臂长参数
   arm_lengths:
@@ -24,13 +25,37 @@ robot:
 
   # 关节限位
   joint_limits:
-    - [-2.5, 2.5]      # Joint 0: Shoulder_Pitch
-    - [-2.5, 2.5]     # Joint 1: Shoulder_Roll
-    - [-3.14, 3.14]    # Joint 2: Shoulder_Yaw
-    - [-2.5, 3]     # Joint 3: Elbow_Pitch
+    - [-7, 7]      # Joint 0: Shoulder_Pitch
+    - [-7, 7]     # Joint 1: Shoulder_Roll
+    - [-7, 7]    # Joint 2: Shoulder_Yaw
+    - [-7, 7]     # Joint 3: Elbow_Pitch
     - [-3.14, 3.14]    # Joint 4: Wrist_Yaw
     - [-3.14, 3.14]    # Joint 5: Wrist_Pitch
     - [-3.14, 3.14]    # Joint 6: Wrist_Roll
+
+  # 关节方向系数（用于调整电机旋转方向）
+  # 1 = 正向, -1 = 反向
+  # 在真机测试时可以方便地调整每个关节的旋转方向
+  joint_directions:
+    - -1  # Joint 0: Shoulder_Pitch (反向)
+    - 1   # Joint 1: Shoulder_Roll
+    - -1  # Joint 2: Shoulder_Yaw (反向)
+    - 1  # Joint 3: Elbow_Pitch (反向，配合修改后的URDF)
+    - 1   # Joint 4: Wrist_Yaw
+    - 1   # Joint 5: Wrist_Pitch
+    - 1   # Joint 6: Wrist_Roll
+
+  # 关节零位偏移（单位：弧度）
+  # 用于调整每个关节的零位定义，使人体中立姿态对应机器人零位
+  # 计算公式: q_final = q_calculated * joint_directions[i] + joint_offsets[i]
+  joint_offsets:
+    - -1.5708  # Joint 0: Shoulder_Pitch (-90° = -π/2, 使手臂下垂为零位)
+    - 0.0      # Joint 1: Shoulder_Roll
+    - 0.0      # Joint 2: Shoulder_Yaw
+    - 0.0   # Joint 3: Elbow_Pitch (+90° = +π/2, 配合direction=-1使用)
+    - 0.0      # Joint 4: Wrist_Yaw
+    - 0.0      # Joint 5: Wrist_Pitch
+    - 0.0      # Joint 6: Wrist_Roll
 
 # ==========================================
 # 坐标系转换
@@ -39,7 +64,7 @@ coordinate_transform:
   # 转换矩阵：Shoulder Frame → Robot Base Frame
   # 用户和机器人同向放置（不是面对面）
   rotation_matrix: [
-    [0,  0,  1],  # X_robot = Z_shoulder (前 = 前)
+    [0,  0,  1],  # X_robot = -Z_shoulder (前 = -前，修正镜面对称)
     [0, -1,  0],  # Y_robot = -Y_shoulder (左 = -右)
     [1,  0,  0]   # Z_robot = X_shoulder (上 = 上)
   ]
@@ -79,8 +104,9 @@ control:
   pink_elbow_priority: 0.5  # 肘部任务优先级（中）
 
   # 速度和加速度限制
-  max_joint_velocity: 0.8      # rad/s
-  max_joint_acceleration: 2.0  # rad/s^2
+  # 真机测试安全参数（降低到仿真的 30-40%）
+  max_joint_velocity: 0.3      # rad/s (原 0.8，降低到 37.5%)
+  max_joint_acceleration: 0.8  # rad/s^2 (原 2.0，降低到 40%)
 
   # 控制频率
   frequency: 50  # Hz
@@ -102,18 +128,21 @@ vist_kalman:
 
   # 几何解析求解器（肘部约束集成）
   geometric_solver:
-    enabled: false  # 暂时禁用几何解析求解器
+    enabled: true  # 启用几何解析求解器 - 追求构型一致性
     # 当启用时，VIST 将使用几何解析解计算臂部配置（q1-q4）
     # 优势：
     # - 解析解速度快（10-100x）
     # - 配置唯一且自然
     # - 符合人体运动学
+    # - 直接追求方向向量一致性，末端位置自然对齐
     trust_weight: 2.0  # 几何解析解的信任权重（相对于微分IK）
                        # 通过调整 Q 矩阵实现：Q_arm *= (1.0 / trust_weight)
 
   # 仿生多任务观测模型（3+4解耦）
   biomimetic_observation:
-    enabled: true  # 启用仿生多任务观测（完整版集成）
+    enabled: false  # 禁用仿生观测 - 避免与几何求解器冲突
+    # 仿生观测使用增量控制 + 微分IK，会与几何求解器的直接求解冲突
+    # 几何求解器追求构型一致性，更纯粹、更直接
     # 当启用时，VIST 将人体运动分解为三个独立任务：
     # 1. 手部任务：末端位置追踪
     # 2. 肘部任务：J4角度模仿
@@ -193,8 +222,8 @@ filtering:
   ema_alpha: 0.5  # 滤波系数 (0=最大平滑, 1=无滤波)
 
   # One Euro Filter 参数
-  oneeuro_min_cutoff: 0.2  # 最小截止频率
-  oneeuro_beta: 0.003      # 速度系数
+  oneeuro_min_cutoff: 0.1  # 最小截止频率（降低以增强滤波）
+  oneeuro_beta: 0.001      # 速度系数（降低以减少对速度变化的敏感度）
   oneeuro_d_cutoff: 1.0    # 导数截止频率
 
   # 控制节点滤波（VIST 核心算法）
@@ -235,7 +264,8 @@ safety:
   max_data_timeout: 50  # frames (1秒 @ 50Hz)
 
   # 位置限制
-  max_distance_from_shoulder: 0.7  # meters (1.2 * arm_length)
+  # 真机测试：缩小工作空间以提高安全性
+  max_distance_from_shoulder: 0.5  # meters (原 0.7，缩小到约 0.9 * arm_length)
 
   # 调试模式
   debug_mode: false

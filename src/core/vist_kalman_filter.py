@@ -99,6 +99,11 @@ class VISTKalmanFilter:
         # ==========================================
         self.previous_target_pos = None  # 上一帧目标位置
 
+        # 预滤波器：在数据进入卡尔曼滤波前先平滑
+        self.previous_elbow_angle = None  # 上一帧肘部角度（用于 EMA 滤波）
+        self.previous_shoulder_delta = None  # 上一帧肩部增量（用于 EMA 滤波）
+        self.prefilter_alpha = 0.3  # EMA 滤波系数（0-1，越小越平滑）
+
         # ==========================================
         # 7. 统计信息
         # ==========================================
@@ -126,17 +131,26 @@ class VISTKalmanFilter:
         vel_variance = self.config.vist_velocity_variance
         Q[self.n_joints:, self.n_joints:] = vel_variance * np.eye(self.n_joints)
 
-        # 【关键修正】只对 J3 (Swivel) 施加阻尼，释放 J4
-        # J3 (索引2) 是真正的冗余自由度，需要抑制高频抖动
+        # 【关键修正】大幅增强肩部关节自由度，解决向前运动困难的问题
+        # J1 (Shoulder Pitch) 是最关键的关节，需要最大的自由度
+        shoulder_pitch_idx = 0
+        shoulder_roll_idx = 1
+        shoulder_pitch_boost = 3.0  # 大幅增强 J1，让大臂能向前抬起
+        shoulder_roll_boost = 2.0   # 适度增强 J2
+        Q[shoulder_pitch_idx, shoulder_pitch_idx] *= shoulder_pitch_boost
+        Q[self.n_joints + shoulder_pitch_idx, self.n_joints + shoulder_pitch_idx] *= shoulder_pitch_boost
+        Q[shoulder_roll_idx, shoulder_roll_idx] *= shoulder_roll_boost
+        Q[self.n_joints + shoulder_roll_idx, self.n_joints + shoulder_roll_idx] *= shoulder_roll_boost
+
+        # J3 (Swivel) 施加强阻尼，抑制冗余自由度的抖动和跳变
         swivel_idx = 2
-        swivel_damping = 0.5  # 轻微阻尼
+        swivel_damping = 0.1  # 强阻尼，防止 q3 跳变（从 0.5 降低到 0.1）
         Q[swivel_idx, swivel_idx] *= swivel_damping
         Q[self.n_joints + swivel_idx, self.n_joints + swivel_idx] *= swivel_damping
 
-        # J4 (索引3) 是任务关节，给予更大的自由度
-        # 但不要过度提升，否则会放大抖动
+        # J4 (Elbow) 是任务关节，给予适度的自由度
         elbow_idx = 3
-        elbow_boost = 1.5  # 从 2.0 降低到 1.5，减少对抖动的敏感度
+        elbow_boost = 1.2  # 适度提升，避免过于强势
         Q[elbow_idx, elbow_idx] *= elbow_boost
         Q[self.n_joints + elbow_idx, self.n_joints + elbow_idx] *= elbow_boost
 
@@ -192,6 +206,16 @@ class VISTKalmanFilter:
                           (self.config.vist_virtual_base_variance - self.config.vist_virtual_min_variance) * \
                           (1.0 - self.alpha_smoothed)
         R[self.n_joints:, self.n_joints:] = virtual_variance * np.eye(self.n_joints)
+
+        # 【关键修正】当使用几何求解器时，大幅降低臂部关节（J1-J4）的微分IK权重
+        # 让几何求解器完全主导臂部控制，避免两个观测打架
+        if self.geometric_solver is not None:
+            # 臂部关节（J1-J4）：几何求解器主导
+            for i in range(4):  # J1, J2, J3, J4
+                # 大幅降低人类指令观测的噪声（提高权重）
+                R[i, i] = 1e-4  # 高置信度，完全信任几何解析解
+                # 大幅增大微分IK观测的噪声（降低权重）
+                R[self.n_joints + i, self.n_joints + i] = 1e2  # 低置信度，基本忽略微分IK
 
         return R
 
@@ -434,7 +458,19 @@ class VISTKalmanFilter:
             # ==========================================
             # 计算肘部位置误差
             current_elbow_pos = self._estimate_current_elbow_position()
-            delta_elbow_pos = elbow_pos - current_elbow_pos
+            delta_elbow_pos_raw = elbow_pos - current_elbow_pos
+
+            # 【预滤波】EMA 平滑肘部位置增量，减少原始数据抖动
+            if self.previous_shoulder_delta is None:
+                # 第一帧：直接使用原始值
+                delta_elbow_pos = delta_elbow_pos_raw
+            else:
+                # EMA 滤波：filtered = alpha * new + (1-alpha) * old
+                delta_elbow_pos = (self.prefilter_alpha * delta_elbow_pos_raw +
+                                  (1.0 - self.prefilter_alpha) * self.previous_shoulder_delta)
+
+            # 更新历史值
+            self.previous_shoulder_delta = delta_elbow_pos
 
             # 使用微分IK计算肩部关节增量（只用前3个关节）
             z_shoulder = self._compute_shoulder_joints_for_elbow(delta_elbow_pos)
@@ -450,13 +486,27 @@ class VISTKalmanFilter:
                 np.linalg.norm(vec_upper) * np.linalg.norm(vec_lower) + 1e-6
             )
             cos_angle = np.clip(cos_angle, -1.0, 1.0)
-            human_elbow_angle = np.arccos(cos_angle)
+            human_elbow_angle_raw = np.arccos(cos_angle)
+
+            # 【预滤波】EMA 平滑肘部角度，减少原始数据抖动
+            if self.previous_elbow_angle is None:
+                # 第一帧：直接使用原始值
+                human_elbow_angle = human_elbow_angle_raw
+            else:
+                # EMA 滤波：filtered = alpha * new + (1-alpha) * old
+                # alpha=0.3 表示 30% 新数据 + 70% 历史数据（较强平滑）
+                human_elbow_angle = (self.prefilter_alpha * human_elbow_angle_raw +
+                                    (1.0 - self.prefilter_alpha) * self.previous_elbow_angle)
+
+            # 更新历史值
+            self.previous_elbow_angle = human_elbow_angle
 
             # 机器人当前肘部角度
             robot_elbow_angle = self.state[3]  # J4 = 索引3 (Right_Elbow_Pitch_Joint)
 
-            # 肘部角度增量
-            z_observation[3] = human_elbow_angle - robot_elbow_angle
+            # 肘部角度增量（不再增强，避免压制肩部运动）
+            elbow_delta = human_elbow_angle - robot_elbow_angle
+            z_observation[3] = elbow_delta  # 1.0x，与其他关节平衡
 
             # ==========================================
             # 层级 3: 腕部关节（J5-J7）- 控制末端位置
@@ -490,12 +540,12 @@ class VISTKalmanFilter:
         # 尝试获取肘部frame
         try:
             # 检查 frame 是否存在
-            if self.ik_solver.model.existFrame("Right_Elbow_Link"):
-                elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
+            if self.ik_solver.model.existFrame("Right_Elbow_Pitch_Link"):
+                elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Pitch_Link")
                 elbow_pos = self.ik_solver.data.oMf[elbow_frame_id].translation
             else:
                 # Frame 不存在，使用配置参数估算
-                raise ValueError("Right_Elbow_Link frame not found")
+                raise ValueError("Right_Elbow_Pitch_Link frame not found")
         except Exception as e:
             # 回退：使用配置参数估算
             print(f"⚠️ [VIST] 肘部 frame 不存在，使用几何估算: {e}")
@@ -523,10 +573,10 @@ class VISTKalmanFilter:
             # 计算肘部frame的雅可比矩阵
             try:
                 # 检查 frame 是否存在
-                if not self.ik_solver.model.existFrame("Right_Elbow_Link"):
-                    raise ValueError("Right_Elbow_Link frame not found in URDF")
+                if not self.ik_solver.model.existFrame("Right_Elbow_Pitch_Link"):
+                    raise ValueError("Right_Elbow_Pitch_Link frame not found in URDF")
 
-                elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
+                elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Pitch_Link")
                 pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
                 pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
 
@@ -641,8 +691,8 @@ class VISTKalmanFilter:
 
         # 方法1：尝试使用URDF中定义的frame（如果存在）
         try:
-            shoulder_frame_id = self.ik_solver.model.getFrameId("Right_Shoulder_Link")
-            elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Link")
+            shoulder_frame_id = self.ik_solver.model.getFrameId("Right_Shoulder_Pitch_Link")
+            elbow_frame_id = self.ik_solver.model.getFrameId("Right_Elbow_Pitch_Link")
             wrist_frame_id = self.ik_solver.ee_frame_id
 
             shoulder_pos = self.ik_solver.data.oMf[shoulder_frame_id].translation
@@ -717,7 +767,7 @@ class VISTKalmanFilter:
         # 2. 计算人类指令观测
         if human_delta_theta is None:
             # ==========================================
-            # 模式选择：仿生多任务 vs 单一观测
+            # 模式选择：仿生多任务 vs 几何解析 vs 标准微分IK
             # ==========================================
             if use_biomimetic and elbow_pos is not None and shoulder_pos is not None:
                 # 【仿生模式】：使用3+4解耦的分层控制观测
@@ -727,13 +777,13 @@ class VISTKalmanFilter:
                 )
                 # 注意：新版本直接返回完整的观测向量，不需要额外融合
 
-            elif elbow_pos is not None and shoulder_pos is not None:
-                # 【几何解析模式】：使用完整的几何解耦
+            elif self.geometric_solver is not None and elbow_pos is not None and shoulder_pos is not None:
+                # 【几何解析模式】：使用完整的几何解耦（需要几何求解器）
                 human_delta_theta = self.compute_human_delta_theta_from_elbow(
                     shoulder_pos, elbow_pos, target_pos, target_quat
                 )
             elif previous_target_pos is not None:
-                # 从人手位置变化计算人类指令（回退方案）
+                # 【标准微分IK模式】：从人手位置变化计算人类指令
                 human_delta_theta = self.compute_human_delta_theta(target_pos, previous_target_pos)
             else:
                 # 如果没有历史数据，使用零向量
@@ -936,6 +986,8 @@ class VISTKalmanFilter:
         self.alpha = 0.0
         self.alpha_smoothed = 0.0
         self.previous_target_pos = None  # 重置历史位置
+        self.previous_elbow_angle = None  # 重置预滤波器历史
+        self.previous_shoulder_delta = None  # 重置预滤波器历史
         self.iteration_count = 0
 
 

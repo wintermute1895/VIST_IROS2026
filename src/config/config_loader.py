@@ -50,6 +50,16 @@ class VISTConfig:
         """关节限位 (7, 2) numpy array"""
         return np.array(self._config['robot']['joint_limits'], dtype=np.float64)
 
+    @property
+    def robot_joint_directions(self):
+        """关节方向系数 (7,) numpy array, 1=正向, -1=反向"""
+        return np.array(self._config['robot'].get('joint_directions', [1, 1, 1, 1, 1, 1, 1]), dtype=np.float64)
+
+    @property
+    def robot_joint_offsets(self):
+        """关节零位偏移 (7,) numpy array, 单位：弧度"""
+        return np.array(self._config['robot'].get('joint_offsets', [0, 0, 0, 0, 0, 0, 0]), dtype=np.float64)
+
     # ==========================================
     # 坐标系转换
     # ==========================================

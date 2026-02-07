@@ -30,7 +30,7 @@ class GeometricArmSolver:
     2. 腕部姿态（后3个关节）：由目标末端姿态和臂部配置确定
     """
 
-    def __init__(self, model, data, controlled_joints, ee_frame_id):
+    def __init__(self, model, data, controlled_joints, ee_frame_id, config=None):
         """
         初始化几何求解器
 
@@ -39,6 +39,7 @@ class GeometricArmSolver:
             data: Pinocchio 数据
             controlled_joints: 受控关节索引列表
             ee_frame_id: 末端执行器 frame ID
+            config: 系统配置对象（可选，用于读取关节方向）
         """
         self.model = model
         self.data = data
@@ -66,7 +67,25 @@ class GeometricArmSolver:
         self.arm_joint_indices = controlled_joints[:4]  # q1, q2, q3, q4
         self.wrist_joint_indices = controlled_joints[4:]  # q5, q6, q7
 
-        print(f"✅ [GeometricSolver] 初始化完成")
+        # 读取关节方向配置（用于调整电机旋转方向）
+        if config is not None and hasattr(config, 'robot_joint_directions'):
+            self.joint_directions = np.array(config.robot_joint_directions)
+            print(f"✅ [GeometricSolver] 初始化完成（使用配置的关节方向）")
+            print(f"   关节方向: {self.joint_directions}")
+        else:
+            # 默认所有关节正向
+            self.joint_directions = np.ones(7)
+            print(f"✅ [GeometricSolver] 初始化完成（使用默认关节方向）")
+
+        # 读取关节零位偏移配置（用于调整零位定义）
+        if config is not None and hasattr(config, 'robot_joint_offsets'):
+            self.joint_offsets = np.array(config.robot_joint_offsets)
+            print(f"   关节偏移: {self.joint_offsets} (弧度)")
+            print(f"   关节偏移: {np.degrees(self.joint_offsets)} (度)")
+        else:
+            # 默认所有关节无偏移
+            self.joint_offsets = np.zeros(7)
+
         print(f"   臂部关节索引: {self.arm_joint_indices}")
         print(f"   腕部关节索引: {self.wrist_joint_indices}")
         print(f"   关节名称映射: {self.joint_name_to_index}")
@@ -107,23 +126,41 @@ class GeometricArmSolver:
 
         # q1 (Shoulder Pitch): 绕 Y 轴旋转（俯仰）
         # 计算向量在 XZ 平面的投影
+        # 注意：关节方向和零位偏移由配置文件控制
         q1 = np.arctan2(v_shoulder_elbow[2], v_shoulder_elbow[0])
 
         # q2 (Shoulder Roll): 绕 X 轴旋转（横滚）
         # 计算向量与 XZ 平面的夹角
+        # 注意：v_shoulder_elbow 已经在 Robot Base Frame 中，Y 轴已经通过坐标转换翻转过
+        # 不要再次翻转，否则会负负得正！
         r_xz = np.sqrt(v_shoulder_elbow[0]**2 + v_shoulder_elbow[2]**2)
         q2 = np.arctan2(v_shoulder_elbow[1], r_xz)
 
-        # q3 (Shoulder Yaw): 绕 Z 轴旋转（偏航）
-        # 这个需要考虑肘部的旋转自由度
-        # 简化处理：假设肩部偏航角为 0（可以通过优化调整）
-        q3 = 0.0
+        # q3 (Shoulder Yaw): 大臂自旋角度
+        # 关键：q3 控制大臂绕自身轴线的旋转，需要由小臂方向决定
+        # 方法：将小臂向量反向转换到视觉坐标系，计算其在 YZ 平面的角度
+        #
+        # 反向转换：Robot Frame → Shoulder Frame
+        # X_shoulder = Z_robot, Y_shoulder = -Y_robot, Z_shoulder = X_robot
+        v_elbow_wrist_shoulder = np.array([
+            v_elbow_wrist[2],   # X_shoulder = Z_robot (上)
+            -v_elbow_wrist[1],  # Y_shoulder = -Y_robot (右)
+            v_elbow_wrist[0]    # Z_shoulder = X_robot (前)
+        ])
+
+        # 计算小臂在视觉坐标系 YZ 平面的角度
+        # Y 轴正方向 = 右 = 外旋，Y 轴负方向 = 左 = 内旋
+        q3 = np.arctan2(v_elbow_wrist_shoulder[1], v_elbow_wrist_shoulder[2])
 
         # ==========================================
         # 2. 计算肘部角度（q4）
         # ==========================================
-        # 肘部角度 = π - 两向量夹角
-        # 因为肘部是弯曲的，所以是补角
+        # 肘部角度 = 两向量夹角
+        #
+        # 关节零位定义：
+        # - 机器人 URDF: q4 = 0° 表示手臂完全伸直（两向量平行）
+        # - 机器人 URDF: q4 = 180° 表示手臂完全折叠（两向量反向）
+        # - 因此 q4 = arccos(cos_angle)，直接使用夹角
         r_elbow_wrist = np.linalg.norm(v_elbow_wrist)
         if r_elbow_wrist < 1e-6:
             raise ValueError("肘部和腕部位置重合，无法求解")
@@ -131,10 +168,9 @@ class GeometricArmSolver:
         # 计算两向量夹角（使用点积）
         cos_angle = np.dot(v_shoulder_elbow, v_elbow_wrist) / (r * r_elbow_wrist)
         cos_angle = np.clip(cos_angle, -1.0, 1.0)  # 防止数值误差
-        angle = np.arccos(cos_angle)
 
-        # 肘部角度 = π - 夹角
-        q4 = np.pi - angle
+        # 肘部角度 = 夹角（不需要取补角）
+        q4 = np.arccos(cos_angle)
 
         return np.array([q1, q2, q3, q4])
 
@@ -249,7 +285,9 @@ class GeometricArmSolver:
         for joint_name, angle in joint_angles.items():
             if joint_name in self.joint_name_to_index:
                 idx = self.joint_name_to_index[joint_name]
-                q_solution[idx] = angle
+                # 应用关节方向系数和零位偏移
+                # 公式: q_final = q_calculated * direction + offset
+                q_solution[idx] = angle * self.joint_directions[idx] + self.joint_offsets[idx]
 
         return q_solution
 

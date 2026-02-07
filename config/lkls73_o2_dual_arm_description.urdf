@@ -781,9 +781,9 @@
     <child
       link="Right_Elbow_Pitch_Link" />
     <axis
-      xyz="0 1 0" />
+      xyz="0 -1 0" />
     <limit
-      lower="0"
+      lower="-2.2"
       upper="2.2"
       effort="0"
       velocity="0" />
