@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 # VIST System Configuration
 # 系统配置文件 - 统一管理所有参数
 
@@ -49,7 +40,7 @@ robot:
   # 用于调整每个关节的零位定义，使人体中立姿态对应机器人零位
   # 计算公式: q_final = q_calculated * joint_directions[i] + joint_offsets[i]
   joint_offsets:
-    - -1.5708  # Joint 0: Shoulder_Pitch (-90° = -π/2, 使手臂下垂为零位)
+    - 0.0  # Joint 0: Shoulder_Pitch (-90° = -π/2, 使手臂下垂为零位)
     - 0.0      # Joint 1: Shoulder_Roll
     - 0.0      # Joint 2: Shoulder_Yaw
     - 0.0   # Joint 3: Elbow_Pitch (+90° = +π/2, 配合direction=-1使用)
@@ -264,9 +255,33 @@ safety:
   max_data_timeout: 50  # frames (1秒 @ 50Hz)
 
   # 位置限制
-  # 真机测试：缩小工作空间以提高安全性
-  max_distance_from_shoulder: 0.5  # meters (原 0.7，缩小到约 0.9 * arm_length)
+  max_distance_from_shoulder: 0.7  # meters (1.2 * arm_length)
 
   # 调试模式
   debug_mode: false
   debug_print_interval: 30  # frames
+
+# ==========================================
+# 真机驱动参数
+# ==========================================
+hardware:
+  # 机器人控制器 IP 地址
+  robot_ip: "192.168.10.21"
+
+  # 使用哪个手臂
+  arm_side: "right"  # "left" 或 "right"
+
+  # SDK 运动控制参数
+  move_joint_speed: 0.1      # 关节运动速度 (rad/s)，默认0.1（安全）
+  move_joint_accel: 0.5      # 关节运动加速度 (rad/s²)，默认0.5
+  move_joint_block: false    # 是否阻塞等待运动完成
+
+  # 关节跟随模式（用于遥操作）
+  joint_follow_mode: false    # true=高跟随模式（低延迟），false=低跟随模式（平滑）
+
+  # 连接超时
+  connection_timeout: 10.0   # 秒
+
+  # 状态读取重试次数
+  state_read_retries: 5
+  state_read_interval: 0.5   # 秒

@@ -88,9 +88,9 @@ class RealArmDriver(BaseArmDriver):
     """
     LinkerArm真机驱动
 
-    SDK关节顺序（硬编码，基于LinkerArm lkls73_o2）：
-    SDK[0]: Shoulder Roll  (肩部侧摆)
-    SDK[1]: Shoulder Pitch (肩部俯仰)
+    SDK关节顺序（基于LinkerArm lkls73_o2，Web控制器验证）：
+    SDK[0]: Shoulder Pitch (肩部俯仰)
+    SDK[1]: Shoulder Roll  (肩部侧摆)
     SDK[2]: Shoulder Yaw   (肩部旋转)
     SDK[3]: Elbow Pitch    (肘部俯仰)
     SDK[4]: Wrist Yaw      (腕部旋转)
@@ -107,7 +107,8 @@ class RealArmDriver(BaseArmDriver):
     URDF[6]: Wrist Roll     (腕部翻转)
     """
 
-    # 映射关系：URDF索引 → SDK索引（硬编码）
+    # 映射关系：URDF索引 → SDK索引
+    # Web控制器验证：SDK顺序正确，直接对应即可
     URDF_TO_SDK = [
         0,  # URDF[0] Shoulder_Pitch → SDK[0]
         1,  # URDF[1] Shoulder_Roll  → SDK[1]
@@ -118,7 +119,7 @@ class RealArmDriver(BaseArmDriver):
         6   # URDF[6] Wrist_Roll     → SDK[6]
     ]
 
-    # 映射关系：SDK索引 → URDF索引（硬编码）
+    # 映射关系：SDK索引 → URDF索引
     SDK_TO_URDF = [
         0,  # SDK[0] Shoulder_Pitch → URDF[0]
         1,  # SDK[1] Shoulder_Roll  → URDF[1]
