@@ -44,7 +44,7 @@ from src.config import get_config
 class RealRobotVIST:
     """VIST 真机控制器：完整的 VIST 框架 + 真机驱动"""
 
-    def __init__(self, robot_ip="192.168.1.183", arm_side="right", enable_visualization=False):
+    def __init__(self, robot_ip="192.168.1.183", arm_side="right", enable_visualization=True):
         """
         初始化真机控制器
 

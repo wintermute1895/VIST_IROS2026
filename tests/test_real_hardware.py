@@ -167,7 +167,45 @@ def stage2_single_joint_test(driver, safety_monitor):
     print(f"目标位置: {np.rad2deg(q_target[joint_idx]):.2f}°")
     print(f"误差: {np.rad2deg(abs(q_final[joint_idx] - q_target[joint_idx])):.2f}°")
 
-    print("\n✅ 阶段2完成：单关节运动正常")
+    # 回到零位
+    print("\n" + "-"*60)
+    print("准备回到零位...")
+    wait_for_user_confirmation("即将回到零位（所有关节归零）")
+
+    q_zero = np.zeros(len(q_current))
+    print(f"\n目标零位: {np.rad2deg(q_zero)}")
+    print("发送归零指令（慢速安全模式）...")
+
+    success = driver.move_joint_controlled(q_zero, speed=0.1, accel=0.1, block=False)
+    if not success:
+        print("❌ 归零指令发送失败")
+        return False
+
+    # 监控归零过程
+    print("监控归零状态...")
+    start_time = time.time()
+    timeout = 30.0  # 30秒超时
+    while time.time() - start_time < timeout:
+        timestamp, q_actual, _ = driver.get_state()
+        error = np.linalg.norm(q_zero - q_actual)
+        print(f"  误差: {error:.4f} rad ({np.rad2deg(error):.2f}°)", end='\r')
+
+        # 如果误差小于1度，认为到达零位
+        if error < np.deg2rad(1.0):
+            print("\n✅ 已到达零位")
+            break
+
+        time.sleep(0.1)
+    else:
+        print("\n⚠️ 归零超时，但继续测试")
+
+    # 显示最终零位状态
+    _, q_final_zero, _ = driver.get_state()
+    print(f"\n最终零位状态:")
+    for i, q in enumerate(q_final_zero):
+        print(f"  关节 {i}: {np.rad2deg(q):6.2f}°")
+
+    print("\n✅ 阶段2完成：单关节运动正常，已回到零位")
     return True
 
 
@@ -177,10 +215,44 @@ def stage3_ik_validation_test(driver, ik_solver, safety_monitor):
     print("阶段 3: IK 求解器验证测试")
     print("="*60)
 
-    wait_for_user_confirmation("即将测试 IK 求解器（固定目标位姿）")
-
-    # 获取当前位置
+    # 确认机器人在零位
+    print("\n⚠️ 阶段3需要从零位开始")
     _, q_current, _ = driver.get_state()
+    print(f"当前关节角度:")
+    for i, q in enumerate(q_current):
+        print(f"  关节 {i}: {np.rad2deg(q):6.2f}°")
+
+    # 检查是否接近零位（允许±2度误差）
+    q_zero = np.zeros(len(q_current))
+    error_from_zero = np.linalg.norm(q_current - q_zero)
+    print(f"\n与零位的误差: {np.rad2deg(error_from_zero):.2f}°")
+
+    if error_from_zero > np.deg2rad(5.0):  # 如果误差大于5度
+        print("⚠️ 机器人不在零位！")
+        wait_for_user_confirmation("是否先回到零位？")
+
+        print("\n发送归零指令...")
+        success = driver.move_joint_controlled(q_zero, speed=0.1, accel=0.1, block=False)
+        if not success:
+            print("❌ 归零指令发送失败")
+            return False
+
+        # 等待归零完成
+        print("等待归零完成...")
+        start_time = time.time()
+        while time.time() - start_time < 30.0:
+            _, q_actual, _ = driver.get_state()
+            error = np.linalg.norm(q_zero - q_actual)
+            print(f"  误差: {error:.4f} rad ({np.rad2deg(error):.2f}°)", end='\r')
+            if error < np.deg2rad(1.0):
+                print("\n✅ 已到达零位")
+                break
+            time.sleep(0.1)
+
+        # 更新当前位置
+        _, q_current, _ = driver.get_state()
+
+    wait_for_user_confirmation("即将测试 IK 求解器（固定目标位姿）")
 
     # 定义测试目标位姿
     # 根据URDF分析，零位时末端在 [0, -0.15, 0.84]
@@ -212,7 +284,7 @@ def stage3_ik_validation_test(driver, ik_solver, safety_monitor):
 
     # 显示关节角度变化
     print("\n关节角度变化:")
-    for i, (q_curr, q_sol) in enumerate(zip(q_current, q_solution)):
+    for i, (q_curr, q_sol) in enumerate(zip(q_current, q_solution[:7])):
         delta = np.rad2deg(q_sol - q_curr)
         print(f"  Joint {i}: {np.rad2deg(q_curr):6.2f}° → {np.rad2deg(q_sol):6.2f}° (Δ{delta:+6.2f}°)")
 
@@ -227,7 +299,7 @@ def stage3_ik_validation_test(driver, ik_solver, safety_monitor):
     start_time = time.time()
     while time.time() - start_time < 3.0:
         timestamp, q_actual, _ = driver.get_state()
-        error = np.linalg.norm(q_solution - q_actual)
+        error = np.linalg.norm(q_solution[:7] - q_actual)
         print(f"  关节误差: {error:.4f} rad ({np.rad2deg(error):.2f}°)", end='\r')
         time.sleep(0.1)
 
@@ -247,7 +319,8 @@ def stage4_full_loop_test(driver, ik_solver, safety_monitor):
     _, q_current, _ = driver.get_state()
 
     # 定义圆周轨迹参数
-    center = np.array([0.3, 0.0, 0.3])
+    # 零位末端在 [0.0, -0.15, 0.84]，选择附近的可达位置
+    center = np.array([0.15, -0.15, 0.75])
     radius = 0.05  # 5cm 半径
     duration = 10.0  # 10秒
     frequency = 10  # 10Hz 控制频率
@@ -266,6 +339,7 @@ def stage4_full_loop_test(driver, ik_solver, safety_monitor):
 
     ik_failure_count = 0
     max_failures = 5
+    test_success = True
 
     try:
         while time.time() - start_time < duration:
@@ -303,6 +377,7 @@ def stage4_full_loop_test(driver, ik_solver, safety_monitor):
 
             if ik_failure_count >= max_failures:
                 print(f"\n❌ 连续失败 {max_failures} 次，停止测试")
+                test_success = False
                 break
 
             # 发送指令
@@ -319,9 +394,14 @@ def stage4_full_loop_test(driver, ik_solver, safety_monitor):
 
     except KeyboardInterrupt:
         print("\n\n⏹️ 用户中断测试")
+        test_success = False
 
-    print("\n✅ 阶段4完成：完整回路测试正常")
-    return True
+    if test_success:
+        print("\n✅ 阶段4完成：完整回路测试正常")
+    else:
+        print("\n❌ 阶段4失败：完整回路测试未通过")
+
+    return test_success
 
 
 def main():
@@ -331,37 +411,67 @@ def main():
     print("="*60)
 
     # 1. 加载配置
-    config_path = os.path.join(project_root, "config", "hardware.yaml")
+    config_path = os.path.join(project_root, "config", "system_config.yaml")
     print(f"\n📁 加载配置: {config_path}")
 
     with open(config_path, 'r') as f:
         hw_config = yaml.safe_load(f)
 
-    arm_config = hw_config['arm']
-    print(f"  IP: {arm_config['ip']}")
-    print(f"  Side: {arm_config['side']}")
-    print(f"  DoF: {arm_config['dof']}")
+    # 从hardware配置中读取参数
+    hw_params = hw_config['hardware']
+    print(f"  IP: {hw_params['robot_ip']}")
+    print(f"  Side: {hw_params['arm_side']}")
+    print(f"  DoF: 7")  # LinkerArm固定为7自由度
 
     # 2. 初始化驱动器
     print("\n🦾 初始化真机驱动器...")
     driver = RealArmDriver(
-        ip=arm_config['ip'],
-        dof=arm_config['dof'],
-        arm_side=arm_config['side']
+        ip=hw_params['robot_ip'],
+        dof=7,  # LinkerArm固定为7自由度
+        arm_side=hw_params['arm_side']
     )
 
     # 3. 初始化 IK 求解器
     print("\n🧠 初始化 IK 求解器...")
 
     # 从配置读取URDF路径
-    urdf_filename = arm_config.get('urdf', 'right_arm_only.urdf')
+    urdf_filename = hw_config['robot_model'].get('urdf_file', 'lkls73_o2_dual_arm_description.urdf')
     urdf_path = os.path.join(project_root, "config", urdf_filename)
     print(f"   使用URDF: {urdf_filename}")
 
-    # 使用空列表表示控制所有关节（对于简化URDF，所有关节都是受控的）
+    # 确定控制的关节名称（而不是索引）
+    arm_side = hw_params['arm_side']
+    if arm_side == 'right':
+        controlled_joints = [
+            'Right_Shoulder_Pitch_Joint',
+            'Right_Shoulder_Roll_Joint',
+            'Right_Shoulder_Yaw_Joint',
+            'Right_Elbow_Pitch_Joint',
+            'Right_Wrist_Yaw_Joint',
+            'Right_Wrist_Pitch_Joint',
+            'Right_Wrist_Roll_Joint'
+        ]
+        end_effector_frame = hw_config['robot_model']['end_effector_frames']['right']
+    else:
+        controlled_joints = [
+            'Left_Shoulder_Pitch_Joint',
+            'Left_Shoulder_Roll_Joint',
+            'Left_Shoulder_Yaw_Joint',
+            'Left_Elbow_Pitch_Joint',
+            'Left_Wrist_Yaw_Joint',
+            'Left_Wrist_Pitch_Joint',
+            'Left_Wrist_Roll_Joint'
+        ]
+        end_effector_frame = hw_config['robot_model']['end_effector_frames']['left']
+
+    print(f"   控制关节: {controlled_joints}")
+    print(f"   末端执行器: {end_effector_frame}")
+
+    # 初始化IK求解器，指定控制的关节和末端执行器
     ik_solver = PinocchioIKSolver(
         urdf_path=urdf_path,
-        controlled_joints=[]  # 空列表 = 控制所有关节
+        controlled_joints=controlled_joints,
+        end_effector_frame=end_effector_frame
     )
 
     # 4. 初始化安全监控器

@@ -12,6 +12,7 @@ Vision Node with RealSense Depth Integration
 注意：本节点不做坐标系转换，只输出原始数据
 """
 import cv2
+import mediapipe as mp
 import numpy as np
 import socket
 import json
@@ -19,10 +20,6 @@ import time
 import pyrealsense2 as rs
 import sys
 import os
-
-# 导入MediaPipe兼容层（支持0.10.x版本）
-import mediapipe_compat
-import mediapipe as mp
 
 # 添加项目根目录到路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
