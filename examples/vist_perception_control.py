@@ -18,7 +18,7 @@ import time
 import numpy as np
 
 # 添加项目根目录到路径
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 from src.perception.target_detector import (
@@ -210,9 +210,11 @@ def example_vist_perception_control():
     motion_mapper = ArmMotionMapper()
 
     # 1.3 IK 求解器
+    urdf_path = os.path.join(project_root, 'config', config.robot_model_urdf_file)
+
     ik_solver = PinocchioIKSolver(
-        urdf_path=config.urdf_path,
-        ee_frame_name=config.end_effector_frame
+        urdf_path=urdf_path,
+        end_effector_frame=config.robot_model_end_effector_frame
     )
 
     # 1.4 VIST 卡尔曼滤波器
