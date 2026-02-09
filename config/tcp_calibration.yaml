@@ -1,0 +1,52 @@
+# TCP 偏移标定配置文件
+
+# TCP 偏移定义
+# 格式：position: [x, y, z] (米)
+#      orientation: [x, y, z, w] (四元数)
+
+tcp_offsets:
+  # 默认 TCP（手指中点）
+  default:
+    position: [0.0, 0.0, 0.185]  # 185mm（示例值，需要实际测量）
+    orientation: [0.0, 0.0, 0.0, 1.0]  # 无旋转
+    description: "手指中点，用于一般操作"
+
+  # USB 插入任务
+  usb_insertion:
+    position: [0.0, 0.0, 0.205]  # 205mm（手指尖端，示例值）
+    orientation: [0.0, 0.0, 0.0, 1.0]
+    description: "手指尖端，用于 USB 插入"
+
+  # 抓取任务
+  grasping:
+    position: [0.0, 0.0, 0.150]  # 150mm（手掌中心，示例值）
+    orientation: [0.0, 0.0, 0.0, 1.0]
+    description: "手掌中心，用于抓取物体"
+
+  # 推动任务
+  pushing:
+    position: [0.0, 0.0, 0.200]  # 200mm（手指接触点，示例值）
+    orientation: [0.0, 0.0, 0.0, 1.0]
+    description: "手指接触点，用于推动物体"
+
+# 标定记录
+calibration_record:
+  date: "2026-02-09"
+  method: "direct_measurement"  # 'direct_measurement', 'teaching', 'vision'
+  accuracy: 0.002  # ±2mm（估计值）
+  verified: false
+  notes: |
+    这是默认配置，需要根据实际硬件测量。
+
+    测量步骤：
+    1. 使用游标卡尺测量法兰盘到手指的距离
+    2. 或使用示教方法标定（运行 scripts/calibrate_tcp_offset.py）
+    3. 验证精度（运行 scripts/verify_tcp_calibration.py）
+    4. 更新此配置文件
+
+# 硬件信息（用于记录）
+hardware:
+  robot_model: "LKLS73-O2"
+  end_effector: "Dexterous Hand"  # 灵巧手型号
+  adapter_height: 0.065  # 法兰盘适配器高度（米）
+  hand_base_to_finger: 0.120  # 手基座到手指的距离（米）
