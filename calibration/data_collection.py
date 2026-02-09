@@ -31,6 +31,7 @@ class DataCollector:
         self.config = config
         self.robot = robot
         self.collected_data = []  # 存储采集的数据
+        self.collected_poses = []  # 存储已采集的位姿矩阵（用于检测变化）
 
         # 初始化 RealSense 相机
         self.pipeline = rs.pipeline()
@@ -59,6 +60,47 @@ class DataCollector:
         # 转换为 numpy 数组
         color_image = np.asanyarray(color_frame.get_data())
         return color_image
+
+    def check_pose_variation(self, new_pose: np.ndarray) -> tuple[bool, str]:
+        """
+        检查新位姿与已采集位姿的变化是否足够
+
+        Args:
+            new_pose: 新的机械臂位姿（4x4 矩阵）
+
+        Returns:
+            tuple: (是否足够不同, 提示信息)
+        """
+        if len(self.collected_poses) == 0:
+            return True, "第一个位姿"
+
+        # 计算与所有已采集位姿的距离
+        min_position_dist = float('inf')
+        min_rotation_dist = float('inf')
+
+        new_position = new_pose[:3, 3]
+        new_rotation = new_pose[:3, :3]
+
+        for old_pose in self.collected_poses:
+            old_position = old_pose[:3, 3]
+            old_rotation = old_pose[:3, :3]
+
+            # 位置距离（欧氏距离）
+            position_dist = np.linalg.norm(new_position - old_position)
+            min_position_dist = min(min_position_dist, position_dist)
+
+            # 旋转距离（Frobenius 范数）
+            rotation_dist = np.linalg.norm(new_rotation - old_rotation, 'fro')
+            min_rotation_dist = min(min_rotation_dist, rotation_dist)
+
+        # 阈值设置
+        MIN_POSITION_CHANGE = 0.02  # 2cm
+        MIN_ROTATION_CHANGE = 0.1   # 旋转矩阵差异
+
+        if min_position_dist < MIN_POSITION_CHANGE and min_rotation_dist < MIN_ROTATION_CHANGE:
+            return False, f"⚠️  位姿变化过小 (位置: {min_position_dist*1000:.1f}mm, 旋转: {min_rotation_dist:.3f})"
+        else:
+            return True, f"✓ 位姿变化足够 (位置: {min_position_dist*1000:.1f}mm, 旋转: {min_rotation_dist:.3f})"
 
     def save_sample(self, image: np.ndarray, robot_pose: np.ndarray, sample_id: int):
         """
@@ -98,6 +140,63 @@ class DataCollector:
         with open(metadata_file, 'w') as f:
             json.dump(self.collected_data, f, indent=2)
         print(f"✓ 元数据已保存到: {metadata_file}")
+
+        # 分析位姿变化
+        self.analyze_pose_variation(poses_array)
+
+    def analyze_pose_variation(self, poses: np.ndarray):
+        """
+        分析采集的位姿变化情况
+
+        Args:
+            poses: 位姿数组 (N, 4, 4)
+        """
+        print(f"\n{'='*60}")
+        print("位姿变化分析")
+        print(f"{'='*60}")
+
+        if len(poses) < 2:
+            print("样本数量不足，无法分析")
+            return
+
+        # 提取位置和旋转
+        positions = poses[:, :3, 3]
+
+        # 计算位置变化范围
+        print(f"\n位置变化范围（米）:")
+        print(f"  X: [{positions[:, 0].min():.3f}, {positions[:, 0].max():.3f}]  变化: {positions[:, 0].max() - positions[:, 0].min():.3f}")
+        print(f"  Y: [{positions[:, 1].min():.3f}, {positions[:, 1].max():.3f}]  变化: {positions[:, 1].max() - positions[:, 1].min():.3f}")
+        print(f"  Z: [{positions[:, 2].min():.3f}, {positions[:, 2].max():.3f}]  变化: {positions[:, 2].max() - positions[:, 2].min():.3f}")
+
+        # 计算相邻位姿间距
+        distances = []
+        for i in range(len(poses) - 1):
+            dist = np.linalg.norm(positions[i] - positions[i+1])
+            distances.append(dist)
+
+        print(f"\n相邻位姿间距（米）:")
+        print(f"  平均: {np.mean(distances):.3f}")
+        print(f"  最小: {np.min(distances):.3f}")
+        print(f"  最大: {np.max(distances):.3f}")
+
+        # 检查是否所有位姿相同
+        all_same = True
+        for i in range(1, len(poses)):
+            if not np.allclose(poses[0], poses[i], atol=1e-6):
+                all_same = False
+                break
+
+        if all_same:
+            print(f"\n❌ 警告：所有位姿完全相同！")
+            print(f"   这会导致手眼标定失败")
+            print(f"   请使用真实机械臂并移动到不同位置重新采集")
+        elif np.mean(distances) < 0.01:
+            print(f"\n⚠️  警告：位姿变化较小（平均间距 < 1cm）")
+            print(f"   建议增加位姿变化范围以提高标定精度")
+        else:
+            print(f"\n✓ 位姿变化良好")
+
+        print(f"{'='*60}\n")
 
     def run(self):
         """
@@ -155,8 +254,21 @@ class DataCollector:
                         robot_pose = self.robot.get_current_pose()
                         print(f"\n机械臂位姿:\n{robot_pose}")
 
+                        # 检查位姿变化
+                        is_different, message = self.check_pose_variation(robot_pose)
+                        print(f"位姿检查: {message}")
+
+                        if not is_different and len(self.collected_poses) > 0:
+                            print("   建议移动机械臂到更不同的位置")
+                            print("   是否仍要保存此位姿? (y/n): ", end='')
+                            confirm = input().strip().lower()
+                            if confirm != 'y':
+                                print("已跳过此位姿\n")
+                                continue
+
                         # 保存样本
                         self.save_sample(image, robot_pose, sample_count)
+                        self.collected_poses.append(robot_pose)
                         sample_count += 1
 
                         print(f"进度: {sample_count}/{self.config.min_samples}\n")
@@ -203,14 +315,14 @@ def main():
     # 创建机械臂接口
     # ⚠️ 注意：这里使用 Mock 接口进行测试
     # 实际使用时，请替换为你自己的机械臂接口实现
-    print("⚠️ 当前使用 Mock Robot Interface（测试模式）")
-    print("   实际使用时，请在代码中替换为你的机械臂接口\n")
+    print("⚠️ 当前使用 真实 Robot Interface（测试模式）")
+    print("   实际使用时，请在代码中设定为你的机械臂接口\n")
 
-    robot = MockRobotInterface()
+    # robot = MockRobotInterface()
 
     # 如果你已经实现了自己的机械臂接口，请取消下面的注释：
-    # from robot_interface import YourRobotInterface
-    # robot = YourRobotInterface()
+    from robot_interface import YourRobotInterface
+    robot = YourRobotInterface()
 
     # 创建数据采集器
     try:

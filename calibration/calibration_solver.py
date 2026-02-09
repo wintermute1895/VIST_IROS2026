@@ -105,6 +105,23 @@ class HandEyeCalibrationSolver:
         robot_poses = np.load(str(self.config.poses_file))
         print(f"✓ 加载了 {len(robot_poses)} 组机械臂位姿数据")
 
+        # 检查位姿是否都相同
+        all_same = True
+        for i in range(1, len(robot_poses)):
+            if not np.allclose(robot_poses[0], robot_poses[i], atol=1e-6):
+                all_same = False
+                break
+
+        if all_same:
+            print(f"\n❌ 严重错误：所有机械臂位姿完全相同！")
+            print(f"   第一个位姿:\n{robot_poses[0]}")
+            print(f"\n   这会导致手眼标定失败")
+            print(f"   原因：标定需要机械臂在不同位置和姿态下采集数据")
+            print(f"\n   解决方案：")
+            print(f"   1. 使用真实机械臂（而非 MockRobotInterface）")
+            print(f"   2. 移动机械臂到不同位置重新采集数据")
+            raise ValueError("所有机械臂位姿相同，无法进行标定")
+
         # 读取元数据
         metadata_file = self.config.data_dir / "metadata.json"
         if metadata_file.exists():
