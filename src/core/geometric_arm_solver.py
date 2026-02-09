@@ -126,8 +126,10 @@ class GeometricArmSolver:
 
         # q1 (Shoulder Pitch): 绕 Y 轴旋转（俯仰）
         # 计算向量在 XZ 平面的投影
-        # 注意：关节方向和零位偏移由配置文件控制
-        q1 = np.arctan2(v_shoulder_elbow[2], v_shoulder_elbow[0])
+        # 注意：几何计算的零位（X轴正方向）与URDF零位（Z轴负方向，即下垂）不同
+        # 需要添加π/2偏移来对齐：URDF的0°对应几何计算的-π/2
+        q1_geometric = np.arctan2(v_shoulder_elbow[2], v_shoulder_elbow[0])
+        q1 = q1_geometric + np.pi/2  # 对齐URDF零位定义
 
         # q2 (Shoulder Roll): 绕 X 轴旋转（横滚）
         # 计算向量与 XZ 平面的夹角

@@ -184,8 +184,13 @@ class RealArmDriver(BaseArmDriver):
         self.robot = LbotRobot(tcp_host=ip)
         print(f"🦾 [RealDriver] Initialized for {arm_side.upper()} arm")
 
-    def connect(self):
-        """建立连接并使能机械臂"""
+    def connect(self, use_safety_checks=True):
+        """
+        建立连接并使能机械臂
+
+        Args:
+            use_safety_checks: 是否使用安全检查（默认True，强烈推荐）
+        """
         print(f"🦾 [RealDriver] Connecting to {self.ip}...")
 
         # SDK 的连接函数是 connect()，返回 bool
@@ -196,15 +201,30 @@ class RealArmDriver(BaseArmDriver):
             print(f"❌ Connection Failed! Error: {error_msg}")
             return False
 
-        print("✅ Connected. Enabling Robot...")
-        # 使能机械臂（需要指定左臂或右臂）
-        self.robot.enable_arm(self.arm_enum, enable=True)
+        print("✅ Connected.")
 
-        # 等待机器人就绪并开始发送状态数据
-        print("⏳ Waiting for robot to be ready...")
-        time.sleep(2)  # 增加等待时间
+        # 使能机械臂（使用安全检查）
+        if use_safety_checks:
+            # 导入安全检查模块
+            from src.robot.safety_checks import safe_enable_arm
+
+            print("\n⚠️  使用安全检查模式（推荐）")
+            print("   如需跳过安全检查，请在代码中设置 use_safety_checks=False")
+
+            # 执行安全使能
+            enable_success = safe_enable_arm(self, self.config)
+            if not enable_success:
+                print("❌ 安全使能失败")
+                self.robot.disconnect()
+                return False
+        else:
+            # 直接使能（不推荐，仅用于调试）
+            print("⚠️  跳过安全检查，直接使能（不推荐）")
+            self.robot.enable_arm(self.arm_enum, enable=True)
+            time.sleep(2)
 
         # 验证能否读取状态
+        print("\n⏳ 验证状态读取...")
         for attempt in range(5):
             joint_pos = self.robot.get_joint_positions(self.arm_enum)
             if joint_pos is not None and len(joint_pos) >= self.dof:
@@ -325,12 +345,22 @@ class RealArmDriver(BaseArmDriver):
         # 原因：joint_follow API 有严重的控制错乱bug（详见 docs/SDK_BUG_REPORT_joint_follow.md）
         # move_joint 经过测试，控制精度 ±0.03°，完全可靠
         from lbot import api as lbot_api
+
+        # 从配置读取速度和加速度参数
+        if self.config is not None:
+            speed = self.config.hardware_move_joint_speed
+            accel = self.config.hardware_move_joint_accel
+        else:
+            # 默认值（如果没有配置）
+            speed = 1.0
+            accel = 2.0
+
         success = lbot_api.move_joint(
             self.arm_enum,
             q_cmd_list,
-            speed=0.1,  # 速度 (rad/s)
-            accel=0.5,  # 加速度 (rad/s^2)
-            block=False  # 非阻塞模式（遥操作需要高频率控制）
+            speed=speed,   # 使用配置的速度
+            accel=accel,   # 使用配置的加速度
+            block=False    # 非阻塞模式（遥操作需要高频率控制）
         )
 
         if not success:

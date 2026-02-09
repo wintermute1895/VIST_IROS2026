@@ -56,11 +56,12 @@ robot:
   # 关节零位偏移（单位：弧度）
   # 用于调整每个关节的零位定义，使人体中立姿态对应机器人零位
   # 计算公式: q_final = q_calculated * joint_directions[i] + joint_offsets[i]
+  # 说明：URDF中J0=0°已经对应手臂下垂，不需要额外偏移
   joint_offsets:
-    - 0.0  # Joint 0: Shoulder_Pitch (-90° = -π/2, 使手臂下垂为零位)
+    - 0.0      # Joint 0: Shoulder_Pitch (URDF的0°已经是下垂姿态)
     - 0.0      # Joint 1: Shoulder_Roll
     - 0.0      # Joint 2: Shoulder_Yaw
-    - 0.0   # Joint 3: Elbow_Pitch (+90° = +π/2, 配合direction=-1使用)
+    - 0.0      # Joint 3: Elbow_Pitch
     - 0.0      # Joint 4: Wrist_Yaw
     - 0.0      # Joint 5: Wrist_Pitch
     - 0.0      # Joint 6: Wrist_Roll
@@ -117,8 +118,10 @@ control:
   max_joint_acceleration: 0.8  # rad/s^2 (原 2.0，降低到 40%)
 
   # 控制频率
-  frequency: 50  # Hz
-  dt: 0.02       # 1/frequency (seconds)
+  # ⚠️ 真机注意：move_joint有轨迹规划，不能发送太频繁
+  # 建议：10-15Hz 以避免命令冲突和电机过载
+  frequency: 10  # Hz (降低到10Hz，避免与move_joint轨迹规划冲突)
+  dt: 0.1     # 1/frequency (seconds)
 
   # 遥操作时长
   duration: 300.0  # seconds (5 minutes)
@@ -297,8 +300,12 @@ hardware:
   joint_sign_flip: [false, true, true, false, true, false, false]
 
   # SDK 运动控制参数
-  move_joint_speed: 0.1      # 关节运动速度 (rad/s)，默认0.1（安全）
-  move_joint_accel: 0.5      # 关节运动加速度 (rad/s²)，默认0.5
+  # 真机运动参数（针对move_joint优化）
+  # 注意：由于joint_follow有bug，只能使用move_joint
+  # move_joint会做轨迹规划，所以需要提高速度以减少延迟
+  # ⚠️ 安全参数：降低速度和加速度以防止电机过载
+  move_joint_speed: 0.1      # 关节运动速度 (rad/s) - 降低到安全值
+  move_joint_accel: 0.1      # 关节运动加速度 (rad/s²) - 降低到安全值
   move_joint_block: false    # 是否阻塞等待运动完成
 
   # 关节跟随模式（用于遥操作）

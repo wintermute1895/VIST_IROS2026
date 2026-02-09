@@ -102,7 +102,7 @@ class RealRobotVIST:
             duration = self.config.control_duration
 
         print("\n" + "=" * 80)
-        print("🚀 准备启动真机控制...")
+        print("🚀 准备启动遥操作控制")
         print("=" * 80)
 
         print("\n⚠️  安全提示：")
@@ -111,12 +111,22 @@ class RealRobotVIST:
         print("   3. 确保视觉节点正在运行")
         print("   4. 按 Ctrl+C 可随时停止")
 
-        # 倒计时
-        print(f"\n⏱️  {countdown_seconds}秒后开始...")
+        # 倒计时（给操作员时间走到摄像头前）
+        print("\n" + "=" * 80)
+        print("📹 请操作员就位")
+        print("=" * 80)
+        print(f"⏱️  {countdown_seconds} 秒后开始遥操作")
+        print("\n请利用这段时间：")
+        print("  1. 从电脑前走到摄像头视野内")
+        print("  2. 调整站位，确保身体在摄像头中心")
+        print("  3. 确认手臂在摄像头视野内")
+        print("  4. 准备开始操作")
+        print("\n倒计时：")
+
         for i in range(countdown_seconds, 0, -1):
-            print(f"   {i}...", end='\r')
+            print(f"   {i}...", end='\r', flush=True)
             time.sleep(1)
-        print("   🚀 开始！" + " " * 20)
+        print("   🚀 开始遥操作！" + " " * 20)
 
         start_time = time.time()
         frame_count = 0
@@ -160,7 +170,7 @@ class RealRobotVIST:
                 frame_count += 1
 
                 # 5. 状态显示（每秒一次）
-                if time.sleep() - last_print_time >= 1.0:
+                if time.time() - last_print_time >= 1.0:
                     success_rate = (success_count / frame_count * 100) if frame_count > 0 else 0
 
                     status_msg = f"✅ 帧数: {frame_count} | 成功率: {success_rate:.1f}%"

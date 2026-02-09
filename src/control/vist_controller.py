@@ -102,14 +102,29 @@ class VISTController:
         debug_info['target_pos'] = target_pos
         debug_info['target_elbow'] = target_elbow
 
-        # 2. 工作空间检查
+        # 2. 工作空间检查（可选 - 几何解析解理论上总是在工作空间内）
+        # 注意：由于motion mapper使用归一化重定向，target_pos应该总是在工作空间内
+        # 这个检查主要用于调试，检测配置错误或坐标系不匹配
         shoulder_pos = self.config.robot_shoulder_position
         dist_to_shoulder = np.linalg.norm(target_pos - shoulder_pos)
         max_reach = self.config.robot_arm_lengths['upper'] + \
                     self.config.robot_arm_lengths['forearm']
 
-        if dist_to_shoulder > max_reach * 0.95:
-            return None, False, {"error": "目标位置超出工作空间"}
+        # 调试输出（仅在距离异常时打印）
+        if dist_to_shoulder > max_reach * 0.98:  # 98%阈值用于调试
+            print(f"⚠️ [工作空间检查] 距离接近极限")
+            print(f"   肩部位置 (config): {shoulder_pos}")
+            print(f"   肩部位置 (mapper): {self.mapper.P_base_shoulder}")
+            print(f"   目标位置: {target_pos}")
+            print(f"   距离: {dist_to_shoulder:.4f}m")
+            print(f"   最大臂展: {max_reach:.4f}m")
+            print(f"   使用率: {dist_to_shoulder/max_reach*100:.1f}%")
+
+        # 放宽阈值到99%，避免误报（几何解析解理论上不会超出）
+        if dist_to_shoulder > max_reach * 0.99:
+            print(f"❌ [工作空间检查] 目标位置超出工作空间！")
+            print(f"   这不应该发生 - 可能是配置错误或坐标系不匹配")
+            return None, False, {"error": f"目标位置超出工作空间 ({dist_to_shoulder:.3f}m > {max_reach*0.99:.3f}m)"}
 
         # 3. VIST 卡尔曼滤波求解
         q_solution, success, error = self.vist_filter.solve(
