@@ -236,6 +236,29 @@ def on_hand_release():
 
 ## 🔧 意图感知的完整实现
 
+### 核心创新：冲突检测（β term）
+
+**关键公式**：
+```python
+α = f(v, d)           # 基础意图因子（基于速度和距离）
+β = conflict(...)     # 冲突因子（人类-算法意图冲突）
+α_effective = α × (1-β)  # 有效意图因子
+```
+
+**冲突因子 β**：
+- **β = 0**：无冲突（人类和算法方向一致）
+- **β = 1**：完全冲突（人类和算法方向相反）
+- **0 < β < 1**：部分冲突（柔顺接管）
+
+**效果**：
+- 当人类"抵抗"算法时，β 增大，α_eff 降低
+- 系统自动降低算法权重，允许人类接管
+- 无需显式切换模式，实现**柔顺接管 (Compliant Takeover)**
+
+详细说明请参考：[CONFLICT_DETECTION_AND_COMPLIANT_TAKEOVER.md](./CONFLICT_DETECTION_AND_COMPLIANT_TAKEOVER.md)
+
+---
+
 ### 扩展的意图因子
 
 ```python

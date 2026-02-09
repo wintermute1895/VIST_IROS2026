@@ -333,3 +333,22 @@ visualization:
 
   # 轨迹点数量
   max_trajectory_points: 100
+
+# ==========================================
+# 增强功能配置（新增 2026-02-09）
+# ==========================================
+enhanced_features:
+  # 是否启用意图检测和冲突检测
+  # true: 启用增强模式（5阶段状态机 + 冲突检测 + 柔顺接管）
+  # false: 基础模式（直接运动映射，向后兼容）
+  enable_intent_detection: false
+
+  # 是否启用目标检测（AprilTag/ArUco）
+  enable_target_detection: false
+
+  # 目标检测器类型
+  target_detector_type: "apriltag"  # "apriltag" 或 "aruco"
+
+  # 最大速度限制（用于简化安全监控器）
+  max_velocity: 0.10  # 10 cm/s
+

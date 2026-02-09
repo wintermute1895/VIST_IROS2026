@@ -7,6 +7,7 @@ LinkerArm 机械臂接口测试脚本
 
 from robot_interface import LinkerArmInterface
 import numpy as np
+from pathlib import Path
 
 
 def test_connection():
@@ -16,12 +17,16 @@ def test_connection():
     print("=" * 60)
 
     try:
+        # 计算 SDK 路径（相对于项目根目录）
+        project_root = Path(__file__).parent.parent
+        sdk_path = project_root / "src" / "robot" / "sdk" / "linkerarm"
+
         # 创建机器人接口
         # 请根据实际情况修改 IP 地址和机械臂选择
         robot = LinkerArmInterface(
             tcp_host="192.168.10.21",  # 修改为你的机器人 IP
             arm_side="right",            # 或 "right"
-            sdk_path="/home/luka/.ssh/VIST/src/robot/sdk/linkerarm"  # 可选
+            sdk_path=str(sdk_path)  # 使用动态计算的路径
         )
 
         print("✓ 成功连接到机器人\n")

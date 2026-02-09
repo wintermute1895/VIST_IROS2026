@@ -89,33 +89,30 @@ class CalibrationVerifier:
         # 转换为灰度图
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # 检测 ArUco 标记
-        aruco_dict = cv2.aruco.getPredefinedDictionary(self.config.aruco_dict_type)
-        aruco_params = cv2.aruco.DetectorParameters()
-        detector = cv2.aruco.ArucoDetector(aruco_dict, aruco_params)
+        # OpenCV 4.7.0+ 使用新的 CharucoDetector API
+        charuco_params = cv2.aruco.CharucoParameters()
+        detector_params = cv2.aruco.DetectorParameters()
+        charuco_detector = cv2.aruco.CharucoDetector(self.board, charuco_params, detector_params)
 
-        marker_corners, marker_ids, _ = detector.detectMarkers(gray)
+        # 检测 ChArUco 板
+        charuco_corners, charuco_ids, _, _ = charuco_detector.detectBoard(gray)
 
-        if marker_ids is not None and len(marker_ids) > 0:
-            # 插值 ChArUco 角点
-            num_corners, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
-                marker_corners, marker_ids, gray, self.board
+        if charuco_corners is not None and len(charuco_corners) >= 4:
+            # 估计标定板位姿
+            # 获取 ChArUco 板的 3D 角点坐标
+            obj_points = self.board.getChessboardCorners()[charuco_ids.flatten()]
+
+            # 使用 solvePnP 估计位姿
+            success, rvec, tvec = cv2.solvePnP(
+                obj_points,
+                charuco_corners,
+                self.camera_matrix,
+                self.dist_coeffs,
+                flags=cv2.SOLVEPNP_ITERATIVE
             )
 
-            if num_corners >= 4:
-                # 估计标定板位姿
-                success, rvec, tvec = cv2.aruco.estimatePoseCharucoBoard(
-                    charuco_corners,
-                    charuco_ids,
-                    self.board,
-                    self.camera_matrix,
-                    self.dist_coeffs,
-                    None,
-                    None
-                )
-
-                if success:
-                    return True, rvec, tvec, charuco_corners, charuco_ids
+            if success:
+                return True, rvec, tvec, charuco_corners, charuco_ids
 
         return False, None, None, None, None
 

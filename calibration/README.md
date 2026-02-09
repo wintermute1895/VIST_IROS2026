@@ -164,7 +164,7 @@ calibration_data/              # 数据存储目录（自动创建）
 │   ├── sample_000.png
 │   ├── sample_001.png
 │   └── ...
-├── robot_poses.npy            # 机械臂位姿数组
+├── hand_eye_robot_poses.npy   # 手眼标定机械臂位姿数组
 ├── metadata.json              # 元数据
 ├── T_end_to_cam.npy          # 标定结果（4x4 矩阵）
 └── hand_eye_result.json       # 标定结果（JSON 格式）

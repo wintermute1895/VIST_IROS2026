@@ -26,20 +26,20 @@ class CalibrationConfig:
 
         # ⚠️ 重要：以下两个参数必须填写真实测量值（单位：米）
         # 使用卡尺或精确测量工具测量标定板上的实际尺寸
-        self.square_size = 0.040  # 棋盘格方格边长（米），例如 40mm = 0.040m
-        self.marker_size = 0.030  # ArUco 二维码边长（米），例如 30mm = 0.030m
+        self.square_size = 0.025  # 棋盘格方格边长（米），例如 40mm = 0.040m
+        self.marker_size = 0.018  # ArUco 二维码边长（米），例如 30mm = 0.030m
         # ⚠️ 注意：marker_size 必须小于 square_size，通常为 square_size 的 0.75 倍
 
         # ==================== 相机内参 ====================
         # Intel RealSense D405 相机内参
         # 方式1：手动填写（从 RealSense Viewer 或标定结果获取）
-        self.camera_matrix = np.array([
+        '''self.camera_matrix = np.array([
             [615.0, 0.0, 320.0],  # fx, 0, cx
             [0.0, 615.0, 240.0],  # 0, fy, cy
             [0.0, 0.0, 1.0]       # 0, 0, 1
         ], dtype=np.float64)
 
-        self.dist_coeffs = np.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)  # 畸变系数
+        self.dist_coeffs = np.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)  # 畸变系数'''
 
         # 方式2：从 RealSense SDK 动态读取（推荐）
         self.use_realsense_intrinsics = True  # 设为 True 时自动从相机读取内参
@@ -47,7 +47,7 @@ class CalibrationConfig:
         # ==================== 数据存储路径 ====================
         self.data_dir = Path("calibration_data")  # 数据存储根目录
         self.images_dir = self.data_dir / "images"  # 图像存储目录
-        self.poses_file = self.data_dir / "robot_poses.npy"  # 机械臂位姿文件
+        self.poses_file = self.data_dir / "hand_eye_robot_poses.npy"  # 手眼标定机械臂位姿文件
         self.result_file = self.data_dir / "hand_eye_result.json"  # 标定结果文件
         self.result_matrix_file = self.data_dir / "T_end_to_cam.npy"  # 变换矩阵文件
 

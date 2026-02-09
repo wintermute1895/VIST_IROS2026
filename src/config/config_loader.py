@@ -433,6 +433,29 @@ class VISTConfig:
         return self._config['safety']['debug_print_interval']
 
     # ==========================================
+    # 增强功能配置（新增）
+    # ==========================================
+    @property
+    def enable_intent_detection(self):
+        """是否启用意图检测和冲突检测"""
+        return self._config.get('enhanced_features', {}).get('enable_intent_detection', False)
+
+    @property
+    def enable_target_detection(self):
+        """是否启用目标检测（AprilTag/ArUco）"""
+        return self._config.get('enhanced_features', {}).get('enable_target_detection', False)
+
+    @property
+    def target_detector_type(self):
+        """目标检测器类型 ('apriltag' 或 'aruco')"""
+        return self._config.get('enhanced_features', {}).get('target_detector_type', 'apriltag')
+
+    @property
+    def max_velocity(self):
+        """最大速度限制 (m/s)"""
+        return self._config.get('enhanced_features', {}).get('max_velocity', 0.10)
+
+    # ==========================================
     # 硬件参数
     # ==========================================
     @property
