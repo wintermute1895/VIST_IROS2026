@@ -33,7 +33,7 @@ from src.robot.arm_driver import RealArmDriver
 class EmergencyStopMonitor:
     """紧急停止监控器"""
 
-    def __init__(self, robot_ip="192.168.1.183", arm_side="right"):
+    def __init__(self, robot_ip="192.168.10.21", arm_side="right"):
         """
         初始化监控器
 

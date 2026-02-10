@@ -24,6 +24,11 @@ from src.config import get_config
 from src.control.vist_controller import VISTController
 from src.robot.robot_interface import RobotInterface
 from src.robot.visualizer import RobotVisualizer
+from src.utils.performance_monitor import TeleopMetrics
+from src.utils.logger import setup_logger
+
+# 设置日志
+logger = setup_logger(__name__)
 
 
 class RealRobotVIST:
@@ -36,14 +41,14 @@ class RealRobotVIST:
         Args:
             enable_visualization: 是否启用可视化（None=从配置读取）
         """
-        print("=" * 80)
-        print("🦾 VIST 真机控制系统（重构版）")
-        print("=" * 80)
+        logger.info("="*80)
+        logger.info("VIST 真机控制系统（重构版）")
+        logger.info("="*80)
 
         # 1. 加载配置
-        print("\n📁 加载系统配置...")
+        logger.info("加载系统配置...")
         self.config = get_config()
-        print("✅ 配置加载完成")
+        logger.info("配置加载完成")
 
         # 2. 初始化 VIST 控制器（算法层）
         self.controller = VISTController(self.config)
@@ -51,13 +56,17 @@ class RealRobotVIST:
         # 3. 初始化机器人接口（硬件层）
         self.robot = RobotInterface(self.config)
 
-        # 4. 初始化可视化器（可选）
+        # 4. 初始化性能监控器
+        self.perf_metrics = TeleopMetrics()
+        logger.info("性能监控器初始化完成")
+
+        # 5. 初始化可视化器（可选）
         if enable_visualization is None:
             enable_visualization = self.config.visualization_enable
 
         self.visualizer = None
         if enable_visualization:
-            print("\n🎨 初始化可视化器...")
+            logger.info("初始化可视化器...")
             try:
                 self.visualizer = RobotVisualizer(
                     model=self.controller.ik_solver.model,
@@ -66,13 +75,12 @@ class RealRobotVIST:
                     enable=True
                 )
                 if self.visualizer.enable:
-                    print(f"✅ 可视化器初始化成功: {self.visualizer.get_url()}")
+                    logger.info(f"可视化器初始化成功: {self.visualizer.get_url()}")
             except Exception as e:
-                print(f"⚠️ 可视化器初始化失败: {e}")
+                logger.warning(f"可视化器初始化失败: {e}")
                 self.visualizer = None
 
-        print("\n✅ 初始化完成！")
-        print("\n" + "=" * 80)
+        logger.info("初始化完成！")
 
     def connect(self):
         """连接到真机"""
@@ -135,45 +143,77 @@ class RealRobotVIST:
 
         try:
             while time.time() - start_time < duration:
+                # 开始计时总循环
+                self.perf_metrics.monitor.start_timer("total_loop")
                 loop_start = time.time()
 
                 # 1. 接收人体关键点
+                self.perf_metrics.monitor.start_timer("receive_keypoints")
                 human_keypoints = self.robot.receive_keypoints()
+                self.perf_metrics.monitor.stop_timer("receive_keypoints")
+
                 if human_keypoints is None:
+                    self.perf_metrics.monitor.stop_timer("total_loop")
                     time.sleep(self.config.control_dt)
                     continue
 
                 # 检查关键点是否完整
                 if 'wrist' not in human_keypoints or 'elbow' not in human_keypoints:
+                    self.perf_metrics.monitor.stop_timer("total_loop")
                     time.sleep(self.config.control_dt)
                     continue
 
                 # 2. VIST 控制器处理
+                self.perf_metrics.monitor.start_timer("vist_process")
                 q_safe, success, debug_info = self.controller.process(human_keypoints)
+                self.perf_metrics.monitor.stop_timer("vist_process")
 
                 if not success:
                     # 处理失败，跳过此帧
+                    self.perf_metrics.record_failure()
                     if frame_count % 30 == 0:
-                        print(f"\n⚠️ 控制失败: {debug_info.get('error', 'Unknown')}")
+                        logger.warning(f"控制失败: {debug_info.get('error', 'Unknown')}")
+                    self.perf_metrics.monitor.stop_timer("total_loop")
                     time.sleep(self.config.control_dt)
                     continue
 
+                self.perf_metrics.record_success()
                 success_count += 1
 
                 # 3. 发送到真机
+                self.perf_metrics.monitor.start_timer("send_command")
                 self.robot.send_command(q_safe)
+                self.perf_metrics.monitor.stop_timer("send_command")
 
-                # 4. 更新可视化
+                # 4. 记录跟踪误差（如果有）
+                if 'target_pos' in debug_info and 'current_pos' in debug_info:
+                    import numpy as np
+                    error = np.linalg.norm(
+                        np.array(debug_info['target_pos']) -
+                        np.array(debug_info['current_pos'])
+                    )
+                    self.perf_metrics.record_tracking_error(error)
+
+                # 5. 更新可视化
                 if self.visualizer is not None and self.visualizer.enable:
                     self.visualizer.update(self.controller.q_current)
 
                 frame_count += 1
 
-                # 5. 状态显示（每秒一次）
+                # 停止总循环计时
+                self.perf_metrics.monitor.stop_timer("total_loop")
+
+                # 6. 状态显示（每秒一次）
                 if time.time() - last_print_time >= 1.0:
                     success_rate = (success_count / frame_count * 100) if frame_count > 0 else 0
 
                     status_msg = f"✅ 帧数: {frame_count} | 成功率: {success_rate:.1f}%"
+
+                    # 添加性能指标
+                    loop_stats = self.perf_metrics.monitor.get_stats("total_loop")
+                    if loop_stats:
+                        status_msg += f" | 延迟: {loop_stats['mean']*1000:.1f}ms"
+                        status_msg += f" | 频率: {loop_stats['frequency']:.1f}Hz"
 
                     # VIST 意图因子
                     if hasattr(self.controller.vist_filter, 'alpha_smoothed'):
@@ -200,37 +240,50 @@ class RealRobotVIST:
                     time.sleep(self.config.control_dt - elapsed)
 
         except KeyboardInterrupt:
-            print("\n\n⏹️ 用户中断")
+            logger.info("用户中断")
         except Exception as e:
-            print(f"\n❌ 运行时错误: {e}")
+            logger.error(f"运行时错误: {e}")
             import traceback
             traceback.print_exc()
         finally:
             # 断开连接
             self.robot.disconnect()
 
-            # 统计信息
-            print(f"\n📊 统计:")
-            print(f"   总帧数: {frame_count}")
-            print(f"   成功帧数: {success_count}")
+            # 打印性能摘要
+            print("\n" + "="*80)
+            print("📊 性能报告")
+            print("="*80)
+
+            # 基础统计
+            print(f"\n基础统计:")
+            print(f"  总帧数: {frame_count}")
+            print(f"  成功帧数: {success_count}")
             if frame_count > 0:
-                print(f"   成功率: {success_count / frame_count * 100:.1f}%")
-            print(f"   运行时长: {time.time() - start_time:.1f}秒")
+                print(f"  成功率: {success_count / frame_count * 100:.1f}%")
+            print(f"  运行时长: {time.time() - start_time:.1f}秒")
             if frame_count > 0:
-                print(f"   平均帧率: {frame_count / (time.time() - start_time):.1f} fps")
+                print(f"  平均帧率: {frame_count / (time.time() - start_time):.1f} fps")
+
+            # 性能详情
+            self.perf_metrics.print_summary()
+
+            # 保存性能数据
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            filename = f"logs/performance_{timestamp}.json"
+            self.perf_metrics.monitor.save_to_file(filename)
 
             # 安全控制器统计
             safety_stats = self.controller.get_safety_statistics()
             print(f"\n🛡️  安全控制统计:")
-            print(f"   速度限制: {safety_stats['velocity_limited_count']}次")
-            print(f"   加速度限制: {safety_stats['acceleration_limited_count']}次")
-            print(f"   位置限制: {safety_stats['position_limited_count']}次")
+            print(f"  速度限制: {safety_stats['velocity_limited_count']}次")
+            print(f"  加速度限制: {safety_stats['acceleration_limited_count']}次")
+            print(f"  位置限制: {safety_stats['position_limited_count']}次")
 
             # 关闭可视化器
             if self.visualizer is not None:
                 self.visualizer.close()
 
-            print("\n✅ 真机控制器已退出")
+            logger.info("真机控制器已退出")
 
 
 def main():

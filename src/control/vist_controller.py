@@ -2,12 +2,13 @@
 VIST 控制器
 封装 VIST 算法逻辑（纯算法，不涉及硬件）
 
-更新日期：2026-02-09
+更新日期：2026-02-10
 新增功能：
 - 意图检测与冲突检测（EnhancedIntentDetector）
 - 简化安全监控（SimplifiedSafetyMonitor）
 - 目标检测（AprilTag/ArUco）
 - 5 阶段状态机控制流程
+- 统一日志系统
 """
 
 import numpy as np
@@ -29,6 +30,11 @@ from src.core.intent_detector import (
 )
 from src.core.safety_monitor_simplified import SimplifiedSafetyMonitor
 from src.perception.target_detector import create_target_detector
+
+# 日志系统
+from src.utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 class VISTController:
@@ -55,12 +61,12 @@ class VISTController:
         self.enable_target_detection = getattr(config, 'enable_target_detection', False)
 
         # 1. 初始化运动映射器
-        print("\n🗺️  初始化运动映射器...")
+        logger.info("初始化运动映射器...")
         self.mapper = ArmMotionMapper()
-        print("✅ 运动映射器初始化完成")
+        logger.info("运动映射器初始化完成")
 
         # 2. 初始化 IK 求解器
-        print("\n🧠 初始化 IK 求解器...")
+        logger.info("初始化 IK 求解器...")
         project_root = Path(__file__).parent.parent.parent
         urdf_path = project_root / "config" / config.robot_model_urdf_file
 
@@ -68,15 +74,15 @@ class VISTController:
             urdf_path=str(urdf_path),
             end_effector_frame=config.robot_model_end_effector_frame
         )
-        print("✅ IK 求解器初始化完成")
+        logger.info("IK 求解器初始化完成")
 
         # 3. 初始化 VIST 框架
-        print("\n🔬 初始化 VIST 框架...")
+        logger.info("初始化 VIST 框架...")
 
         # 3.1 初始化几何求解器
         geometric_solver = None
         if config.vist_geometric_solver_enabled:
-            print("   🧮 启用几何解析求解器...")
+            logger.info("启用几何解析求解器...")
             geometric_solver = GeometricArmSolver(
                 model=self.ik_solver.model,
                 data=self.ik_solver.data,
@@ -84,7 +90,7 @@ class VISTController:
                 ee_frame_id=self.ik_solver.ee_frame_id,
                 config=config
             )
-            print(f"   ✅ 几何求解器初始化完成 (trust_weight={config.vist_geometric_solver_trust_weight})")
+            logger.info(f"几何求解器初始化完成 (trust_weight={config.vist_geometric_solver_trust_weight})")
 
         # 3.2 初始化 VIST 卡尔曼滤波器
         self.vist_filter = VISTKalmanFilter(
@@ -92,15 +98,15 @@ class VISTController:
             config,
             geometric_solver=geometric_solver
         )
-        print("✅ VIST Kalman Filter 初始化完成")
+        logger.info("VIST Kalman Filter 初始化完成")
 
         # 4. 初始化安全控制器
-        print("\n🛡️  初始化安全控制器...")
+        logger.info("初始化安全控制器...")
         self.safety_controller = SafeRobotController(
             config=config,
             enable_logging=True
         )
-        print("✅ 安全控制器初始化完成")
+        logger.info("安全控制器初始化完成")
 
         # 5. 初始化增强功能（如果启用）
         self.intent_detector = None
@@ -109,21 +115,21 @@ class VISTController:
         self.target_socket_pos = None
 
         if self.enable_intent_detection:
-            print("\n🎯 初始化意图检测器（增强模式）...")
+            logger.info("初始化意图检测器（增强模式）...")
             self.intent_detector = EnhancedIntentDetector(config)
-            print("✅ 意图检测器初始化完成")
+            logger.info("意图检测器初始化完成")
 
             # 初始化简化安全监控器
-            print("\n🛡️  初始化简化安全监控器...")
+            logger.info("初始化简化安全监控器...")
             config_max_velocity = getattr(config, 'max_velocity', 0.10)
             self.safety_monitor = SimplifiedSafetyMonitor(config_max_velocity)
-            print("✅ 简化安全监控器初始化完成")
+            logger.info("简化安全监控器初始化完成")
 
         if self.enable_target_detection:
-            print("\n🎯 初始化目标检测器...")
+            logger.info("初始化目标检测器...")
             detector_type = getattr(config, 'target_detector_type', 'apriltag')
             self.target_detector = create_target_detector(detector_type, config)
-            print(f"✅ 目标检测器初始化完成 (类型: {detector_type})")
+            logger.info(f"目标检测器初始化完成 (类型: {detector_type})")
 
         # 初始化状态
         self.q_current = pin.neutral(self.ik_solver.model).copy()
@@ -132,7 +138,7 @@ class VISTController:
 
         # 打印模式信息
         mode = "增强模式（意图检测 + 冲突检测）" if self.enable_intent_detection else "基础模式（直接控制）"
-        print(f"\n✅ VIST 控制器初始化完成 - {mode}")
+        logger.info(f"VIST 控制器初始化完成 - {mode}")
 
 
     def process(self, human_keypoints, camera_image=None):
@@ -181,7 +187,7 @@ class VISTController:
                     self.config.robot_arm_lengths['forearm']
 
         if dist_to_shoulder > max_reach * 0.99:
-            print(f"❌ [工作空间检查] 目标位置超出工作空间！")
+            logger.error(f"目标位置超出工作空间: {dist_to_shoulder:.3f}m > {max_reach*0.99:.3f}m")
             return None, False, {"error": f"目标位置超出工作空间 ({dist_to_shoulder:.3f}m > {max_reach*0.99:.3f}m)"}
 
         # 3. VIST 卡尔曼滤波求解
@@ -228,7 +234,7 @@ class VISTController:
             target_result = self.target_detector.detect(camera_image)
             if target_result is not None:
                 self.target_socket_pos = target_result.position
-                print(f"🎯 [Controller] 检测到目标位置: {self.target_socket_pos}")
+                logger.info(f"检测到目标位置: {self.target_socket_pos}")
                 debug_info['target_detected'] = True
 
         # 2. 运动映射
@@ -318,7 +324,7 @@ class VISTController:
             )
 
             if not is_safe:
-                print(f"🚨 [Controller] 安全监控器触发: {safety_msg}")
+                logger.warning(f"安全监控器触发: {safety_msg}")
                 return None, False, {"error": f"安全监控器: {safety_msg}"}
 
             if safety_msg:  # 有警告消息
@@ -415,4 +421,4 @@ class VISTController:
         if self.intent_detector is not None:
             self.intent_detector.reset()
 
-        print("✅ [VISTController] 状态已重置")
+        logger.info("VISTController 状态已重置")

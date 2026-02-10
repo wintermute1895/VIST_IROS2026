@@ -28,6 +28,10 @@ sys.path.insert(0, project_root)
 
 from src.config import get_config
 from src.core.one_euro_filter import VectorOneEuroFilter, QuaternionOneEuroFilter
+from src.utils.logger import setup_logger
+
+# 设置日志
+logger = setup_logger(__name__)
 
 
 class ArmMotionMapper:
