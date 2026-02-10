@@ -1,0 +1,82 @@
+calibration_solver:
+  max_identical_poses: 2
+  method: 0
+  pose_similarity_threshold: 1.0e-06
+  use_refine_strategy: true
+camera:
+  camera_type: realsense_d405
+  cx: 320.0
+  cy: 240.0
+  distortion_coeffs:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  enable_hardware_reset: true
+  fps: 30
+  frame_timeout: 5000
+  fx: 615.0
+  fy: 615.0
+  height: 480
+  use_auto_intrinsics: true
+  width: 640
+charuco_board:
+  aruco_dict_type: 0
+  cols: 7
+  marker_size: 0.018
+  min_corners_for_pose: 4
+  rows: 5
+  square_size: 0.025
+data_collection:
+  capture_key: s
+  font_face: 0
+  font_scale: 1.0
+  font_thickness: 2
+  min_position_change: 0.02
+  min_rotation_change: 0.1
+  min_samples: 15
+  quit_key: q
+  recommended_samples: 20
+  text_color_info: &id001 !!python/tuple
+  - 0
+  - 255
+  - 0
+  text_color_warning: !!python/tuple
+  - 0
+  - 165
+  - 255
+  window_name: Data Collection - RealSense D405
+robot:
+  arm_side: right
+  connection_timeout: 10.0
+  move_accel: 0.1
+  move_block: true
+  move_speed: 0.3
+  sdk_relative_path: src/robot/sdk/linkerarm
+  sdk_search_paths:
+  - src/robot/sdk/linkerarm
+  - ../src/robot/sdk/linkerarm
+  - /home/luka/.ssh/VIST/src/robot/sdk/linkerarm
+  tcp_host: 192.168.10.21
+storage:
+  data_dir: calibration_data
+  error_stats_filename: calibration_error_stats.json
+  image_format: png
+  image_prefix: sample_
+  images_subdir: images
+  metadata_filename: metadata.json
+  poses_filename: hand_eye_robot_poses.npy
+  result_filename: hand_eye_result.json
+  result_matrix_filename: T_end_to_cam.npy
+validation:
+  acceptable_threshold: 5.0
+  detected_corner_color: *id001
+  excellent_threshold: 1.0
+  good_threshold: 2.0
+  line_thickness: 2
+  reprojection_point_color: !!python/tuple
+  - 0
+  - 0
+  - 255
+  reprojection_point_radius: 8

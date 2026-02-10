@@ -200,7 +200,7 @@ class CalibrationVerifier:
             tvec: 平移向量
         """
         # 绘制坐标轴（长度为 square_size）
-        axis_length = self.config.square_size
+        axis_length = self.config.charuco_board.square_size
         cv2.drawFrameAxes(image, self.camera_matrix, self.dist_coeffs,
                          rvec, tvec, axis_length, 3)
 
@@ -239,7 +239,7 @@ class CalibrationVerifier:
                     # 绘制检测到的角点
                     cv2.aruco.drawDetectedCornersCharuco(
                         display_image, charuco_corners, charuco_ids,
-                        self.config.detected_corner_color
+                        self.config.validation.detected_corner_color
                     )
 
                     # 绘制标定板坐标轴
@@ -256,8 +256,8 @@ class CalibrationVerifier:
                         cv2.circle(
                             display_image,
                             tuple(reprojected_point),
-                            self.config.reprojection_point_radius,
-                            self.config.reprojection_point_color,
+                            self.config.validation.reprojection_point_radius,
+                            self.config.validation.reprojection_point_color,
                             -1  # 填充
                         )
 
@@ -265,7 +265,7 @@ class CalibrationVerifier:
                         cv2.drawMarker(
                             display_image,
                             tuple(reprojected_point),
-                            self.config.reprojection_point_color,
+                            self.config.validation.reprojection_point_color,
                             cv2.MARKER_CROSS,
                             20,
                             2

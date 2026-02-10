@@ -230,7 +230,8 @@ class LinkerArmInterface(RobotInterface):
     使用 LBot SDK 控制 LinkerArm 双臂机器人
     """
 
-    def __init__(self, tcp_host: str = "192.168.10.21", arm_side: str = "left", sdk_path: str = None):
+    def __init__(self, tcp_host: str = "192.168.10.21", arm_side: str = "left", sdk_path: str = None,
+                 move_speed: float = 0.3, move_accel: float = 0.1, move_block: bool = True):
         """
         初始化 LinkerArm 机械臂连接
 
@@ -239,9 +240,17 @@ class LinkerArmInterface(RobotInterface):
             arm_side: 使用的机械臂，"left" 或 "right"
             sdk_path: LBot SDK 的路径（可选）。如果不提供，将尝试自动查找。
                      例如: "/home/luka/.ssh/VIST/src/robot/sdk/linkerarm"
+            move_speed: 运动速度 (m/s)
+            move_accel: 加速度 (m/s²)
+            move_block: 是否阻塞等待运动完成
         """
         import sys
         import os
+
+        # 保存运动控制参数
+        self.move_speed = move_speed
+        self.move_accel = move_accel
+        self.move_block = move_block
 
         # 确定 SDK 路径
         if sdk_path is None:
@@ -340,9 +349,9 @@ class LinkerArmInterface(RobotInterface):
             self.arm,
             position,
             euler,
-            speed=0.3,      # 运动速度 (m/s)
-            accel=0.1,      # 加速度 (m/s²)
-            block=True      # 阻塞等待运动完成
+            speed=self.move_speed,
+            accel=self.move_accel,
+            block=self.move_block
         )
 
         if not success:

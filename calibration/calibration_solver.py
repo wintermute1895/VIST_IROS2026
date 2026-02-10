@@ -198,64 +198,140 @@ class HandEyeCalibrationSolver:
         求解手眼标定
 
         Returns:
-            tuple: (旋转矩阵, 平移向量) - 从 End-Effector 到 Camera 的变换
+            tuple: (旋转矩阵, 平移向量) - 根据标定类型返回不同的变换
+                   eye_in_hand: End-Effector 到 Camera 的变换
+                   eye_to_hand: Base 到 Camera 的变换
         """
         print("开始手眼标定计算...")
+        print(f"标定类型: {self.config.calibration_solver.calibration_type}")
 
         if len(self.R_gripper2base) < 3:
             raise ValueError(f"有效样本数量不足（{len(self.R_gripper2base)}），至少需要 3 组数据")
 
-        # 使用 cv2.calibrateHandEye 进行手眼标定
-        # 注意：这是 Eye-in-Hand 配置，所以使用对应的方法
-        R_cam2gripper, t_cam2gripper = cv2.calibrateHandEye(
-            self.R_gripper2base,
-            self.t_gripper2base,
-            self.R_target2cam,
-            self.t_target2cam,
-            method=self.config.calibration_method
-        )
+        calibration_type = self.config.calibration_solver.calibration_type
 
-        # 转换为 End-Effector 到 Camera 的变换
-        # calibrateHandEye 返回的是 Camera 到 Gripper 的变换
-        # 我们需要的是 Gripper 到 Camera 的变换，所以需要求逆
-        T_cam2gripper = np.eye(4)
-        T_cam2gripper[:3, :3] = R_cam2gripper
-        T_cam2gripper[:3, 3] = t_cam2gripper.flatten()
+        if calibration_type == "eye_in_hand":
+            # Eye-in-Hand 标定：相机安装在机械臂末端
+            print("使用 Eye-in-Hand 标定方法 (cv2.calibrateHandEye)")
 
-        T_gripper2cam = np.linalg.inv(T_cam2gripper)
+            R_cam2gripper, t_cam2gripper = cv2.calibrateHandEye(
+                self.R_gripper2base,
+                self.t_gripper2base,
+                self.R_target2cam,
+                self.t_target2cam,
+                method=self.config.calibration_solver.method
+            )
 
-        R_end2cam = T_gripper2cam[:3, :3]
-        t_end2cam = T_gripper2cam[:3, 3].reshape(3, 1)
+            # 转换为 End-Effector 到 Camera 的变换
+            # calibrateHandEye 返回的是 Camera 到 Gripper 的变换
+            # 我们需要的是 Gripper 到 Camera 的变换，所以需要求逆
+            T_cam2gripper = np.eye(4)
+            T_cam2gripper[:3, :3] = R_cam2gripper
+            T_cam2gripper[:3, 3] = t_cam2gripper.flatten()
 
-        print("✓ 手眼标定计算完成")
+            T_gripper2cam = np.linalg.inv(T_cam2gripper)
 
-        return R_end2cam, t_end2cam
+            R_result = T_gripper2cam[:3, :3]
+            t_result = T_gripper2cam[:3, 3].reshape(3, 1)
 
-    def save_results(self, R_end2cam: np.ndarray, t_end2cam: np.ndarray):
+            print("✓ Eye-in-Hand 标定计算完成")
+            print("  结果: T_end_to_cam (末端到相机的变换)")
+
+        elif calibration_type == "eye_to_hand":
+            # Eye-to-Hand 标定：相机固定在外部
+            print("使用 Eye-to-Hand 标定方法 (cv2.calibrateRobotWorldHandEye)")
+
+            # 对于 eye-to-hand，标定板安装在机械臂末端
+            # R_world2cam: 标定板（世界坐标系）到相机的变换
+            # R_base2gripper: 基座到末端的变换
+            # 返回: R_cam2world (相机到世界坐标系), R_gripper2base (末端到基座)
+
+            # 准备输入数据
+            # 需要 base2gripper (基座到末端)，所以对 gripper2base 求逆
+            R_base2gripper = []
+            t_base2gripper = []
+
+            for R_g2b, t_g2b in zip(self.R_gripper2base, self.t_gripper2base):
+                T_g2b = np.eye(4)
+                T_g2b[:3, :3] = R_g2b
+                T_g2b[:3, 3] = t_g2b.flatten()
+
+                T_b2g = np.linalg.inv(T_g2b)
+
+                R_base2gripper.append(T_b2g[:3, :3])
+                t_base2gripper.append(T_b2g[:3, 3].reshape(3, 1))
+
+            # 调用 calibrateRobotWorldHandEye
+            R_cam2world, t_cam2world, _, _ = cv2.calibrateRobotWorldHandEye(
+                R_world2cam=self.R_target2cam,  # 标定板到相机
+                t_world2cam=self.t_target2cam,
+                R_base2gripper=R_base2gripper,  # 基座到末端
+                t_base2gripper=t_base2gripper,
+                method=self.config.calibration_solver.method
+            )
+
+            # 结果是相机到世界坐标系（标定板）的变换
+            # 但我们需要的是基座到相机的变换
+            # 由于标定板固定在末端，世界坐标系就是基座坐标系
+            # 所以 R_cam2world 就是 R_cam2base
+            # 我们需要 R_base2cam，所以求逆
+
+            T_cam2base = np.eye(4)
+            T_cam2base[:3, :3] = R_cam2world
+            T_cam2base[:3, 3] = t_cam2world.flatten()
+
+            T_base2cam = np.linalg.inv(T_cam2base)
+
+            R_result = T_base2cam[:3, :3]
+            t_result = T_base2cam[:3, 3].reshape(3, 1)
+
+            print("✓ Eye-to-Hand 标定计算完成")
+            print("  结果: T_base_to_cam (基座到相机的变换)")
+
+        else:
+            raise ValueError(f"不支持的标定类型: {calibration_type}，必须是 'eye_in_hand' 或 'eye_to_hand'")
+
+        return R_result, t_result
+
+    def save_results(self, R_result: np.ndarray, t_result: np.ndarray):
         """
         保存标定结果
 
         Args:
-            R_end2cam: 旋转矩阵
-            t_end2cam: 平移向量
+            R_result: 旋转矩阵
+            t_result: 平移向量
         """
+        calibration_type = self.config.calibration_solver.calibration_type
+
         # 构建 4x4 变换矩阵
-        T_end2cam = np.eye(4)
-        T_end2cam[:3, :3] = R_end2cam
-        T_end2cam[:3, 3] = t_end2cam.flatten()
+        T_result = np.eye(4)
+        T_result[:3, :3] = R_result
+        T_result[:3, 3] = t_result.flatten()
 
         # 保存为 .npy 文件
-        np.save(str(self.config.result_matrix_file), T_end2cam)
+        np.save(str(self.config.result_matrix_file), T_result)
         print(f"✓ 变换矩阵已保存到: {self.config.result_matrix_file}")
+
+        # 根据标定类型设置结果字典的键名
+        if calibration_type == "eye_in_hand":
+            matrix_key = "T_end_to_cam"
+            description = "末端到相机的变换"
+        elif calibration_type == "eye_to_hand":
+            matrix_key = "T_base_to_cam"
+            description = "基座到相机的变换"
+        else:
+            matrix_key = "T_result"
+            description = "变换矩阵"
 
         # 保存为 JSON 文件（便于查看）
         result_dict = {
-            "T_end_to_cam": T_end2cam.tolist(),
-            "rotation_matrix": R_end2cam.tolist(),
-            "translation_vector": t_end2cam.flatten().tolist(),
+            matrix_key: T_result.tolist(),
+            "rotation_matrix": R_result.tolist(),
+            "translation_vector": t_result.flatten().tolist(),
             "valid_samples": len(self.valid_samples),
             "valid_sample_ids": self.valid_samples,
-            "calibration_method": str(self.config.calibration_method)
+            "calibration_method": str(self.config.calibration_solver.method),
+            "calibration_type": calibration_type
         }
 
         with open(self.config.result_file, 'w') as f:
@@ -264,12 +340,12 @@ class HandEyeCalibrationSolver:
 
         # 打印结果
         print(f"\n{'='*60}")
-        print("手眼标定结果 (T_end_to_cam):")
+        print(f"手眼标定结果 ({description}):")
         print(f"{'='*60}")
-        print(f"\n变换矩阵 (4x4):\n{T_end2cam}")
-        print(f"\n旋转矩阵 (3x3):\n{R_end2cam}")
-        print(f"\n平移向量 (3x1):\n{t_end2cam.flatten()}")
-        print(f"\n平移向量 (米): x={t_end2cam[0,0]:.4f}, y={t_end2cam[1,0]:.4f}, z={t_end2cam[2,0]:.4f}")
+        print(f"\n变换矩阵 (4x4):\n{T_result}")
+        print(f"\n旋转矩阵 (3x3):\n{R_result}")
+        print(f"\n平移向量 (3x1):\n{t_result.flatten()}")
+        print(f"\n平移向量 (米): x={t_result[0,0]:.4f}, y={t_result[1,0]:.4f}, z={t_result[2,0]:.4f}")
         print(f"{'='*60}\n")
 
     def run(self):
@@ -280,15 +356,15 @@ class HandEyeCalibrationSolver:
             # 1. 处理所有样本
             valid_count = self.process_all_samples()
 
-            if valid_count < self.config.min_samples:
-                print(f"⚠️ 警告: 有效样本数量 ({valid_count}) 少于推荐值 ({self.config.min_samples})")
+            if valid_count < self.config.data_collection.min_samples:
+                print(f"⚠️ 警告: 有效样本数量 ({valid_count}) 少于推荐值 ({self.config.data_collection.min_samples})")
                 print("   标定精度可能不够理想，建议重新采集更多数据")
 
             # 2. 求解手眼标定
-            R_end2cam, t_end2cam = self.solve_hand_eye_calibration()
+            R_result, t_result = self.solve_hand_eye_calibration()
 
             # 3. 保存结果
-            self.save_results(R_end2cam, t_end2cam)
+            self.save_results(R_result, t_result)
 
             print("✓ 标定流程完成!")
 

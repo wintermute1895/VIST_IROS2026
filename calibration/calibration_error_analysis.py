@@ -257,13 +257,13 @@ class CalibrationErrorAnalyzer:
         # 精度评估
         print(f"\n标定质量评估:")
         mean_error = stats['mean_error']
-        if mean_error < 1.0:
+        if mean_error < self.config.validation.excellent_threshold:
             quality = "优秀 (Excellent)"
             color_code = "✓"
-        elif mean_error < 2.0:
+        elif mean_error < self.config.validation.good_threshold:
             quality = "良好 (Good)"
             color_code = "✓"
-        elif mean_error < 5.0:
+        elif mean_error < self.config.validation.acceptable_threshold:
             quality = "可接受 (Acceptable)"
             color_code = "⚠"
         else:
@@ -274,10 +274,9 @@ class CalibrationErrorAnalyzer:
         print(f"  平均误差: {mean_error:.3f} 像素")
 
         # 保存统计结果
-        stats_file = self.config.data_dir / "calibration_error_stats.json"
-        with open(stats_file, 'w', encoding='utf-8') as f:
+        with open(self.config.error_stats_file, 'w', encoding='utf-8') as f:
             json.dump(stats, f, indent=2, ensure_ascii=False)
-        print(f"\n✓ 误差统计已保存到: {stats_file}")
+        print(f"\n✓ 误差统计已保存到: {self.config.error_stats_file}")
 
     def run(self):
         """

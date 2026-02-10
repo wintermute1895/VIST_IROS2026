@@ -11,7 +11,7 @@ from datetime import datetime
 import json
 
 from config import CalibrationConfig
-from robot_interface import RobotInterface, MockRobotInterface
+from robot_interface import RobotInterface, MockRobotInterface, LinkerArmInterface
 
 
 class DataCollector:
@@ -37,10 +37,29 @@ class DataCollector:
         self.pipeline = rs.pipeline()
         self.rs_config = rs.config()
 
-        # 配置彩色流（640x480 @ 30fps）
-        self.rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        # 从配置读取相机参数
+        self.rs_config.enable_stream(
+            rs.stream.color,
+            config.camera.width,
+            config.camera.height,
+            rs.format.bgr8,
+            config.camera.fps
+        )
 
-        print("正在启动 RealSense D405 相机...")
+        print(f"正在启动 {config.camera.camera_type} 相机...")
+        print(f"  分辨率: {config.camera.width}x{config.camera.height} @ {config.camera.fps}fps")
+
+        # 硬件复位（如果启用）
+        if config.camera.enable_hardware_reset:
+            try:
+                ctx = rs.context()
+                devices = ctx.query_devices()
+                for dev in devices:
+                    dev.hardware_reset()
+                print("  ✓ 相机硬件复位成功")
+            except Exception as e:
+                print(f"  ⚠️ 相机硬件复位失败: {e}")
+
         self.pipeline.start(self.rs_config)
         print("✓ 相机启动成功")
 
@@ -93,9 +112,9 @@ class DataCollector:
             rotation_dist = np.linalg.norm(new_rotation - old_rotation, 'fro')
             min_rotation_dist = min(min_rotation_dist, rotation_dist)
 
-        # 阈值设置
-        MIN_POSITION_CHANGE = 0.02  # 2cm
-        MIN_ROTATION_CHANGE = 0.1   # 旋转矩阵差异
+        # 从配置读取阈值
+        MIN_POSITION_CHANGE = self.config.data_collection.min_position_change
+        MIN_ROTATION_CHANGE = self.config.data_collection.min_rotation_change
 
         if min_position_dist < MIN_POSITION_CHANGE and min_rotation_dist < MIN_ROTATION_CHANGE:
             return False, f"⚠️  位姿变化过小 (位置: {min_position_dist*1000:.1f}mm, 旋转: {min_rotation_dist:.3f})"
@@ -111,8 +130,8 @@ class DataCollector:
             robot_pose: 机械臂位姿（4x4 矩阵）
             sample_id: 样本编号
         """
-        # 保存图像
-        image_filename = f"sample_{sample_id:03d}.png"
+        # 使用配置中的文件格式
+        image_filename = f"{self.config.storage.image_prefix}{sample_id:03d}.{self.config.storage.image_format}"
         image_path = self.config.images_dir / image_filename
         cv2.imwrite(str(image_path), image)
 
@@ -136,10 +155,9 @@ class DataCollector:
         print(f"✓ 机械臂位姿已保存到: {self.config.poses_file}")
 
         # 保存元数据（JSON 格式）
-        metadata_file = self.config.data_dir / "metadata.json"
-        with open(metadata_file, 'w') as f:
+        with open(self.config.metadata_file, 'w') as f:
             json.dump(self.collected_data, f, indent=2)
-        print(f"✓ 元数据已保存到: {metadata_file}")
+        print(f"✓ 元数据已保存到: {self.config.metadata_file}")
 
         # 分析位姿变化
         self.analyze_pose_variation(poses_array)
@@ -206,9 +224,9 @@ class DataCollector:
         print("Eye-in-Hand 数据采集")
         print("="*60)
         print("操作说明:")
-        print("  - 按 's' 键: 保存当前图像和机械臂位姿")
-        print("  - 按 'q' 键: 退出采集")
-        print(f"  - 最少需要采集 {self.config.min_samples} 组数据")
+        print(f"  - 按 '{self.config.data_collection.capture_key}' 键: 保存当前图像和机械臂位姿")
+        print(f"  - 按 '{self.config.data_collection.quit_key}' 键: 退出采集")
+        print(f"  - 最少需要采集 {self.config.data_collection.min_samples} 组数据")
         print("\n采集建议:")
         print("  1. 移动机械臂到不同位置和姿态")
         print("  2. 确保标定板在相机视野内且清晰可见")
@@ -229,26 +247,26 @@ class DataCollector:
                 display_image = image.copy()
 
                 # 添加信息文本
-                info_text = f"Samples: {sample_count}/{self.config.min_samples}"
+                info_text = f"Samples: {sample_count}/{self.config.data_collection.min_samples}"
                 cv2.putText(display_image, info_text, (10, 30),
-                           cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-                if sample_count < self.config.min_samples:
-                    status_text = "Press 's' to capture"
-                    color = (0, 165, 255)  # 橙色
+                           self.config.data_collection.font_face, self.config.data_collection.font_scale,
+                           self.config.data_collection.text_color_info, self.config.data_collection.font_thickness)
+                if sample_count < self.config.data_collection.min_samples:
+                    status_text = f"Press '{self.config.data_collection.capture_key}' to capture"
+                    color = self.config.data_collection.text_color_warning
                 else:
-                    status_text = "Ready! Press 'q' to finish"
-                    color = (0, 255, 0)  # 绿色
+                    status_text = f"Ready! Press '{self.config.data_collection.quit_key}' to finish"
+                    color = self.config.data_collection.text_color_info
 
                 cv2.putText(display_image, status_text, (10, 70),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
-
-                cv2.imshow("Data Collection - RealSense D405", display_image)
+                           self.config.data_collection.font_face, 0.7, color,
+                           self.config.data_collection.font_thickness)
+                cv2.imshow(self.config.data_collection.window_name, display_image)
 
                 # 处理按键
                 key = cv2.waitKey(1) & 0xFF
 
-                if key == ord('s'):
+                if key == ord(self.config.data_collection.capture_key):
                     # 获取当前机械臂位姿
                     try:
                         robot_pose = self.robot.get_current_pose()
@@ -271,16 +289,16 @@ class DataCollector:
                         self.collected_poses.append(robot_pose)
                         sample_count += 1
 
-                        print(f"进度: {sample_count}/{self.config.min_samples}\n")
+                        print(f"进度: {sample_count}/{self.config.data_collection.min_samples}\n")
 
                     except Exception as e:
                         print(f"⚠️ 获取机械臂位姿失败: {e}")
                         print("   请检查机械臂连接和接口实现\n")
 
-                elif key == ord('q'):
-                    if sample_count < self.config.min_samples:
+                elif key == ord(self.config.data_collection.quit_key):
+                    if sample_count < self.config.data_collection.min_samples:
                         print(f"\n⚠️ 警告: 当前只采集了 {sample_count} 组数据")
-                        print(f"   建议至少采集 {self.config.min_samples} 组数据以获得更好的标定精度")
+                        print(f"   建议至少采集 {self.config.data_collection.min_samples} 组数据以获得更好的标定精度")
                         print("   是否确认退出? (y/n): ", end='')
 
                         # 等待用户确认
@@ -291,6 +309,7 @@ class DataCollector:
 
                     print(f"\n采集完成! 共采集 {sample_count} 组数据")
                     break
+
 
         finally:
             # 保存所有数据
@@ -312,17 +331,22 @@ def main():
     config = CalibrationConfig()
     config.print_config()
 
-    # 创建机械臂接口
-    # ⚠️ 注意：这里使用 Mock 接口进行测试
-    # 实际使用时，请替换为你自己的机械臂接口实现
-    print("⚠️ 当前使用 真实 Robot Interface（测试模式）")
-    print("   实际使用时，请在代码中设定为你的机械臂接口\n")
+    # 创建机械臂接口 - LinkerArm (LBot)
+    print("正在连接 LinkerArm 机械臂...")
+    print(f"  IP: {config.robot.tcp_host}")
+    print(f"  使用机械臂: {config.robot.arm_side}\n")
 
-    # robot = MockRobotInterface()
+    # 获取 SDK 路径
+    sdk_path = config.get_sdk_path()
 
-    # 如果你已经实现了自己的机械臂接口，请取消下面的注释：
-    from robot_interface import YourRobotInterface
-    robot = YourRobotInterface()
+    robot = LinkerArmInterface(
+        tcp_host=config.robot.tcp_host,
+        arm_side=config.robot.arm_side,
+        sdk_path=str(sdk_path),
+        move_speed=config.robot.move_speed,
+        move_accel=config.robot.move_accel,
+        move_block=config.robot.move_block
+    )
 
     # 创建数据采集器
     try:
