@@ -111,12 +111,23 @@ class VISTKalmanFilter:
 
     def _build_process_noise_covariance(self):
         """
-        构建各向异性过程噪声协方差矩阵 Q
+        构建各向异性过程噪声协方差矩阵 Q（含Z轴锁定机制）
 
-        关键修正：
+        基础功能：
         - J4 (Elbow Pitch, 索引3) 是任务关节，不应该被阻尼
         - J3 (Shoulder Yaw/Swivel, 索引2) 是冗余自由度，需要轻微阻尼
         - J4 应该像伺服电机一样灵活响应人体动作
+
+        【核心创新】Z轴锁定机制：
+        在精密插入阶段（α > 0.8），通过动态调整Q矩阵冻结非插入方向的运动。
+
+        原理：
+        - 计算每个关节对末端Z方向的贡献（通过雅可比矩阵）
+        - 对于主要影响X-Y平面的关节，大幅减小其过程噪声
+        - 这会"冻结"这些关节，只允许Z方向的运动
+
+        公式：Q_i(α) = Q_base · freeze_factor(α, J_i·ẑ)
+        其中 freeze_factor 在 α→1 且关节i不影响Z方向时趋近于0
 
         Returns:
             Q: 过程噪声协方差矩阵 (state_dim x state_dim)
@@ -154,11 +165,89 @@ class VISTKalmanFilter:
         Q[elbow_idx, elbow_idx] *= elbow_boost
         Q[self.n_joints + elbow_idx, self.n_joints + elbow_idx] *= elbow_boost
 
+        # ==========================================
+        # 【核心创新】Z轴锁定机制
+        # ==========================================
+        # 阈值：α > 0.8 表示即将进入或已经进入精密插入阶段
+        z_lock_threshold = 0.8
+
+        if self.alpha_smoothed > z_lock_threshold:
+            try:
+                # 1. 获取当前关节配置
+                q_controlled = self.state[:self.n_joints]
+                q_full = self._get_full_q_from_controlled(q_controlled)
+
+                # 确保配置有效
+                if not np.all(np.isfinite(q_full)):
+                    # 配置无效，跳过Z轴锁定
+                    return Q
+
+                # 2. 计算雅可比矩阵
+                pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+                pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+
+                J_full = pin.computeFrameJacobian(
+                    self.ik_solver.model,
+                    self.ik_solver.data,
+                    q_full,
+                    self.ik_solver.ee_frame_id,
+                    pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+                )
+
+                # 只使用位置部分（前3行）和受控关节
+                J = J_full[:3, self.ik_solver.controlled_indices]
+
+                # 3. Z方向单位向量（插入方向）
+                z_axis = np.array([0, 0, 1])
+
+                # 4. 计算冻结因子（基于意图因子的强度）
+                # α = 0.8 → freeze_strength = 0
+                # α = 1.0 → freeze_strength = 1
+                freeze_strength = (self.alpha_smoothed - z_lock_threshold) / (1.0 - z_lock_threshold)
+                freeze_strength = np.clip(freeze_strength, 0.0, 1.0)
+
+                # 5. 对每个关节应用Z轴锁定
+                for i in range(self.n_joints):
+                    # 计算第i个关节对末端位置的影响（雅可比列）
+                    J_i = J[:, i]
+
+                    # 计算该关节对Z方向的贡献（投影）
+                    z_contribution = abs(np.dot(J_i, z_axis))
+
+                    # 归一化：z_contribution 的范围通常在 [0, 0.5] 左右
+                    # 我们将其映射到 [0, 1]，阈值设为 0.3
+                    z_contribution_normalized = min(z_contribution / 0.3, 1.0)
+
+                    # 计算冻结因子：
+                    # - 如果关节主要影响Z方向（z_contribution大），则不冻结
+                    # - 如果关节主要影响X-Y平面（z_contribution小），则冻结
+                    # freeze_factor = 1 - freeze_strength * (1 - z_contribution_normalized)
+                    #
+                    # 当 freeze_strength=1 且 z_contribution_normalized=0 时：
+                    #   freeze_factor = 1 - 1*(1-0) = 0（完全冻结）
+                    # 当 freeze_strength=1 且 z_contribution_normalized=1 时：
+                    #   freeze_factor = 1 - 1*(1-1) = 1（不冻结）
+                    freeze_factor = 1.0 - freeze_strength * (1.0 - z_contribution_normalized)
+
+                    # 最小冻结因子：避免完全冻结导致数值问题
+                    freeze_factor = max(freeze_factor, 0.01)
+
+                    # 应用冻结因子到Q矩阵
+                    Q[i, i] *= freeze_factor
+                    Q[self.n_joints + i, self.n_joints + i] *= freeze_factor
+
+            except Exception as e:
+                # Z轴锁定失败，记录警告但不影响主流程
+                print(f"⚠️ [VIST] Z轴锁定计算失败: {e}")
+                # 继续使用基础的Q矩阵
+
         return Q
 
-    def _build_observation_noise_covariance(self, use_biomimetic=False):
+    def _build_observation_noise_covariance(self, use_biomimetic=False,
+                                           human_delta_theta=None,
+                                           virtual_delta_theta=None):
         """
-        构建意图驱动的观测噪声协方差矩阵 R
+        构建意图驱动的观测噪声协方差矩阵 R（含冲突检测）
 
         R = [R_human    0      ]
             [0       R_virtual]
@@ -166,18 +255,32 @@ class VISTKalmanFilter:
         - R_human: 人类指令噪声（α → 0 时增大，强力去噪）
         - R_virtual: 虚拟引导噪声（α → 1 时减小，磁吸引导）
 
+        【核心创新】挣脱机制（R_conflict）：
+        当操作员检测到算法引导错误时，会主动施加与虚拟引导相反的力，
+        此时 ||Δθ_human - Δθ_virtual|| 增大。
+
+        我们通过动态调整虚拟引导的观测噪声来实现"挣脱"：
+        R_virtual(α, conflict) = R_base(α) + γ_c · ||Δθ_human - Δθ_virtual||²
+
+        当冲突增大时，R_virtual 增大，卡尔曼增益 K 会自动降低虚拟引导的权重，
+        允许操作员"挣脱"错误的引导进行微调。
+
         【关键修正】：在仿生观测模式下，J4 的观测来自直接的几何测量（肘部角度），
         应该和手部位置一样可信，因此大幅降低其观测噪声。
 
         Args:
             use_biomimetic: 是否使用仿生观测模型
+            human_delta_theta: 人类指令增量（用于冲突检测）
+            virtual_delta_theta: 虚拟引导增量（用于冲突检测）
 
         Returns:
             R: 观测噪声协方差矩阵 (2*n_joints x 2*n_joints)
         """
         R = np.zeros((2 * self.n_joints, 2 * self.n_joints))
 
-        # 人类指令噪声（意图驱动）
+        # ==========================================
+        # 1. 人类指令噪声（意图驱动）
+        # ==========================================
         # α → 0: 增大噪声，降低权重（强力去噪）
         # α → 1: 减小噪声，增大权重（跟随人类指令）
         human_variance = self.config.vist_human_base_variance + \
@@ -199,14 +302,36 @@ class VISTKalmanFilter:
             for i in range(3):  # J1, J2, J3
                 R[i, i] = 5e-3  # 适度滤波，比默认的 1e-2 小一半
 
-        # 虚拟引导噪声（意图驱动）
+        # ==========================================
+        # 2. 虚拟引导噪声（意图驱动 + 冲突检测）
+        # ==========================================
         # α → 0: 增大噪声，降低权重（自由移动）
         # α → 1: 减小噪声，增大权重（磁吸引导）
         virtual_variance = self.config.vist_virtual_base_variance + \
                           (self.config.vist_virtual_base_variance - self.config.vist_virtual_min_variance) * \
                           (1.0 - self.alpha_smoothed)
+
+        # 【核心创新】冲突项：当人类指令与虚拟引导冲突时，增大虚拟引导的噪声
+        if human_delta_theta is not None and virtual_delta_theta is not None:
+            # 计算冲突强度：||Δθ_human - Δθ_virtual||²
+            conflict = np.linalg.norm(human_delta_theta - virtual_delta_theta)**2
+
+            # 冲突增益 γ_c：控制冲突项的影响强度
+            # 从配置文件读取，如果不存在则使用默认值
+            conflict_gain = getattr(self.config, 'vist_conflict_gain', 0.5)
+
+            # 添加冲突项到虚拟引导噪声
+            # 当冲突大时，R_virtual 增大，降低虚拟引导的权重
+            virtual_variance += conflict_gain * conflict
+
+            # 限制最大方差，避免数值问题
+            virtual_variance = min(virtual_variance, 1e3)
+
         R[self.n_joints:, self.n_joints:] = virtual_variance * np.eye(self.n_joints)
 
+        # ==========================================
+        # 3. 几何求解器特殊处理
+        # ==========================================
         # 【关键修正】当使用几何求解器时，大幅降低臂部关节（J1-J4）的微分IK权重
         # 让几何求解器完全主导臂部控制，避免两个观测打架
         if self.geometric_solver is not None:
@@ -221,16 +346,23 @@ class VISTKalmanFilter:
 
     def detect_intent(self, target_pos, current_pos, velocity):
         """
-        检测操作意图
+        检测操作意图（增强版：包含方向夹角）
 
         意图因子 α ∈ [0, 1]:
-        - α → 0: 自由移动模式（快速移动，远离目标）
-        - α → 1: 精密操作模式（接近目标，速度慢）
+        - α → 0: 自由移动模式（快速移动，远离目标，或切向移动）
+        - α → 1: 精密操作模式（接近目标，速度慢，且正对目标）
+
+        公式：α = w_d·α_distance + w_v·α_velocity + w_θ·α_alignment
+        其中：
+        - α_distance: 基于距离的因子（距离越近，值越大）
+        - α_velocity: 基于速度的因子（速度越慢，值越大）
+        - α_alignment: 基于方向对齐的因子（正对目标时值最大）
+        - 权重：w_d=0.3, w_v=0.3, w_θ=0.4（方向对齐是最重要的意图指标）
 
         Args:
             target_pos: 目标位置 (3D)
             current_pos: 当前位置 (3D)
-            velocity: 当前速度 (标量或3D)
+            velocity: 当前速度 (标量或3D向量)
 
         Returns:
             alpha: 意图因子
@@ -238,27 +370,60 @@ class VISTKalmanFilter:
         # 计算距离
         distance = np.linalg.norm(target_pos - current_pos)
 
-        # 计算速度大小
+        # 计算速度大小和速度向量
         if np.isscalar(velocity):
             speed = abs(velocity)
+            velocity_vec = np.zeros(3)  # 标量速度无法计算方向
         else:
             speed = np.linalg.norm(velocity)
+            velocity_vec = velocity
 
-        # Sigmoid 函数：距离越近，α 越大
-        # α = 1 / (1 + exp(-k * (d_threshold - distance)))
+        # ==========================================
+        # 1. 距离因子：距离越近，α_distance 越大
+        # ==========================================
         d_threshold = self.config.vist_distance_threshold
         k = self.config.vist_sigmoid_k
-
         alpha_distance = 1.0 / (1.0 + np.exp(-k * (d_threshold - distance)))
 
-        # 速度因子：速度越慢，α 越大
+        # ==========================================
+        # 2. 速度因子：速度越慢，α_velocity 越大
+        # ==========================================
         v_threshold = self.config.vist_velocity_threshold
         alpha_velocity = 1.0 / (1.0 + np.exp(-k * (v_threshold - speed)))
 
-        # 综合意图因子（取平均）
-        self.alpha = 0.5 * (alpha_distance + alpha_velocity)
+        # ==========================================
+        # 3. 方向对齐因子：正对目标时 α_alignment 越大
+        # ==========================================
+        direction_to_target = target_pos - current_pos
+        direction_to_target_norm = np.linalg.norm(direction_to_target)
 
-        # EMA 平滑
+        if direction_to_target_norm > 1e-6 and speed > 1e-6:
+            # 归一化方向向量
+            direction_to_target = direction_to_target / direction_to_target_norm
+            velocity_normalized = velocity_vec / speed
+
+            # 计算夹角的余弦值
+            cos_angle = np.dot(direction_to_target, velocity_normalized)
+            cos_angle = np.clip(cos_angle, -1.0, 1.0)
+
+            # 对齐因子：
+            # cos_angle =  1 (正对目标) → alpha_alignment = 1.0
+            # cos_angle =  0 (切向移动) → alpha_alignment = 0.5
+            # cos_angle = -1 (背离目标) → alpha_alignment = 0.0
+            alpha_alignment = (cos_angle + 1.0) / 2.0
+        else:
+            # 速度太小或距离太近，无法计算方向，默认为对齐
+            alpha_alignment = 1.0
+
+        # ==========================================
+        # 4. 综合意图因子（加权平均）
+        # ==========================================
+        # 权重分配：方向对齐最重要（0.4），距离和速度次之（各0.3）
+        self.alpha = 0.3 * alpha_distance + 0.3 * alpha_velocity + 0.4 * alpha_alignment
+
+        # ==========================================
+        # 5. EMA 平滑
+        # ==========================================
         smoothing = self.config.vist_intent_smoothing
         self.alpha_smoothed = smoothing * self.alpha_smoothed + (1.0 - smoothing) * self.alpha
 
@@ -792,8 +957,12 @@ class VISTKalmanFilter:
         # 3. 构建观测向量
         z = np.concatenate([human_delta_theta, delta_theta_virtual])
 
-        # 4. 构建观测噪声协方差（意图驱动，传递仿生模式标志）
-        R = self._build_observation_noise_covariance(use_biomimetic=use_biomimetic)
+        # 4. 构建观测噪声协方差（意图驱动 + 冲突检测）
+        R = self._build_observation_noise_covariance(
+            use_biomimetic=use_biomimetic,
+            human_delta_theta=human_delta_theta,
+            virtual_delta_theta=delta_theta_virtual
+        )
 
         # 5. 计算卡尔曼增益
         # K = P @ H^T @ (H @ P @ H^T + R)^(-1)

@@ -232,6 +232,19 @@ class VISTConfig:
         return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('virtual_min_variance', 1e-5))
 
     @property
+    def vist_conflict_gain(self):
+        """VIST 冲突增益（挣脱机制）
+
+        控制冲突项 R_conflict = γ_c · ||Δθ_human - Δθ_virtual||² 的强度。
+
+        推荐值：
+        - 0.1-0.3: 弱挣脱（算法主导性强）
+        - 0.5: 平衡（默认值）
+        - 0.8-1.0: 强挣脱（人类主导性强）
+        """
+        return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('conflict_gain', 0.5))
+
+    @property
     def vist_differential_ik_damping(self):
         """VIST 微分 IK 阻尼"""
         return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('differential_ik_damping', 5e-3))
