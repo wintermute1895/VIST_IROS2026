@@ -292,6 +292,11 @@ class VISTConfig:
         """几何解析解的信任权重"""
         return float(self._config.get('vist_kalman', {}).get('geometric_solver', {}).get('trust_weight', 2.0))
 
+    @property
+    def vist_wrist_control_mode(self):
+        """腕部控制模式 (full_dof, constrained_horizontal, wrist_locked)"""
+        return self._config.get('vist_kalman', {}).get('geometric_solver', {}).get('wrist_control_mode', 'full_dof')
+
     # ==========================================
     # VIST 仿生多任务观测参数
     # ==========================================

@@ -149,6 +149,22 @@ vist_kalman:
     trust_weight: 2.0  # 几何解析解的信任权重（相对于微分IK）
                        # 通过调整 Q 矩阵实现：Q_arm *= (1.0 / trust_weight)
 
+    # 腕部控制模式（4+3解耦策略）
+    wrist_control_mode: "full_dof"  # 可选: "full_dof", "constrained_horizontal", "wrist_locked"
+    # 模式说明：
+    # - full_dof: 全自由度欧拉角分解（默认）
+    #   * J5-J7通过欧拉角分解自动匹配目标姿态
+    #   * 适合通用遥操作任务
+    # - constrained_horizontal: 约束水平模式（推荐用于桌面操作）
+    #   * J5 (Wrist Yaw): 锁定为0（保持水平）
+    #   * J6 (Wrist Pitch): 与J4配合约束，保持末端水平于桌面
+    #   * J7 (Wrist Roll): 从目标姿态提取手腕旋转
+    #   * 适合插入、抓取等桌面操作任务
+    # - wrist_locked: 腕部锁定模式
+    #   * J5-J7全部锁定为0
+    #   * 只控制臂部配置（J1-J4），末端姿态固定
+    #   * 适合简单的位置追踪任务
+
   # 仿生多任务观测模型（3+4解耦）
   biomimetic_observation:
     enabled: false  # 禁用仿生观测 - 避免与几何求解器冲突

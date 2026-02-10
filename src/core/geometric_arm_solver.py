@@ -39,7 +39,7 @@ class GeometricArmSolver:
             data: Pinocchio 数据
             controlled_joints: 受控关节索引列表
             ee_frame_id: 末端执行器 frame ID
-            config: 系统配置对象（可选，用于读取关节方向）
+            config: 系统配置对象（可选，用于读取关节方向和腕部控制模式）
         """
         self.model = model
         self.data = data
@@ -86,8 +86,16 @@ class GeometricArmSolver:
             # 默认所有关节无偏移
             self.joint_offsets = np.zeros(7)
 
+        # 读取腕部控制模式配置
+        if config is not None and hasattr(config, 'vist_wrist_control_mode'):
+            self.wrist_control_mode = config.vist_wrist_control_mode
+        else:
+            # 默认使用全自由度模式
+            self.wrist_control_mode = 'full_dof'
+
         print(f"   臂部关节索引: {self.arm_joint_indices}")
         print(f"   腕部关节索引: {self.wrist_joint_indices}")
+        print(f"   腕部控制模式: {self.wrist_control_mode}")
         print(f"   关节名称映射: {self.joint_name_to_index}")
 
     def solve_arm_configuration(self, shoulder_pos, elbow_pos, wrist_pos):
@@ -178,14 +186,14 @@ class GeometricArmSolver:
 
     def solve_wrist_orientation(self, q_arm, target_orientation):
         """
-        Stage 2: 腕部姿态求解（欧拉角分解）
+        Stage 2: 腕部姿态求解（支持多种控制模式）
 
         给定臂部配置（q1-q4）和目标末端姿态，计算腕部关节角度（q5-q7）
 
-        算法思路：
-        1. 使用正运动学计算臂部末端（腕部基座）的姿态
-        2. 计算从腕部基座到目标姿态的相对旋转
-        3. 将相对旋转分解为欧拉角（对应 q5, q6, q7）
+        支持三种控制模式：
+        1. full_dof: 全自由度欧拉角分解（默认）
+        2. constrained_horizontal: 约束水平模式（J5锁定，J6保持水平）
+        3. wrist_locked: 腕部锁定模式（J5-J7全部锁定为0）
 
         Args:
             q_arm: 臂部关节角度 [q1, q2, q3, q4] (numpy array)
@@ -193,6 +201,33 @@ class GeometricArmSolver:
 
         Returns:
             q_wrist: 腕部关节角度 [q5, q6, q7] (numpy array)
+        """
+        # 模式1: 腕部锁定模式（最简单）
+        if self.wrist_control_mode == 'wrist_locked':
+            return np.zeros(3)
+
+        # 模式2: 约束水平模式
+        if self.wrist_control_mode == 'constrained_horizontal':
+            return self._solve_wrist_constrained_horizontal(q_arm, target_orientation)
+
+        # 模式3: 全自由度模式（默认）
+        return self._solve_wrist_full_dof(q_arm, target_orientation)
+
+    def _solve_wrist_full_dof(self, q_arm, target_orientation):
+        """
+        全自由度腕部求解（欧拉角分解）
+
+        算法思路：
+        1. 使用正运动学计算臂部末端（腕部基座）的姿态
+        2. 计算从腕部基座到目标姿态的相对旋转
+        3. 将相对旋转分解为欧拉角（对应 q5, q6, q7）
+
+        Args:
+            q_arm: 臂部关节角度 [q1, q2, q3, q4]
+            target_orientation: 目标末端姿态（旋转矩阵或四元数）
+
+        Returns:
+            q_wrist: 腕部关节角度 [q5, q6, q7]
         """
         # 构建完整的关节配置（臂部 + 腕部初始值）
         # 注意：controlled_joints 是 velocity indices，不能直接用于索引 q_full
@@ -244,6 +279,55 @@ class GeometricArmSolver:
         # 这对应于腕部的 Yaw-Pitch-Roll 关节
         euler_angles = Rotation.from_matrix(R_relative).as_euler('ZYX', degrees=False)
         q5, q6, q7 = euler_angles  # Yaw, Pitch, Roll
+
+        return np.array([q5, q6, q7])
+
+    def _solve_wrist_constrained_horizontal(self, q_arm, target_orientation):
+        """
+        约束水平模式腕部求解
+
+        约束策略：
+        - J5 (Wrist Yaw): 锁定为0（保持水平）
+        - J6 (Wrist Pitch): 与J4配合约束，保持末端水平于桌面
+        - J7 (Wrist Roll): 从目标姿态提取手腕旋转
+
+        这种模式适合桌面操作任务（如插入、抓取），可以：
+        1. 简化控制，减少自由度
+        2. 保持末端水平，避免碰撞
+        3. 提高操作稳定性
+
+        Args:
+            q_arm: 臂部关节角度 [q1, q2, q3, q4]
+            target_orientation: 目标末端姿态（旋转矩阵或四元数）
+
+        Returns:
+            q_wrist: 腕部关节角度 [q5, q6, q7]
+        """
+        # J5 (Wrist Yaw): 锁定为0
+        q5 = 0.0
+
+        # J6 (Wrist Pitch): 补偿肘部弯曲，保持末端水平
+        # 当肘部弯曲时（q4 > 0），腕部需要反向弯曲以保持水平
+        # 简化模型：q6 = -q4（完全补偿）
+        # 实际可能需要根据机器人几何参数调整系数
+        q4 = q_arm[3]  # 肘部角度
+        q6 = -q4  # 补偿肘部弯曲
+
+        # J7 (Wrist Roll): 从目标姿态提取手腕旋转
+        # 将目标姿态转换为旋转矩阵
+        if target_orientation.shape == (4,):
+            # 四元数 [x, y, z, w]
+            target_rot = Rotation.from_quat(target_orientation).as_matrix()
+        elif target_orientation.shape == (3, 3):
+            # 旋转矩阵
+            target_rot = target_orientation
+        else:
+            raise ValueError(f"不支持的姿态格式: {target_orientation.shape}")
+
+        # 提取绕Z轴的旋转（Roll角度）
+        # 使用欧拉角分解，只取Roll分量
+        euler_angles = Rotation.from_matrix(target_rot).as_euler('ZYX', degrees=False)
+        q7 = euler_angles[2]  # Roll
 
         return np.array([q5, q6, q7])
 
