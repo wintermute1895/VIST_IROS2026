@@ -202,7 +202,7 @@ vist_kalman:
   # 观测模型参数
   observation_model:
     # 姿态控制开关（李代数支持）
-    use_orientation_control: false  # 是否使用姿态控制（默认false，只控制位置）
+    use_orientation_control: true  # 论文框架：默认启用李代数
     # 说明：
     # - false: 只使用位置控制（3D雅可比），适合USB插入等位置主导任务
     # - true: 使用位置+姿态控制（6D雅可比 + 李代数），适合需要精确姿态的任务
@@ -242,7 +242,7 @@ vist_kalman:
     # α 计算方法选择
     # ==========================================
     # 可选值: "sigmoid" (现有实现) 或 "paper" (论文框架)
-    alpha_computation_method: "sigmoid"  # 默认使用现有的sigmoid方法
+    alpha_computation_method: "paper"  # 论文框架配置：使用指数衰减 + 反比例
 
     # ==========================================
     # 方法1: Sigmoid 实现 (现有baseline)

@@ -14,6 +14,7 @@ VIST Kalman Filter - 基于意图感知的遥操作统一状态估计框架
 import numpy as np
 import pinocchio as pin
 from scipy.linalg import inv
+from src.utils.lie_algebra import slerp_rotation
 
 
 class VISTKalmanFilter:
@@ -346,7 +347,7 @@ class VISTKalmanFilter:
 
     def detect_intent(self, target_pos, current_pos, velocity):
         """
-        检测操作意图（增强版：包含方向夹角）
+        检测操作意图（支持两种方法）
 
         意图因子 α ∈ [0, 1]:
         - α → 0: 自由移动模式（快速移动，远离目标，或切向移动）
@@ -357,7 +358,6 @@ class VISTKalmanFilter:
         - α_distance: 基于距离的因子（距离越近，值越大）
         - α_velocity: 基于速度的因子（速度越慢，值越大）
         - α_alignment: 基于方向对齐的因子（正对目标时值最大）
-        - 权重：w_d=0.3, w_v=0.3, w_θ=0.4（方向对齐是最重要的意图指标）
 
         Args:
             target_pos: 目标位置 (3D)
@@ -378,21 +378,39 @@ class VISTKalmanFilter:
             speed = np.linalg.norm(velocity)
             velocity_vec = velocity
 
-        # ==========================================
-        # 1. 距离因子：距离越近，α_distance 越大
-        # ==========================================
-        d_threshold = self.config.vist_distance_threshold
-        k = self.config.vist_sigmoid_k
-        alpha_distance = 1.0 / (1.0 + np.exp(-k * (d_threshold - distance)))
+        # 获取α计算方法
+        method = self.config.vist_alpha_computation_method
 
         # ==========================================
-        # 2. 速度因子：速度越慢，α_velocity 越大
+        # 1. 距离因子
         # ==========================================
-        v_threshold = self.config.vist_velocity_threshold
-        alpha_velocity = 1.0 / (1.0 + np.exp(-k * (v_threshold - speed)))
+        if method == "paper":
+            # 论文方法：指数衰减
+            # α_dist = exp(-||p-p_target||^2 / (2*sigma_d^2))
+            sigma_d = self.config.vist_alpha_sigma_d
+            alpha_distance = np.exp(-distance**2 / (2 * sigma_d**2))
+        else:
+            # Sigmoid方法（现有baseline）
+            d_threshold = self.config.vist_distance_threshold
+            k = self.config.vist_sigmoid_k
+            alpha_distance = 1.0 / (1.0 + np.exp(-k * (d_threshold - distance)))
 
         # ==========================================
-        # 3. 方向对齐因子：正对目标时 α_alignment 越大
+        # 2. 速度因子
+        # ==========================================
+        if method == "paper":
+            # 论文方法：反比例
+            # α_vel = 1 / (1 + beta_v * ||v||)
+            beta_v = self.config.vist_alpha_beta_v
+            alpha_velocity = 1.0 / (1.0 + beta_v * speed)
+        else:
+            # Sigmoid方法（现有baseline）
+            v_threshold = self.config.vist_velocity_threshold
+            k = self.config.vist_sigmoid_k
+            alpha_velocity = 1.0 / (1.0 + np.exp(-k * (v_threshold - speed)))
+
+        # ==========================================
+        # 3. 方向对齐因子（两种方法通用）
         # ==========================================
         direction_to_target = target_pos - current_pos
         direction_to_target_norm = np.linalg.norm(direction_to_target)
@@ -418,8 +436,13 @@ class VISTKalmanFilter:
         # ==========================================
         # 4. 综合意图因子（加权平均）
         # ==========================================
-        # 权重分配：方向对齐最重要（0.4），距离和速度次之（各0.3）
-        self.alpha = 0.3 * alpha_distance + 0.3 * alpha_velocity + 0.4 * alpha_alignment
+        # 从配置读取权重
+        weights = self.config.vist_alpha_weights
+        w_d = weights['distance']
+        w_v = weights['velocity']
+        w_a = weights['alignment']
+
+        self.alpha = w_d * alpha_distance + w_v * alpha_velocity + w_a * alpha_alignment
 
         # ==========================================
         # 5. EMA 平滑
@@ -428,6 +451,40 @@ class VISTKalmanFilter:
         self.alpha_smoothed = smoothing * self.alpha_smoothed + (1.0 - smoothing) * self.alpha
 
         return self.alpha_smoothed
+
+    def _compute_task_space_error_with_lie_algebra(self, current_pose, target_pose):
+        """
+        计算任务空间误差（使用李代数处理姿态）
+
+        这是混合方案的核心：
+        - 状态空间：关节空间 x = [q, q̇]
+        - 观测空间：任务空间 SE(3)
+        - 姿态误差：使用李代数 δθ = log_SO3(R_current^T R_target)
+
+        Args:
+            current_pose: 当前末端位姿 (pin.SE3)
+            target_pose: 目标位姿 (pin.SE3)
+
+        Returns:
+            δx: [δp, δθ] ∈ ℝ^6，其中 δθ ∈ so(3)
+        """
+        # 1. 位置误差（欧氏空间）
+        δp = target_pose.translation - current_pose.translation
+
+        # 2. 姿态误差（李代数）
+        # 计算相对旋转：R_rel = R_current^T @ R_target
+        R_current = current_pose.rotation
+        R_target = target_pose.rotation
+        R_rel = R_current.T @ R_target
+
+        # 使用 Pinocchio 的 log3 函数将 SO(3) 映射到 so(3)
+        # δθ = log_SO3(R_rel) ∈ ℝ^3 (轴角表示)
+        δθ = pin.log3(R_rel)
+
+        # 3. 组合为 6D 任务空间误差
+        δx = np.concatenate([δp, δθ])
+
+        return δx
 
     def compute_differential_ik(self, target_pos, target_quat=None):
         """
@@ -492,6 +549,69 @@ class VISTKalmanFilter:
 
         except Exception as e:
             print(f"⚠️ [VIST] compute_differential_ik 错误: {e}")
+            import traceback
+            traceback.print_exc()
+            return np.zeros(self.n_joints)
+
+    def compute_differential_ik_with_orientation(self, target_pos, target_quat):
+        """
+        计算带姿态的微分 IK 观测：Δθ = J†·δx
+
+        这是混合方案的实现：
+        - 使用李代数计算任务空间姿态误差
+        - 通过完整的 6D 雅可比矩阵转换到关节空间
+        - 保持关节空间 Kalman 滤波的优势
+
+        Args:
+            target_pos: 目标位置 (3D)
+            target_quat: 目标四元数 [x, y, z, w]
+
+        Returns:
+            delta_theta: 关节角度增量 (n_joints,)
+        """
+        try:
+            # 1. 获取当前关节角度
+            q_controlled = self.state[:self.n_joints]
+            q_full = self._get_full_q_from_controlled(q_controlled)
+
+            # 2. 正运动学：计算当前末端位姿
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+
+            current_pose = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
+
+            # 3. 构建目标位姿 (SE3)
+            target_rot = pin.Quaternion(target_quat[3], target_quat[0], target_quat[1], target_quat[2]).toRotationMatrix()
+            target_pose = pin.SE3(target_rot, target_pos)
+
+            # 4. 使用李代数计算任务空间误差
+            δx = self._compute_task_space_error_with_lie_algebra(current_pose, target_pose)
+
+            # 5. 计算完整的 6D 雅可比矩阵
+            J_full = pin.computeFrameJacobian(
+                self.ik_solver.model,
+                self.ik_solver.data,
+                q_full,
+                self.ik_solver.ee_frame_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+            )
+
+            # 6. 提取受控关节的雅可比（6行 × n_joints列）
+            J = J_full[:, self.ik_solver.controlled_indices]
+
+            # 7. 阻尼伪逆：J† = J^T @ (J @ J^T + λ^2 * I)^(-1)
+            damping = self.config.vist_differential_ik_damping
+            JJT = J @ J.T
+            damping_matrix = damping**2 * np.eye(6)  # 6D 阻尼矩阵
+            J_pinv = J.T @ inv(JJT + damping_matrix)
+
+            # 8. 微分观测：Δθ = J†·δx
+            delta_theta = J_pinv @ δx
+
+            return delta_theta
+
+        except Exception as e:
+            print(f"⚠️ [VIST] compute_differential_ik_with_orientation 错误: {e}")
             import traceback
             traceback.print_exc()
             return np.zeros(self.n_joints)
@@ -927,7 +1047,15 @@ class VISTKalmanFilter:
             success: 是否成功
         """
         # 1. 计算微分 IK 观测（虚拟引导）
-        delta_theta_virtual = self.compute_differential_ik(target_pos, target_quat)
+        # 检查是否启用姿态控制
+        use_orientation = getattr(self.config, 'vist_use_orientation_control', False)
+
+        if use_orientation and target_quat is not None:
+            # 使用带姿态的微分 IK（6D雅可比 + 李代数）
+            delta_theta_virtual = self.compute_differential_ik_with_orientation(target_pos, target_quat)
+        else:
+            # 使用标准微分 IK（只控制位置，3D雅可比）
+            delta_theta_virtual = self.compute_differential_ik(target_pos, target_quat)
 
         # 2. 计算人类指令观测
         if human_delta_theta is None:

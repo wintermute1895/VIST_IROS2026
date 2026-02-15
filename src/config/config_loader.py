@@ -250,6 +250,11 @@ class VISTConfig:
         return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('differential_ik_damping', 5e-3))
 
     @property
+    def vist_use_orientation_control(self):
+        """VIST 是否使用姿态控制（李代数支持）"""
+        return bool(self._config.get('vist_kalman', {}).get('observation_model', {}).get('use_orientation_control', False))
+
+    @property
     def vist_distance_threshold(self):
         """VIST 意图检测距离阈值"""
         return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('distance_threshold', 0.1))
@@ -268,6 +273,36 @@ class VISTConfig:
     def vist_intent_smoothing(self):
         """VIST 意图平滑系数"""
         return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('intent_smoothing', 0.9))
+
+    @property
+    def vist_alpha_computation_method(self):
+        """VIST α计算方法 ('sigmoid' 或 'paper')"""
+        return str(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('alpha_computation_method', 'sigmoid'))
+
+    @property
+    def vist_alpha_sigma_d(self):
+        """VIST α距离项标准差 (论文方法)"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('sigma_d', 0.1))
+
+    @property
+    def vist_alpha_beta_v(self):
+        """VIST α速度项系数 (论文方法)"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('beta_v', 20.0))
+
+    @property
+    def vist_alpha_weights(self):
+        """VIST α权重 (distance, velocity, alignment)"""
+        weights = self._config.get('vist_kalman', {}).get('intent_detection', {}).get('alpha_weights', {})
+        return {
+            'distance': float(weights.get('distance', 0.3)),
+            'velocity': float(weights.get('velocity', 0.3)),
+            'alignment': float(weights.get('alignment', 0.4))
+        }
+
+    @property
+    def vist_fusion_method(self):
+        """VIST 多源融合方法 ('standard' 或 'information')"""
+        return str(self._config.get('vist_kalman', {}).get('observation_model', {}).get('fusion_method', 'standard'))
 
     @property
     def vist_initial_state_variance(self):
