@@ -222,12 +222,16 @@ vist_kalman:
     #                合成观测 z_syn = R_eff(R_h^{-1}z_h + R_v^{-1}z_v)
 
     # 人类指令观测噪声 R_human（意图驱动）
-    human_base_variance: 1e-2  # 基础噪声水平
-    human_max_variance: 1e-1   # 最大噪声（自由移动时）
+    # 论文3.0版本：指数形式 R_human(α) = R_base × exp(λα)
+    human_base_variance: 1e-2  # 基础噪声水平 R_base
+    human_max_variance: 1e-1   # 最大噪声（自由移动时，仅用于兼容旧版本）
+    human_lambda: 3.0          # 指数增长系数 λ（论文3.0版本新增）
 
     # 虚拟引导观测噪声 R_virtual（微分 IK）
-    virtual_base_variance: 1e-4  # 基础噪声水平
-    virtual_min_variance: 1e-5   # 最小噪声（精密操作时）
+    # 论文3.0版本：反比例形式 R_virtual(α) = R_min/(α + ε) + γ_c × conflict
+    virtual_base_variance: 1e-4  # 基础噪声水平（仅用于兼容旧版本）
+    virtual_min_variance: 1e-3   # 最小噪声 R_min（论文3.0版本）
+    conflict_gain: 1.0           # 冲突增益 γ_c（论文3.0版本新增）
 
     # 微分 IK 参数
     differential_ik_damping: 5e-3  # 雅可比伪逆阻尼
@@ -242,7 +246,8 @@ vist_kalman:
     # α 计算方法选择
     # ==========================================
     # 可选值: "sigmoid" (现有实现) 或 "paper" (论文框架)
-    alpha_computation_method: "sigmoid"  # 默认使用现有的sigmoid方法
+    alpha_computation_method: "paper"  # 使用论文3.0版本的非线性融合方法
+    alpha_alignment_power: 2.0  # 方向对齐的指数η（论文3.0版本新增）
 
     # ==========================================
     # 方法1: Sigmoid 实现 (现有baseline)

@@ -67,7 +67,13 @@ class VISTKalmanFilter:
         self.P[self.n_joints:, self.n_joints:] *= config.vist_initial_velocity_variance
 
         # ==========================================
-        # 2. 构建状态转移矩阵 F（恒速模型）
+        # 2. 意图检测状态（必须在构建Q矩阵之前初始化）
+        # ==========================================
+        self.alpha = 0.0  # 意图因子 (0=自由移动, 1=精密操作)
+        self.alpha_smoothed = 0.0  # 平滑后的意图因子
+
+        # ==========================================
+        # 3. 构建状态转移矩阵 F（恒速模型）
         # ==========================================
         # F = [I  dt*I]
         #     [0   I  ]
@@ -75,12 +81,12 @@ class VISTKalmanFilter:
         self.F[:self.n_joints, self.n_joints:] = self.dt * np.eye(self.n_joints)
 
         # ==========================================
-        # 3. 构建过程噪声协方差 Q（各向异性）
+        # 4. 构建过程噪声协方差 Q（各向异性）
         # ==========================================
         self.Q = self._build_process_noise_covariance()
 
         # ==========================================
-        # 4. 构建观测矩阵 H
+        # 5. 构建观测矩阵 H
         # ==========================================
         # 观测向量 z = [Δθ_human, Δθ_virtual]^T (14维)
         # H = [I  0]  (只观测位置，不观测速度)
@@ -88,12 +94,6 @@ class VISTKalmanFilter:
         self.H = np.zeros((2 * self.n_joints, self.state_dim))
         self.H[:self.n_joints, :self.n_joints] = np.eye(self.n_joints)
         self.H[self.n_joints:, :self.n_joints] = np.eye(self.n_joints)
-
-        # ==========================================
-        # 5. 意图检测状态
-        # ==========================================
-        self.alpha = 0.0  # 意图因子 (0=自由移动, 1=精密操作)
-        self.alpha_smoothed = 0.0  # 平滑后的意图因子
 
         # ==========================================
         # 6. 历史数据（用于计算人类指令增量）
@@ -280,13 +280,20 @@ class VISTKalmanFilter:
         R = np.zeros((2 * self.n_joints, 2 * self.n_joints))
 
         # ==========================================
-        # 1. 人类指令噪声（意图驱动）
+        # 1. 人类指令噪声（意图驱动 - 论文3.0版本：指数形式）
         # ==========================================
-        # α → 0: 增大噪声，降低权重（强力去噪）
-        # α → 1: 减小噪声，增大权重（跟随人类指令）
-        human_variance = self.config.vist_human_base_variance + \
-                        (self.config.vist_human_max_variance - self.config.vist_human_base_variance) * \
-                        (1.0 - self.alpha_smoothed)
+        # 论文公式：R_human(α) = R_base × exp(λα) × I
+        #
+        # 物理含义：
+        # - α → 0 (自由移动): R_human ≈ R_base，保持基础滤波
+        # - α → 1 (精密操作): R_human = R_base × exp(λ)，指数级增大噪声，强力抑制人类抖动
+        #
+        # 优势：指数增长提供更陡峭的"去颤"效果
+
+        lambda_h = self.config.vist_human_lambda if hasattr(self.config, 'vist_human_lambda') else 3.0
+        R_base_human = self.config.vist_human_base_variance
+
+        human_variance = R_base_human * np.exp(lambda_h * self.alpha_smoothed)
         R[:self.n_joints, :self.n_joints] = human_variance * np.eye(self.n_joints)
 
         # 【关键修正】在仿生观测模式下，J4 的观测是高置信度的几何测量
@@ -304,13 +311,21 @@ class VISTKalmanFilter:
                 R[i, i] = 5e-3  # 适度滤波，比默认的 1e-2 小一半
 
         # ==========================================
-        # 2. 虚拟引导噪声（意图驱动 + 冲突检测）
+        # 2. 虚拟引导噪声（意图驱动 + 冲突检测 - 论文3.0版本）
         # ==========================================
-        # α → 0: 增大噪声，降低权重（自由移动）
-        # α → 1: 减小噪声，增大权重（磁吸引导）
-        virtual_variance = self.config.vist_virtual_base_variance + \
-                          (self.config.vist_virtual_base_variance - self.config.vist_virtual_min_variance) * \
-                          (1.0 - self.alpha_smoothed)
+        # 论文公式：R_virtual(α) = R_min/(α + ε) × I + γ_c × ||Δθ_h - Δθ_v||² × I
+        #
+        # 物理含义：
+        # - 吸附项 R_min/(α + ε)：α → 1 时，方差减小，虚拟引导主导权增加，产生"磁吸"效果
+        # - 冲突项 γ_c × ||Δθ_h - Δθ_v||²：当人类指令与虚拟引导冲突时，方差爆炸，允许"挣脱"
+        #
+        # 优势：反比例函数提供更强的吸附效果，同时保持数值稳定性
+
+        R_min_virtual = self.config.vist_virtual_min_variance if hasattr(self.config, 'vist_virtual_min_variance') else 1e-3
+        epsilon = 1e-6  # 避免除零
+
+        # 吸附项：反比例函数
+        virtual_variance = R_min_virtual / (self.alpha_smoothed + epsilon)
 
         # 【核心创新】冲突项：当人类指令与虚拟引导冲突时，增大虚拟引导的噪声
         if human_delta_theta is not None and virtual_delta_theta is not None:
@@ -318,15 +333,14 @@ class VISTKalmanFilter:
             conflict = np.linalg.norm(human_delta_theta - virtual_delta_theta)**2
 
             # 冲突增益 γ_c：控制冲突项的影响强度
-            # 从配置文件读取，如果不存在则使用默认值
-            conflict_gain = getattr(self.config, 'vist_conflict_gain', 0.5)
+            conflict_gain = getattr(self.config, 'vist_conflict_gain', 1.0)
 
             # 添加冲突项到虚拟引导噪声
             # 当冲突大时，R_virtual 增大，降低虚拟引导的权重
             virtual_variance += conflict_gain * conflict
 
-            # 限制最大方差，避免数值问题
-            virtual_variance = min(virtual_variance, 1e3)
+        # 限制最大方差，避免数值问题
+        virtual_variance = min(virtual_variance, 1e3)
 
         R[self.n_joints:, self.n_joints:] = virtual_variance * np.eye(self.n_joints)
 
@@ -434,15 +448,34 @@ class VISTKalmanFilter:
             alpha_alignment = 1.0
 
         # ==========================================
-        # 4. 综合意图因子（加权平均）
+        # 4. 综合意图因子（非线性融合 - 论文3.0版本）
         # ==========================================
+        # 论文公式：α_k = Sigmoid(w_d·α_dist + w_v·α_vel) × (α_dir)^η
+        #
+        # 设计理念：
+        # - 状态先验 (State Priors): Sigmoid(w_d·α_dist + w_v·α_vel)
+        #   回答"当前状态是否具备装配条件？"
+        # - 主动门控 (Active Gating): (α_dir)^η
+        #   回答"操作者是否想要装配？"，具有"一票否决权"
+
         # 从配置读取权重
         weights = self.config.vist_alpha_weights
         w_d = weights['distance']
         w_v = weights['velocity']
-        w_a = weights['alignment']
+        w_a = weights.get('alignment', 1.0)  # 兼容旧配置
 
-        self.alpha = w_d * alpha_distance + w_v * alpha_velocity + w_a * alpha_alignment
+        # 方向对齐的指数（控制门控敏感度）
+        eta = self.config.vist_alpha_alignment_power if hasattr(self.config, 'vist_alpha_alignment_power') else 2.0
+
+        # 状态先验：距离和速度的加权和，通过Sigmoid归一化
+        state_prior = w_d * alpha_distance + w_v * alpha_velocity
+        state_prior_normalized = 1.0 / (1.0 + np.exp(-5.0 * (state_prior - 0.5)))  # Sigmoid，中心在0.5
+
+        # 主动门控：方向对齐的幂次，赋予方向项"否决权"
+        active_gating = alpha_alignment ** eta
+
+        # 非线性融合
+        self.alpha = state_prior_normalized * active_gating
 
         # ==========================================
         # 5. EMA 平滑
