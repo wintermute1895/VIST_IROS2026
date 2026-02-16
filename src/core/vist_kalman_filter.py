@@ -359,120 +359,125 @@ class VISTKalmanFilter:
 
         return R
 
-    def detect_intent(self, target_pos, current_pos, velocity):
+    def detect_intent(self, target_pos, current_pos, velocity, target_quat=None, current_quat=None):
         """
-        检测操作意图（支持两种方法）
+        检测操作意图（完全按照论文公式实现）
+
+        论文公式（Eq. 2-5）：
+        - α_geo = exp(-1/2 ξ_err^T W_task ξ_err)  [几何势能]
+        - α_vel = 1/(1 + β||ξ_vel||²)             [运动能量]
+        - α_dir = 1/2(1 + cos(θ))                 [方向对齐]
+        - α_k = σ(w_g·α_geo + w_v·α_vel) · (α_dir)^η  [意图因子]
 
         意图因子 α ∈ [0, 1]:
-        - α → 0: 自由移动模式（快速移动，远离目标，或切向移动）
-        - α → 1: 精密操作模式（接近目标，速度慢，且正对目标）
-
-        公式：α = w_d·α_distance + w_v·α_velocity + w_θ·α_alignment
-        其中：
-        - α_distance: 基于距离的因子（距离越近，值越大）
-        - α_velocity: 基于速度的因子（速度越慢，值越大）
-        - α_alignment: 基于方向对齐的因子（正对目标时值最大）
+        - α → 0: 自由移动模式（远离流形，高速运动，或背离目标）
+        - α → 1: 精密操作模式（接近流形，低速运动，且正对目标）
 
         Args:
             target_pos: 目标位置 (3D)
             current_pos: 当前位置 (3D)
             velocity: 当前速度 (标量或3D向量)
+            target_quat: 目标姿态 (可选，用于完整SE(3)误差计算)
+            current_quat: 当前姿态 (可选，用于完整SE(3)误差计算)
 
         Returns:
             alpha: 意图因子
         """
-        # 计算距离
-        distance = np.linalg.norm(target_pos - current_pos)
+        # ==========================================
+        # 1. 几何势能 α_geo (Eq. 2)
+        # ==========================================
+        # α_geo = exp(-1/2 ξ_err^T W_task ξ_err)
+        #
+        # 如果提供了姿态信息，使用完整的6D任务空间误差
+        # 否则退化为3D位置误差
 
-        # 计算速度大小和速度向量
-        if np.isscalar(velocity):
-            speed = abs(velocity)
-            velocity_vec = np.zeros(3)  # 标量速度无法计算方向
+        if target_quat is not None and current_quat is not None:
+            # 完整SE(3)误差计算
+            # 构造SE(3)位姿
+            import pinocchio as pin
+            target_pose = pin.SE3(pin.Quaternion(target_quat).matrix(), target_pos)
+            current_pose = pin.SE3(pin.Quaternion(current_quat).matrix(), current_pos)
+
+            # 计算6D任务空间误差 [δp, δθ]
+            xi_err = self._compute_task_space_error_with_lie_algebra(current_pose, target_pose)
         else:
-            speed = np.linalg.norm(velocity)
+            # 退化为3D位置误差
+            xi_err = target_pos - current_pos
+
+        # 从配置读取任务流形度量张量 W_task
+        # W_task 是对角矩阵，对不同维度赋予不同权重
+        if hasattr(self.config, 'vist_w_task'):
+            W_task = np.diag(self.config.vist_w_task)
+        else:
+            # 默认：位置权重高，姿态权重低（因为我们主要关注位置精度）
+            if len(xi_err) == 6:
+                W_task = np.diag([10.0, 10.0, 10.0, 1.0, 1.0, 1.0])  # [x,y,z,rx,ry,rz]
+            else:
+                W_task = np.diag([10.0, 10.0, 10.0])  # [x,y,z]
+
+        # 计算马氏距离的平方：ξ_err^T W_task ξ_err
+        mahalanobis_sq = xi_err.T @ W_task @ xi_err
+
+        # 几何势能（高斯形式）
+        alpha_geo = np.exp(-0.5 * mahalanobis_sq)
+
+        # ==========================================
+        # 2. 运动能量 α_vel (Eq. 3)
+        # ==========================================
+        # α_vel = 1/(1 + β||ξ_vel||²)
+
+        # 计算速度向量和速度大小
+        if np.isscalar(velocity):
+            speed_sq = velocity**2
+            velocity_vec = np.zeros(3)
+        else:
+            speed_sq = np.linalg.norm(velocity)**2
             velocity_vec = velocity
 
-        # 获取α计算方法
-        method = self.config.vist_alpha_computation_method
+        # 从配置读取β参数
+        beta = self.config.vist_alpha_beta if hasattr(self.config, 'vist_alpha_beta') else 1.0
+
+        # 运动能量（反比例形式）
+        alpha_vel = 1.0 / (1.0 + beta * speed_sq)
 
         # ==========================================
-        # 1. 距离因子
+        # 3. 方向对齐 α_dir (Eq. 4)
         # ==========================================
-        if method == "paper":
-            # 论文方法：指数衰减
-            # α_dist = exp(-||p-p_target||^2 / (2*sigma_d^2))
-            sigma_d = self.config.vist_alpha_sigma_d
-            alpha_distance = np.exp(-distance**2 / (2 * sigma_d**2))
+        # α_dir = 1/2(1 + ξ_vel^T ξ_err / (||ξ_vel|| ||ξ_err||))
+        #       = 1/2(1 + cos(θ))
+
+        xi_err_norm = np.linalg.norm(xi_err[:3])  # 只使用位置分量计算方向
+        velocity_norm = np.linalg.norm(velocity_vec)
+
+        if xi_err_norm > 1e-6 and velocity_norm > 1e-6:
+            # 计算余弦相似度
+            cos_theta = np.dot(velocity_vec, xi_err[:3]) / (velocity_norm * xi_err_norm)
+            cos_theta = np.clip(cos_theta, -1.0, 1.0)
+
+            # 方向对齐因子
+            alpha_dir = 0.5 * (1.0 + cos_theta)
         else:
-            # Sigmoid方法（现有baseline）
-            d_threshold = self.config.vist_distance_threshold
-            k = self.config.vist_sigmoid_k
-            alpha_distance = 1.0 / (1.0 + np.exp(-k * (d_threshold - distance)))
+            # 速度太小或误差太小，默认为对齐
+            alpha_dir = 1.0
 
         # ==========================================
-        # 2. 速度因子
+        # 4. 意图因子融合 α_k (Eq. 5)
         # ==========================================
-        if method == "paper":
-            # 论文方法：反比例
-            # α_vel = 1 / (1 + beta_v * ||v||)
-            beta_v = self.config.vist_alpha_beta_v
-            alpha_velocity = 1.0 / (1.0 + beta_v * speed)
-        else:
-            # Sigmoid方法（现有baseline）
-            v_threshold = self.config.vist_velocity_threshold
-            k = self.config.vist_sigmoid_k
-            alpha_velocity = 1.0 / (1.0 + np.exp(-k * (v_threshold - speed)))
-
-        # ==========================================
-        # 3. 方向对齐因子（两种方法通用）
-        # ==========================================
-        direction_to_target = target_pos - current_pos
-        direction_to_target_norm = np.linalg.norm(direction_to_target)
-
-        if direction_to_target_norm > 1e-6 and speed > 1e-6:
-            # 归一化方向向量
-            direction_to_target = direction_to_target / direction_to_target_norm
-            velocity_normalized = velocity_vec / speed
-
-            # 计算夹角的余弦值
-            cos_angle = np.dot(direction_to_target, velocity_normalized)
-            cos_angle = np.clip(cos_angle, -1.0, 1.0)
-
-            # 对齐因子：
-            # cos_angle =  1 (正对目标) → alpha_alignment = 1.0
-            # cos_angle =  0 (切向移动) → alpha_alignment = 0.5
-            # cos_angle = -1 (背离目标) → alpha_alignment = 0.0
-            alpha_alignment = (cos_angle + 1.0) / 2.0
-        else:
-            # 速度太小或距离太近，无法计算方向，默认为对齐
-            alpha_alignment = 1.0
-
-        # ==========================================
-        # 4. 综合意图因子（非线性融合 - 论文3.0版本）
-        # ==========================================
-        # 论文公式：α_k = Sigmoid(w_d·α_dist + w_v·α_vel) × (α_dir)^η
-        #
-        # 设计理念：
-        # - 状态先验 (State Priors): Sigmoid(w_d·α_dist + w_v·α_vel)
-        #   回答"当前状态是否具备装配条件？"
-        # - 主动门控 (Active Gating): (α_dir)^η
-        #   回答"操作者是否想要装配？"，具有"一票否决权"
+        # α_k = σ(w_g·α_geo + w_v·α_vel) · (α_dir)^η
 
         # 从配置读取权重
-        weights = self.config.vist_alpha_weights
-        w_d = weights['distance']
-        w_v = weights['velocity']
-        w_a = weights.get('alignment', 1.0)  # 兼容旧配置
-
-        # 方向对齐的指数（控制门控敏感度）
+        w_g = self.config.vist_w_geo if hasattr(self.config, 'vist_w_geo') else 0.5
+        w_v = self.config.vist_w_vel if hasattr(self.config, 'vist_w_vel') else 0.5
         eta = self.config.vist_alpha_alignment_power if hasattr(self.config, 'vist_alpha_alignment_power') else 2.0
 
-        # 状态先验：距离和速度的加权和，通过Sigmoid归一化
-        state_prior = w_d * alpha_distance + w_v * alpha_velocity
-        state_prior_normalized = 1.0 / (1.0 + np.exp(-5.0 * (state_prior - 0.5)))  # Sigmoid，中心在0.5
+        # 状态先验：几何势能和运动能量的加权和
+        state_prior = w_g * alpha_geo + w_v * alpha_vel
 
-        # 主动门控：方向对齐的幂次，赋予方向项"否决权"
-        active_gating = alpha_alignment ** eta
+        # Sigmoid归一化
+        state_prior_normalized = 1.0 / (1.0 + np.exp(-5.0 * (state_prior - 0.5)))
+
+        # 主动门控：方向对齐的幂次
+        active_gating = alpha_dir ** eta
 
         # 非线性融合
         self.alpha = state_prior_normalized * active_gating

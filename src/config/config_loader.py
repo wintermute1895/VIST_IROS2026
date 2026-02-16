@@ -300,6 +300,32 @@ class VISTConfig:
         }
 
     @property
+    def vist_w_task(self):
+        """VIST 任务流形度量张量 W_task (论文英文草稿v1.0)"""
+        w_task = self._config.get('vist_kalman', {}).get('intent_detection', {}).get('w_task', [10.0, 10.0, 10.0, 1.0, 1.0, 1.0])
+        return [float(x) for x in w_task]
+
+    @property
+    def vist_alpha_beta(self):
+        """VIST 运动能量参数 β (论文英文草稿v1.0 Eq. 3)"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('alpha_beta', 1.0))
+
+    @property
+    def vist_w_geo(self):
+        """VIST 几何势能权重 w_g (论文英文草稿v1.0 Eq. 5)"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('w_geo', 0.5))
+
+    @property
+    def vist_w_vel(self):
+        """VIST 运动能量权重 w_v (论文英文草稿v1.0 Eq. 5)"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('w_vel', 0.5))
+
+    @property
+    def vist_alpha_alignment_power(self):
+        """VIST 方向对齐指数 η (论文英文草稿v1.0 Eq. 5)"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('alpha_alignment_power', 2.0))
+
+    @property
     def vist_fusion_method(self):
         """VIST 多源融合方法 ('standard' 或 'information')"""
         return str(self._config.get('vist_kalman', {}).get('observation_model', {}).get('fusion_method', 'standard'))

@@ -243,41 +243,43 @@ vist_kalman:
     # α → 1: 精密操作模式（磁吸引导）
 
     # ==========================================
-    # α 计算方法选择
+    # 论文英文草稿v1.0完整实现 (Eq. 2-5)
     # ==========================================
-    # 可选值: "sigmoid" (现有实现) 或 "paper" (论文框架)
-    alpha_computation_method: "paper"  # 使用论文3.0版本的非线性融合方法
-    alpha_alignment_power: 2.0  # 方向对齐的指数η（论文3.0版本新增）
+    # α_geo = exp(-1/2 ξ_err^T W_task ξ_err)  [几何势能]
+    # α_vel = 1/(1 + β||ξ_vel||²)             [运动能量]
+    # α_dir = 1/2(1 + cos(θ))                 [方向对齐]
+    # α_k = σ(w_g·α_geo + w_v·α_vel) · (α_dir)^η  [意图因子]
+
+    # 任务流形度量张量 W_task (对角矩阵)
+    # 对不同维度赋予不同权重 [x, y, z, rx, ry, rz]
+    w_task: [10.0, 10.0, 10.0, 1.0, 1.0, 1.0]  # 位置权重高，姿态权重低
+
+    # 运动能量参数 β (Eq. 3)
+    # α_vel = 1/(1 + β||ξ_vel||²)
+    alpha_beta: 1.0  # 速度敏感度系数
+
+    # 意图因子融合权重 (Eq. 5)
+    # α_k = σ(w_g·α_geo + w_v·α_vel) · (α_dir)^η
+    w_geo: 0.5  # 几何势能权重
+    w_vel: 0.5  # 运动能量权重
+    alpha_alignment_power: 2.0  # 方向对齐的指数η
+
+    # 意图平滑
+    intent_smoothing: 0.9  # EMA 平滑系数（0-1）
 
     # ==========================================
-    # 方法1: Sigmoid 实现 (现有baseline)
+    # 旧版参数（保留用于向后兼容）
     # ==========================================
-    distance_threshold: 0.1  # 精密模式触发距离（米）
-    velocity_threshold: 0.05  # 速度阈值（m/s）
-    sigmoid_k: 10.0  # 陡峭度（越大越陡）
-
-    # ==========================================
-    # 方法2: 论文框架实现 (指数衰减 + 反比例)
-    # ==========================================
-    # 距离项参数 (指数衰减)
-    # α_dist = exp(-||p-p_target||^2 / (2*sigma_d^2))
-    sigma_d: 0.1  # 距离敏感度标准差（米）
-
-    # 速度项参数 (反比例)
-    # α_vel = 1 / (1 + beta_v * ||v||)
-    beta_v: 20.0  # 速度系数（越大对速度越敏感）
-
-    # 方向项参数 (余弦相似度，两种方法通用)
-    # α_dir = (v_cmd · v_guide / |v_cmd| + 1) / 2
-
-    # α 权重 (两种方法通用)
+    alpha_computation_method: "paper"  # 已废弃，现在总是使用论文方法
+    distance_threshold: 0.1
+    velocity_threshold: 0.05
+    sigmoid_k: 10.0
+    sigma_d: 0.1
+    beta_v: 20.0
     alpha_weights:
       distance: 0.3
       velocity: 0.3
       alignment: 0.4
-
-    # 意图平滑
-    intent_smoothing: 0.9  # EMA 平滑系数（0-1）
 
   # 初始化参数
   initialization:
