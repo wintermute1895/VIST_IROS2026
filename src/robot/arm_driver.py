@@ -2,6 +2,7 @@ import time
 import numpy as np
 import sys
 import os
+import threading
 from abc import ABC, abstractmethod
 
 # ==========================================
@@ -182,6 +183,16 @@ class RealArmDriver(BaseArmDriver):
 
         # 实例化 SDK 高级接口对象（IP 在构造函数中传入）
         self.robot = LbotRobot(tcp_host=ip)
+
+        # TCP 健康监控（工业标准方案）
+        self._connection_healthy = False
+        self._last_successful_read = 0
+        self._heartbeat_thread = None
+        self._heartbeat_running = False
+        self._connection_failures = 0
+        self._max_failures_before_reconnect = 5
+        self._heartbeat_interval = 1.0  # 1秒检查一次
+
         print(f"🦾 [RealDriver] Initialized for {arm_side.upper()} arm")
 
     def connect(self, use_safety_checks=True):
@@ -229,12 +240,102 @@ class RealArmDriver(BaseArmDriver):
             joint_pos = self.robot.get_joint_positions(self.arm_enum)
             if joint_pos is not None and len(joint_pos) >= self.dof:
                 print(f"✅ Robot ready! Joint positions: {joint_pos[:self.dof]}")
+                # 启动心跳监控
+                self._start_heartbeat_monitor()
                 return True
             print(f"   尝试 {attempt+1}/5: 等待状态数据...")
             time.sleep(0.5)
 
         print("⚠️ Warning: Robot enabled but state data not available yet")
+        # 即使数据未就绪，也启动心跳监控
+        self._start_heartbeat_monitor()
         return True  # 仍然返回成功，可能数据会稍后到达
+
+    def _start_heartbeat_monitor(self):
+        """启动心跳监控线程（工业标准方案）"""
+        if self._heartbeat_running:
+            return
+
+        self._heartbeat_running = True
+        self._connection_healthy = True
+        self._last_successful_read = time.time()
+
+        self._heartbeat_thread = threading.Thread(
+            target=self._heartbeat_loop,
+            name="RobotHeartbeat",
+            daemon=True
+        )
+        self._heartbeat_thread.start()
+        print("✅ [RealDriver] TCP 健康监控已启动")
+
+    def _heartbeat_loop(self):
+        """心跳监控循环"""
+        while self._heartbeat_running:
+            try:
+                # 检查连接健康状态
+                current_time = time.time()
+                time_since_last_read = current_time - self._last_successful_read
+
+                # 如果超过3秒没有成功读取，认为连接不健康
+                if time_since_last_read > 3.0:
+                    if self._connection_healthy:
+                        print(f"⚠️ [RealDriver] TCP 连接不健康: {time_since_last_read:.1f}秒无数据")
+                        self._connection_healthy = False
+                        self._connection_failures += 1
+
+                    # 如果失败次数过多，尝试重连
+                    if self._connection_failures >= self._max_failures_before_reconnect:
+                        print(f"🔄 [RealDriver] 尝试自动重连 (失败次数: {self._connection_failures})")
+                        self._attempt_reconnect()
+
+                # 定期尝试读取状态（心跳检测）
+                joint_pos = self.robot.get_joint_positions(self.arm_enum)
+                if joint_pos is not None and len(joint_pos) >= self.dof:
+                    if not self._connection_healthy:
+                        print("✅ [RealDriver] TCP 连接已恢复")
+                        self._connection_healthy = True
+                        self._connection_failures = 0
+                    self._last_successful_read = current_time
+
+            except Exception as e:
+                print(f"⚠️ [RealDriver] 心跳检测错误: {e}")
+
+            time.sleep(self._heartbeat_interval)
+
+    def _attempt_reconnect(self):
+        """尝试重新连接"""
+        try:
+            print("🔄 [RealDriver] 断开旧连接...")
+            self.robot.disconnect()
+            time.sleep(1.0)
+
+            print(f"🔄 [RealDriver] 重新连接到 {self.ip}...")
+            success = self.robot.connect(timeout=10.0)
+
+            if success:
+                print("✅ [RealDriver] 重连成功")
+                self._connection_healthy = True
+                self._connection_failures = 0
+                self._last_successful_read = time.time()
+            else:
+                print("❌ [RealDriver] 重连失败")
+                self._connection_failures += 1
+
+        except Exception as e:
+            print(f"❌ [RealDriver] 重连异常: {e}")
+            self._connection_failures += 1
+
+    def is_connection_healthy(self) -> bool:
+        """检查连接是否健康"""
+        return self._connection_healthy
+
+    def get_connection_statistics(self):
+        """获取连接统计信息"""
+        return {
+            'healthy': self._connection_healthy,
+            'failures': self._connection_failures,
+            'time_since_last_read': time.time() - self._last_successful_read
+        }
 
     def get_state(self):
         """
@@ -267,6 +368,9 @@ class RealArmDriver(BaseArmDriver):
         if len(joint_positions) < self.dof:
             print(f"⚠️ [RealDriver] Incomplete joint data: got {len(joint_positions)}, expected {self.dof}")
             return time.time(), np.zeros(self.dof), np.zeros(self.dof)
+
+        # 更新最后成功读取时间（用于心跳监控）
+        self._last_successful_read = time.time()
 
         # SDK 返回的已经是弧度，直接使用
         q_sdk = np.array(joint_positions[:self.dof])
@@ -416,6 +520,13 @@ class RealArmDriver(BaseArmDriver):
         """
         try:
             print("🦾 [RealDriver] Disconnecting from robot...")
+
+            # 停止心跳监控
+            if self._heartbeat_running:
+                print("   停止心跳监控...")
+                self._heartbeat_running = False
+                if self._heartbeat_thread is not None:
+                    self._heartbeat_thread.join(timeout=2.0)
 
             # 重要：先发送停止指令（当前位置），避免机器人继续运动
             try:

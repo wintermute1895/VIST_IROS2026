@@ -3,6 +3,7 @@
 封装硬件交互逻辑（UDP 接收 + 真机驱动）
 """
 
+import numpy as np
 from src.robot.arm_driver import RealArmDriver
 from src.communication.udp_receiver import UDPReceiver
 
@@ -112,7 +113,3 @@ class RobotInterface:
         self.udp_receiver.close()
         self.driver.disconnect()
         print("\n✅ 已断开连接")
-
-
-# 导入 numpy（用于类型提示）
-import numpy as np

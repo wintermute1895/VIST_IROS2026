@@ -143,11 +143,13 @@ def SE3_distance(M1: pin.SE3, M2: pin.SE3) -> Tuple[float, float]:
         >>> t_dist, r_dist = SE3_distance(M1, M2)  # (1.0, 0.0)
     """
     M_rel = M1.actInv(M2)
-    v = pin.log(M_rel)
 
-    # 分离平移和旋转
-    translation_dist = np.linalg.norm(v.linear)
-    rotation_dist = np.linalg.norm(v.angular)
+    # 平移距离：直接使用平移向量的范数（更准确）
+    translation_dist = np.linalg.norm(M_rel.translation)
+
+    # 旋转距离：使用李代数范数（测地距离）
+    omega = pin.log3(M_rel.rotation)
+    rotation_dist = np.linalg.norm(omega)
 
     return translation_dist, rotation_dist
 

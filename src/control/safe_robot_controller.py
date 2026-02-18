@@ -50,6 +50,11 @@ class SafeRobotController:
         self.q_dot_previous = np.zeros(7)
         self.last_update_time = time.time()
 
+        # 心跳检测（Heartbeat）
+        self.last_command_time = time.time()
+        self.heartbeat_timeout = 0.1  # 100ms 超时
+        self.heartbeat_violations = 0
+
         # 安全状态
         self.emergency_stop = False
         self.velocity_limited_count = 0
@@ -66,6 +71,26 @@ class SafeRobotController:
         print(f"   最大速度: {self.max_velocity} rad/s")
         print(f"   最大加速度: {self.max_acceleration} rad/s²")
         print(f"   控制周期: {self.dt} s")
+        print(f"   心跳超时: {self.heartbeat_timeout} s")
+
+    def check_heartbeat(self):
+        """
+        检查心跳（Heartbeat）
+
+        如果超过 heartbeat_timeout 没有收到命令，返回 True（超时）
+
+        Returns:
+            timeout: 是否超时
+        """
+        current_time = time.time()
+        elapsed = current_time - self.last_command_time
+
+        if elapsed > self.heartbeat_timeout:
+            self.heartbeat_violations += 1
+            print(f"⚠️ [SafeController] 心跳超时！已 {elapsed:.3f}s 未收到命令")
+            return True
+
+        return False
 
     def _init_logging(self):
         """初始化数据记录"""
@@ -192,10 +217,25 @@ class SafeRobotController:
             q_safe: 安全的关节角度 (7,)
             safety_status: 安全状态字典
         """
+        # 更新心跳时间
+        self.last_command_time = time.time()
+
+        # 检查心跳超时
+        if self.check_heartbeat():
+            # 心跳超时，返回零速度命令（停止）
+            return self.q_current, {
+                'emergency_stop': False,
+                'heartbeat_timeout': True,
+                'velocity_limited': False,
+                'acceleration_limited': False,
+                'position_limited': False
+            }
+
         # 检查紧急停止
         if self.emergency_stop:
             return self.q_current, {
                 'emergency_stop': True,
+                'heartbeat_timeout': False,
                 'velocity_limited': False,
                 'acceleration_limited': False,
                 'position_limited': False
@@ -222,6 +262,7 @@ class SafeRobotController:
         # 安全状态
         safety_status = {
             'emergency_stop': False,
+            'heartbeat_timeout': False,
             'velocity_limited': velocity_limited,
             'acceleration_limited': acceleration_limited,
             'position_limited': position_limited
@@ -255,6 +296,7 @@ class SafeRobotController:
             'velocity_limited_count': self.velocity_limited_count,
             'acceleration_limited_count': self.acceleration_limited_count,
             'position_limited_count': self.position_limited_count,
+            'heartbeat_violations': self.heartbeat_violations,
             'emergency_stop': self.emergency_stop
         }
 
@@ -264,10 +306,12 @@ class SafeRobotController:
         self.q_dot_current = np.zeros(7)
         self.q_previous = np.zeros(7)
         self.q_dot_previous = np.zeros(7)
+        self.last_command_time = time.time()
         self.emergency_stop = False
         self.velocity_limited_count = 0
         self.acceleration_limited_count = 0
         self.position_limited_count = 0
+        self.heartbeat_violations = 0
         print("✅ [SafeController] 控制器已重置")
 
 
