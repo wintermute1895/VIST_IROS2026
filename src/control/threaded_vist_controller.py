@@ -254,6 +254,14 @@ class ThreadedVISTController:
                             }
                             self.viz_queue.put(viz_data)
                         else:
+                            # IK 失败降级策略：发送停止指令（保持当前位置）
+                            try:
+                                _, q_current, _ = self.robot_interface.get_state()
+                                self.robot_interface.send_command(q_current)
+                                logger.warning("VIST 求解失败，发送停止指令（保持当前位置）")
+                            except Exception as e:
+                                logger.error(f"发送停止指令失败: {e}")
+
                             with self._stats_lock:
                                 self._stats['control_failures'] += 1
 

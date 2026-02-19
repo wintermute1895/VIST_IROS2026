@@ -46,6 +46,9 @@ class GeometricArmSolver:
         self.controlled_joints = controlled_joints
         self.ee_frame_id = ee_frame_id
 
+        # 调试信息
+        self._last_elbow_debug = {}
+
         # 使用 DEFAULT_RIGHT_ARM_JOINTS 的顺序构建映射
         # 这个顺序是固定的，不依赖于 Pinocchio 的内部索引
         DEFAULT_JOINT_ORDER = [
@@ -92,6 +95,12 @@ class GeometricArmSolver:
         else:
             # 默认使用全自由度模式
             self.wrist_control_mode = 'full_dof'
+
+        # 读取动态腕部解锁配置
+        if config is not None and hasattr(config, 'vist_geometric_solver_enable_dynamic_wrist_unlock'):
+            self.enable_dynamic_wrist_unlock = config.vist_geometric_solver_enable_dynamic_wrist_unlock
+        else:
+            self.enable_dynamic_wrist_unlock = False
 
         print(f"   臂部关节索引: {self.arm_joint_indices}")
         print(f"   腕部关节索引: {self.wrist_joint_indices}")
@@ -165,12 +174,13 @@ class GeometricArmSolver:
         # ==========================================
         # 2. 计算肘部角度（q4）
         # ==========================================
-        # 肘部角度 = 两向量夹角
+        # 电机角度 = 两向量夹角（不需要补角）
         #
         # 关节零位定义：
-        # - 机器人 URDF: q4 = 0° 表示手臂完全伸直（两向量平行）
-        # - 机器人 URDF: q4 = 180° 表示手臂完全折叠（两向量反向）
-        # - 因此 q4 = arccos(cos_angle)，直接使用夹角
+        # - 机器人电机: q4 = 0° 表示手臂垂直向下（伸直），向量夹角 = 0°
+        # - 机器人电机: q4 增大表示手臂弯曲，向量夹角增大
+        # - 人体肘部角度 = 180° - 向量夹角（补角关系）
+        # - 电机角度 = 向量夹角 = arccos(cos_angle)
         r_elbow_wrist = np.linalg.norm(v_elbow_wrist)
         if r_elbow_wrist < 1e-6:
             raise ValueError("肘部和腕部位置重合，无法求解")
@@ -179,12 +189,22 @@ class GeometricArmSolver:
         cos_angle = np.dot(v_shoulder_elbow, v_elbow_wrist) / (r * r_elbow_wrist)
         cos_angle = np.clip(cos_angle, -1.0, 1.0)  # 防止数值误差
 
-        # 肘部角度 = 夹角（不需要取补角）
+        # 电机角度 = 向量夹角（直接使用，不取补角）
         q4 = np.arccos(cos_angle)
+
+        # 保存调试信息
+        self._last_elbow_debug = {
+            'vector_angle': np.degrees(q4),
+            'elbow_angle_human': 180.0 - np.degrees(q4),
+            'elbow_angle_motor': np.degrees(q4),
+            'q4_raw': q4,
+            'v_shoulder_elbow': v_shoulder_elbow,
+            'v_elbow_wrist': v_elbow_wrist,
+        }
 
         return np.array([q1, q2, q3, q4])
 
-    def solve_wrist_orientation(self, q_arm, target_orientation):
+    def solve_wrist_orientation(self, q_arm, target_orientation, alpha=0.0):
         """
         Stage 2: 腕部姿态求解（支持多种控制模式）
 
@@ -195,9 +215,17 @@ class GeometricArmSolver:
         2. constrained_horizontal: 约束水平模式（J5锁定，J6保持水平）
         3. wrist_locked: 腕部锁定模式（J5-J7全部锁定为0）
 
+        动态腕部解锁（平滑过渡）：
+        - 当enable_dynamic_wrist_unlock=True时
+        - 根据α值在constrained和full_dof之间平滑插值
+        - α < 0.5: 完全约束（constrained_horizontal）
+        - 0.5 < α < 0.9: 平滑过渡
+        - α > 0.9: 完全自由（full_dof）
+
         Args:
             q_arm: 臂部关节角度 [q1, q2, q3, q4] (numpy array)
             target_orientation: 目标末端姿态（旋转矩阵或四元数）
+            alpha: 意图因子（0-1），用于动态腕部解锁
 
         Returns:
             q_wrist: 腕部关节角度 [q5, q6, q7] (numpy array)
@@ -206,12 +234,40 @@ class GeometricArmSolver:
         if self.wrist_control_mode == 'wrist_locked':
             return np.zeros(3)
 
-        # 模式2: 约束水平模式
+        # 模式2: 约束水平模式（可能带动态解锁）
         if self.wrist_control_mode == 'constrained_horizontal':
-            return self._solve_wrist_constrained_horizontal(q_arm, target_orientation)
+            # 计算约束模式的解
+            q_wrist_constrained = self._solve_wrist_constrained_horizontal(q_arm, target_orientation)
+
+            # 如果启用动态解锁，根据α进行平滑过渡
+            if self.enable_dynamic_wrist_unlock and alpha > 0.5:
+                # 计算全自由度模式的解
+                q_wrist_free = self._solve_wrist_full_dof(q_arm, target_orientation)
+
+                # 计算混合权重（平滑过渡）
+                # α = 0.5 → weight = 0（完全约束）
+                # α = 0.9 → weight = 1（完全自由）
+                alpha_min = 0.5
+                alpha_max = 0.9
+                weight = np.clip((alpha - alpha_min) / (alpha_max - alpha_min), 0.0, 1.0)
+
+                # 平滑插值
+                q_wrist = (1 - weight) * q_wrist_constrained + weight * q_wrist_free
+                return q_wrist
+            else:
+                return q_wrist_constrained
 
         # 模式3: 全自由度模式（默认）
         return self._solve_wrist_full_dof(q_arm, target_orientation)
+
+    def get_elbow_debug_info(self):
+        """
+        获取最近一次肘部角度计算的调试信息
+
+        Returns:
+            dict: 包含向量夹角、人体肘部角度、电机角度等信息
+        """
+        return self._last_elbow_debug.copy() if self._last_elbow_debug else {}
 
     def _solve_wrist_full_dof(self, q_arm, target_orientation):
         """
@@ -331,7 +387,7 @@ class GeometricArmSolver:
 
         return np.array([q5, q6, q7])
 
-    def solve(self, shoulder_pos, elbow_pos, wrist_pos, target_orientation=None):
+    def solve(self, shoulder_pos, elbow_pos, wrist_pos, target_orientation=None, alpha=0.0):
         """
         完整求解：臂部配置 + 腕部姿态
 
@@ -340,6 +396,7 @@ class GeometricArmSolver:
             elbow_pos: 肘部位置 [x, y, z]
             wrist_pos: 腕部位置 [x, y, z]
             target_orientation: 目标末端姿态（可选，如果为 None 则只求解臂部配置）
+            alpha: 意图因子（0-1），用于动态腕部解锁
 
         Returns:
             q_solution: 完整的关节角度 [q1, q2, q3, q4, q5, q6, q7]
@@ -349,7 +406,7 @@ class GeometricArmSolver:
 
         # Stage 2: 腕部姿态求解
         if target_orientation is not None:
-            q_wrist = self.solve_wrist_orientation(q_arm, target_orientation)
+            q_wrist = self.solve_wrist_orientation(q_arm, target_orientation, alpha)
         else:
             # 如果没有指定目标姿态，腕部保持中立位置
             q_wrist = np.zeros(3)

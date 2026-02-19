@@ -97,7 +97,18 @@ class FullFlowSimulator:
             )
             print("✅ VIST Kalman Filter 初始化完成")
             print(f"   意图检测: 启用")
-            print(f"   微分 IK: 启用")
+
+            # 检查参数覆盖模式
+            if hasattr(self.config, 'vist_simulation_use_parameter_override') and \
+               self.config.vist_simulation_use_parameter_override:
+                print(f"   🎛️  参数覆盖模式: 启用（仿真专用）")
+                print(f"      - α将从参数覆盖管理器读取，而不是从视觉数据计算")
+                print(f"      - 可通过debug_interface.py实时调整参数")
+            else:
+                print(f"   参数覆盖模式: 禁用（从视觉数据计算α）")
+
+            diff_ik_status = "禁用" if self.config.vist_geometric_solver_disable_differential_ik else "启用"
+            print(f"   微分 IK: {diff_ik_status}")
             print(f"   肘部约束: 启用")
             print(f"   几何求解器: {'启用' if self.config.vist_geometric_solver_enabled else '禁用'}")
             print(f"   仿生观测: {'启用' if self.config.vist_biomimetic_enabled else '禁用'}")
@@ -143,7 +154,19 @@ class FullFlowSimulator:
         # 6. 初始化可视化场景
         self._setup_scene()
 
-        # 6.5 加载机器人模型（在场景设置之后）
+        # 6.5 初始化角度显示窗口
+        print("\n📊 初始化角度显示窗口...")
+        try:
+            from src.utils.angle_display_window import get_angle_window
+            self.angle_window = get_angle_window()
+            self.angle_window.start()
+            print("✅ 角度显示窗口已启动")
+        except Exception as e:
+            print(f"⚠️ 角度显示窗口启动失败: {e}")
+            print("   将继续运行但不显示角度信息")
+            self.angle_window = None
+
+        # 6.6 加载机器人模型（在场景设置之后）
         if self.robot_viz is not None:
             print("\n🤖 加载机械臂 3D 模型...")
             try:
@@ -351,6 +374,10 @@ class FullFlowSimulator:
                     target_pos, target_quat, debug_info = result
                     target_elbow = debug_info['elbow_pos']
 
+                    # 更新角度显示窗口
+                    if hasattr(self, 'angle_window') and self.angle_window is not None:
+                        self.angle_window.update(debug_info)
+
                     # 工作空间检查
                     shoulder_pos = self.config.robot_shoulder_position
                     dist_to_shoulder = np.linalg.norm(target_pos - shoulder_pos)
@@ -406,8 +433,16 @@ class FullFlowSimulator:
                                 if i < len(q_solution) and ctrl_idx < len(q_full):
                                     q_full[ctrl_idx] = q_solution[i]
                             self.q_current = q_full
+
+                            # 添加实际电机角度到debug_info（第4个关节，索引3）
+                            if len(q_solution) > 3:
+                                debug_info['actual_motor_angle'] = np.degrees(q_solution[3])
                         else:
                             self.q_current = q_solution.copy()
+
+                        # 更新角度显示窗口（包含实际角度）
+                        if hasattr(self, 'angle_window') and self.angle_window is not None:
+                            self.angle_window.update(debug_info)
 
                     # Step 3: 更新可视化
                     self.update_visualization(
@@ -426,6 +461,13 @@ class FullFlowSimulator:
                         # VIST 特有信息
                         if self.config.ik_strategy == "vist" and hasattr(self.solver, 'alpha_smoothed'):
                             status_msg += f" | 意图因子: {self.solver.alpha_smoothed:.2f}"
+
+                            # 显示参数覆盖状态
+                            if hasattr(self.config, 'vist_simulation_use_parameter_override') and \
+                               self.config.vist_simulation_use_parameter_override:
+                                override = self.solver.override_manager.get_override()
+                                if override.alpha_override is not None:
+                                    status_msg += f" [覆盖: {override.alpha_override:.2f}]"
 
                         status_msg += f" | 目标位置: [{target_pos[0]:.3f}, {target_pos[1]:.3f}, {target_pos[2]:.3f}]"
                         print(status_msg)
@@ -446,6 +488,11 @@ class FullFlowSimulator:
 
         finally:
             self.sock.close()
+
+            # 关闭角度显示窗口
+            if hasattr(self, 'angle_window') and self.angle_window is not None:
+                self.angle_window.stop()
+
             print(f"\n📊 统计:")
             print(f"   总帧数: {frame_count}")
             print(f"   IK成功次数: {ik_success_count}")

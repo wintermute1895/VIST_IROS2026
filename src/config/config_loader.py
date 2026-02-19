@@ -177,6 +177,11 @@ class VISTConfig:
         return self._config.get('vist_kalman', {}).get('enabled', False)
 
     @property
+    def vist_simulation_use_parameter_override(self):
+        """仿真参数覆盖模式是否启用（仿真专用）"""
+        return self._config.get('vist_kalman', {}).get('simulation_use_parameter_override', False)
+
+    @property
     def vist_n_joints(self):
         """VIST 关节数量"""
         return self._config.get('vist_kalman', {}).get('n_joints', 7)
@@ -352,6 +357,16 @@ class VISTConfig:
     def vist_geometric_solver_trust_weight(self):
         """几何解析解的信任权重"""
         return float(self._config.get('vist_kalman', {}).get('geometric_solver', {}).get('trust_weight', 2.0))
+
+    @property
+    def vist_geometric_solver_disable_differential_ik(self):
+        """是否禁用微分IK（只使用几何求解器）"""
+        return self._config.get('vist_kalman', {}).get('geometric_solver', {}).get('disable_differential_ik', False)
+
+    @property
+    def vist_geometric_solver_enable_dynamic_wrist_unlock(self):
+        """是否启用动态腕部解锁（在精密插入阶段解锁腕部）"""
+        return self._config.get('vist_kalman', {}).get('geometric_solver', {}).get('enable_dynamic_wrist_unlock', False)
 
     @property
     def vist_wrist_control_mode(self):

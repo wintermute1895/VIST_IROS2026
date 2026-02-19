@@ -15,6 +15,7 @@ import numpy as np
 import pinocchio as pin
 from scipy.linalg import inv
 from src.utils.lie_algebra import slerp_rotation
+from src.utils.parameter_override import ParameterOverrideManager
 
 
 class VISTKalmanFilter:
@@ -48,6 +49,9 @@ class VISTKalmanFilter:
         self.ik_solver = ik_solver
         self.config = config
         self.geometric_solver = geometric_solver
+
+        # 参数覆盖管理器
+        self.override_manager = ParameterOverrideManager()
 
         # 状态空间维度
         self.n_joints = config.vist_n_joints
@@ -88,7 +92,8 @@ class VISTKalmanFilter:
         # ==========================================
         # 5. 构建观测矩阵 H
         # ==========================================
-        # 观测向量 z = [Δθ_human, Δθ_virtual]^T (14维)
+        # 观测向量 z = [q_human, q_virtual]^T (14维)
+        # 注意：观测是目标关节角度（绝对值），不是增量
         # H = [I  0]  (只观测位置，不观测速度)
         #     [I  0]
         self.H = np.zeros((2 * self.n_joints, self.state_dim))
@@ -112,26 +117,142 @@ class VISTKalmanFilter:
 
     def _build_process_noise_covariance(self):
         """
-        构建各向异性过程噪声协方差矩阵 Q（含Z轴锁定机制）
+        构建过程噪声协方差矩阵 Q（含任务空间流形约束）
 
-        基础功能：
-        - J4 (Elbow Pitch, 索引3) 是任务关节，不应该被阻尼
-        - J3 (Shoulder Yaw/Swivel, 索引2) 是冗余自由度，需要轻微阻尼
-        - J4 应该像伺服电机一样灵活响应人体动作
+        【核心创新】任务空间流形约束通过雅可比投影：
+        在精密插入阶段（α > 0.8），通过任务空间约束自动协调各关节配合。
 
-        【核心创新】Z轴锁定机制：
-        在精密插入阶段（α > 0.8），通过动态调整Q矩阵冻结非插入方向的运动。
+        理论框架：
+        1. 在任务空间定义约束流形 M ⊂ SE(3)
+           - 垂直插入：只允许Z方向运动，其他5-DOF固定
+           - Σ_task = diag([ε, ε, σ_z², ε, ε, ε])
 
-        原理：
-        - 计算每个关节对末端Z方向的贡献（通过雅可比矩阵）
-        - 对于主要影响X-Y平面的关节，大幅减小其过程噪声
-        - 这会"冻结"这些关节，只允许Z方向的运动
+        2. 通过雅可比伪逆投影到关节空间
+           - Q_cons = J† Σ_task (J†)^T
+           - 自动计算各关节需要的协方差配合
 
-        公式：Q_i(α) = Q_base · freeze_factor(α, J_i·ẑ)
-        其中 freeze_factor 在 α→1 且关节i不影响Z方向时趋近于0
+        3. 与意图因子α融合
+           - Q(α) = (1-α)Q_free + αQ_cons
+           - 平滑过渡，无硬切换
+
+        优势：
+        - 腕部关节不会被锁死，而是自动配合大臂运动
+        - 保持末端姿态不变（水平插入）
+        - 纯数学解决方案，无工程补丁
 
         Returns:
             Q: 过程噪声协方差矩阵 (state_dim x state_dim)
+        """
+        Q = np.zeros((self.state_dim, self.state_dim))
+
+        # ==========================================
+        # 第一步：构建基础协方差 Q_free（自由运动）
+        # ==========================================
+        Q_free = self._build_base_process_noise()
+
+        # ==========================================
+        # 第二步：判断是否需要应用流形约束
+        # ==========================================
+        # 获取参数覆盖
+        override = self.override_manager.get_override()
+
+        # 应用阈值覆盖
+        z_lock_threshold = override.z_lock_threshold_override if override.z_lock_threshold_override is not None else 0.8
+
+        # 检查是否应用流形约束
+        should_apply_manifold = override.should_apply_manifold(self.alpha_smoothed, z_lock_threshold)
+
+        if not should_apply_manifold:
+            # 粗略阶段：使用自由协方差
+            Q_final = override.get_q_matrix(Q_free)
+            return Q_final
+
+        # ==========================================
+        # 第三步：应用任务空间流形约束
+        # ==========================================
+        try:
+            # 1. 获取当前关节配置
+            q_controlled = self.state[:self.n_joints]
+            q_full = self._get_full_q_from_controlled(q_controlled)
+
+            if not np.all(np.isfinite(q_full)):
+                Q_final = override.get_q_matrix(Q_free)
+                return Q_final
+
+            # 2. 计算完整雅可比矩阵（6×n_joints：位置+姿态）
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+
+            J_full = pin.computeFrameJacobian(
+                self.ik_solver.model,
+                self.ik_solver.data,
+                q_full,
+                self.ik_solver.ee_frame_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+            )  # 6×7 矩阵
+
+            # 只使用受控关节
+            J = J_full[:, self.ik_solver.controlled_indices]  # 6×n_joints
+
+            # 3. 定义任务空间约束协方差
+            # 垂直插入流形：只允许Z方向运动，其他5个自由度强约束
+            eps = 1e-4  # 强约束（极小方差）
+            sigma_z = 1.0  # 弱约束（允许Z方向运动）
+
+            # Σ_task = diag([ε, ε, σ_z², ε, ε, ε])
+            # 顺序：[x, y, z, rx, ry, rz]
+            Sigma_task_cons = np.diag([eps, eps, sigma_z, eps, eps, eps])
+
+            # 4. 通过雅可比伪逆投影到关节空间
+            # Q_cons = J† Σ_task (J†)^T
+            # 使用阻尼伪逆避免奇异性
+            damping = 1e-3
+            J_pinv = J.T @ np.linalg.inv(J @ J.T + damping * np.eye(6))
+
+            # 投影到关节空间（位置部分）
+            Q_cons_position = J_pinv @ Sigma_task_cons @ J_pinv.T  # n_joints × n_joints
+
+            # 5. 扩展到完整状态空间（位置+速度）
+            Q_cons = np.zeros((self.state_dim, self.state_dim))
+            Q_cons[:self.n_joints, :self.n_joints] = Q_cons_position
+            # 速度部分使用自由协方差
+            Q_cons[self.n_joints:, self.n_joints:] = Q_free[self.n_joints:, self.n_joints:]
+
+            # 6. 根据意图因子α插值融合
+            # α = 0.8 → blend_factor = 0（自由运动）
+            # α = 1.0 → blend_factor = 1（完全约束）
+            blend_factor = (self.alpha_smoothed - z_lock_threshold) / (1.0 - z_lock_threshold)
+            blend_factor = np.clip(blend_factor, 0.0, 1.0)
+
+            # Q(α) = (1-α)Q_free + αQ_cons
+            Q_final = (1 - blend_factor) * Q_free + blend_factor * Q_cons
+
+            # 应用Q矩阵覆盖
+            Q_final = override.get_q_matrix(Q_final)
+
+            return Q_final
+
+        except Exception as e:
+            # 流形约束投影失败，回退到自由协方差
+            print(f"⚠️ [VIST] 任务空间流形约束投影失败: {e}")
+            import traceback
+            traceback.print_exc()
+            Q_final = override.get_q_matrix(Q_free)
+            return Q_final
+
+    def _build_base_process_noise(self):
+        """
+        构建基础过程噪声协方差（自由运动）
+
+        关节特定调优：
+        - J1 (肩俯仰): 3.0× 增强（前向运动）
+        - J2 (肩侧摆): 2.0× 增强
+        - J3 (肩旋转): 0.1× 阻尼（冗余自由度强阻尼）
+        - J4 (肘关节): 1.2× 增强（任务关节）
+        - J5-J7 (腕部): 1.0× 标准
+
+        Returns:
+            Q_free: 基础过程噪声协方差矩阵 (state_dim x state_dim)
         """
         Q = np.zeros((self.state_dim, self.state_dim))
 
@@ -143,104 +264,21 @@ class VISTKalmanFilter:
         vel_variance = self.config.vist_velocity_variance
         Q[self.n_joints:, self.n_joints:] = vel_variance * np.eye(self.n_joints)
 
-        # 【关键修正】大幅增强肩部关节自由度，解决向前运动困难的问题
-        # J1 (Shoulder Pitch) 是最关键的关节，需要最大的自由度
-        shoulder_pitch_idx = 0
-        shoulder_roll_idx = 1
-        shoulder_pitch_boost = 3.0  # 大幅增强 J1，让大臂能向前抬起
-        shoulder_roll_boost = 2.0   # 适度增强 J2
-        Q[shoulder_pitch_idx, shoulder_pitch_idx] *= shoulder_pitch_boost
-        Q[self.n_joints + shoulder_pitch_idx, self.n_joints + shoulder_pitch_idx] *= shoulder_pitch_boost
-        Q[shoulder_roll_idx, shoulder_roll_idx] *= shoulder_roll_boost
-        Q[self.n_joints + shoulder_roll_idx, self.n_joints + shoulder_roll_idx] *= shoulder_roll_boost
+        # 关节特定调优
+        joint_scales = {
+            0: 3.0,  # J1 (肩俯仰): 前向运动关键关节
+            1: 2.0,  # J2 (肩侧摆): 适度增强
+            2: 0.1,  # J3 (肩旋转): 冗余DOF强阻尼
+            3: 1.2,  # J4 (肘关节): 任务关节
+            4: 1.0,  # J5 (腕俯仰): 标准
+            5: 1.0,  # J6 (腕侧摆): 标准
+            6: 1.0,  # J7 (腕旋转): 标准
+        }
 
-        # J3 (Swivel) 施加强阻尼，抑制冗余自由度的抖动和跳变
-        swivel_idx = 2
-        swivel_damping = 0.1  # 强阻尼，防止 q3 跳变（从 0.5 降低到 0.1）
-        Q[swivel_idx, swivel_idx] *= swivel_damping
-        Q[self.n_joints + swivel_idx, self.n_joints + swivel_idx] *= swivel_damping
-
-        # J4 (Elbow) 是任务关节，给予适度的自由度
-        elbow_idx = 3
-        elbow_boost = 1.2  # 适度提升，避免过于强势
-        Q[elbow_idx, elbow_idx] *= elbow_boost
-        Q[self.n_joints + elbow_idx, self.n_joints + elbow_idx] *= elbow_boost
-
-        # ==========================================
-        # 【核心创新】Z轴锁定机制
-        # ==========================================
-        # 阈值：α > 0.8 表示即将进入或已经进入精密插入阶段
-        z_lock_threshold = 0.8
-
-        if self.alpha_smoothed > z_lock_threshold:
-            try:
-                # 1. 获取当前关节配置
-                q_controlled = self.state[:self.n_joints]
-                q_full = self._get_full_q_from_controlled(q_controlled)
-
-                # 确保配置有效
-                if not np.all(np.isfinite(q_full)):
-                    # 配置无效，跳过Z轴锁定
-                    return Q
-
-                # 2. 计算雅可比矩阵
-                pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
-                pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
-
-                J_full = pin.computeFrameJacobian(
-                    self.ik_solver.model,
-                    self.ik_solver.data,
-                    q_full,
-                    self.ik_solver.ee_frame_id,
-                    pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
-                )
-
-                # 只使用位置部分（前3行）和受控关节
-                J = J_full[:3, self.ik_solver.controlled_indices]
-
-                # 3. Z方向单位向量（插入方向）
-                z_axis = np.array([0, 0, 1])
-
-                # 4. 计算冻结因子（基于意图因子的强度）
-                # α = 0.8 → freeze_strength = 0
-                # α = 1.0 → freeze_strength = 1
-                freeze_strength = (self.alpha_smoothed - z_lock_threshold) / (1.0 - z_lock_threshold)
-                freeze_strength = np.clip(freeze_strength, 0.0, 1.0)
-
-                # 5. 对每个关节应用Z轴锁定
-                for i in range(self.n_joints):
-                    # 计算第i个关节对末端位置的影响（雅可比列）
-                    J_i = J[:, i]
-
-                    # 计算该关节对Z方向的贡献（投影）
-                    z_contribution = abs(np.dot(J_i, z_axis))
-
-                    # 归一化：z_contribution 的范围通常在 [0, 0.5] 左右
-                    # 我们将其映射到 [0, 1]，阈值设为 0.3
-                    z_contribution_normalized = min(z_contribution / 0.3, 1.0)
-
-                    # 计算冻结因子：
-                    # - 如果关节主要影响Z方向（z_contribution大），则不冻结
-                    # - 如果关节主要影响X-Y平面（z_contribution小），则冻结
-                    # freeze_factor = 1 - freeze_strength * (1 - z_contribution_normalized)
-                    #
-                    # 当 freeze_strength=1 且 z_contribution_normalized=0 时：
-                    #   freeze_factor = 1 - 1*(1-0) = 0（完全冻结）
-                    # 当 freeze_strength=1 且 z_contribution_normalized=1 时：
-                    #   freeze_factor = 1 - 1*(1-1) = 1（不冻结）
-                    freeze_factor = 1.0 - freeze_strength * (1.0 - z_contribution_normalized)
-
-                    # 最小冻结因子：避免完全冻结导致数值问题
-                    freeze_factor = max(freeze_factor, 0.01)
-
-                    # 应用冻结因子到Q矩阵
-                    Q[i, i] *= freeze_factor
-                    Q[self.n_joints + i, self.n_joints + i] *= freeze_factor
-
-            except Exception as e:
-                # Z轴锁定失败，记录警告但不影响主流程
-                print(f"⚠️ [VIST] Z轴锁定计算失败: {e}")
-                # 继续使用基础的Q矩阵
+        for i in range(self.n_joints):
+            scale = joint_scales.get(i, 1.0)
+            Q[i, i] *= scale
+            Q[self.n_joints + i, self.n_joints + i] *= scale
 
         return Q
 
@@ -293,7 +331,15 @@ class VISTKalmanFilter:
         lambda_h = self.config.vist_human_lambda if hasattr(self.config, 'vist_human_lambda') else 3.0
         R_base_human = self.config.vist_human_base_variance
 
-        human_variance = R_base_human * np.exp(lambda_h * self.alpha_smoothed)
+        # 【关键修正】当禁用微分IK时，几何求解器输出是高质量的，应该大幅降低观测噪声
+        disable_diff_ik = getattr(self.config, 'vist_geometric_solver_disable_differential_ik', False)
+        if disable_diff_ik:
+            # 使用极小的观测噪声，让滤波器高度信任几何求解器
+            # 1e-5: 只滤除微小抖动，保留正常的运动
+            human_variance = 1e-5
+        else:
+            human_variance = R_base_human * np.exp(lambda_h * self.alpha_smoothed)
+
         R[:self.n_joints, :self.n_joints] = human_variance * np.eye(self.n_joints)
 
         # 【关键修正】在仿生观测模式下，J4 的观测是高置信度的几何测量
@@ -344,6 +390,12 @@ class VISTKalmanFilter:
 
         R[self.n_joints:, self.n_joints:] = virtual_variance * np.eye(self.n_joints)
 
+        # 【关键修正】当禁用微分IK时，虚拟引导的观测全为零且不应被信任
+        # 将虚拟部分的方差设为极大值，使其权重接近零
+        disable_diff_ik = getattr(self.config, 'vist_geometric_solver_disable_differential_ik', False)
+        if disable_diff_ik:
+            R[self.n_joints:, self.n_joints:] = 1e10 * np.eye(self.n_joints)
+
         # ==========================================
         # 3. 几何求解器特殊处理
         # ==========================================
@@ -356,6 +408,31 @@ class VISTKalmanFilter:
                 R[i, i] = 1e-4  # 高置信度，完全信任几何解析解
                 # 大幅增大微分IK观测的噪声（降低权重）
                 R[self.n_joints + i, self.n_joints + i] = 1e2  # 低置信度，基本忽略微分IK
+
+        # ==========================================
+        # 4. 流形约束（通过R矩阵实现 - 论文理论方法）
+        # ==========================================
+        # 【核心创新】通过观测噪声实现流形约束，而不是后处理投影
+        #
+        # 原理：当α→1且流形约束启用时，通过增大几何求解器观测的R值，
+        # 降低观测权重，让Q矩阵的流形约束（雅可比投影）发挥作用。
+        #
+        # 这是纯粹的概率方法，符合VIST的"软着陆"理念，避免硬约束反噬。
+        override = self.override_manager.get_override()
+        z_lock_threshold = override.z_lock_threshold_override if override.z_lock_threshold_override is not None else 0.8
+        should_apply_manifold = override.should_apply_manifold(self.alpha_smoothed, z_lock_threshold)
+
+        if should_apply_manifold and self.geometric_solver is not None:
+            # 流形约束启用：增大几何求解器的R值，让Q矩阵约束主导
+            print(f"   🔒 [流形约束] 通过R矩阵实现 (α={self.alpha_smoothed:.2f})")
+
+            # 增大臂部关节的观测噪声，降低几何求解器的权重
+            # 让Q矩阵的雅可比投影约束发挥作用
+            for i in range(4):  # J1-J4
+                R[i, i] = 1e-2  # 从1e-4增大到1e-2，降低观测权重
+
+            # 腕部关节（J5-J7）保持正常，允许姿态调整
+            # 不修改R[4:7, 4:7]，保持原有值
 
         return R
 
@@ -384,6 +461,20 @@ class VISTKalmanFilter:
             alpha: 意图因子
         """
         # ==========================================
+        # 0. 检查参数覆盖模式（仿真专用）
+        # ==========================================
+        if hasattr(self.config, 'vist_simulation_use_parameter_override') and \
+           self.config.vist_simulation_use_parameter_override:
+            # 使用参数覆盖管理器中的α值
+            override = self.override_manager.get_override()
+            if override.alpha_override is not None:
+                self.alpha = override.alpha_override
+                # 在参数覆盖模式下，直接设置α_smoothed为覆盖值
+                # 跳过EMA平滑，以便立即看到效果
+                self.alpha_smoothed = self.alpha
+                print(f"   🎛️ [参数覆盖] α = {self.alpha:.2f}, α_smoothed = {self.alpha_smoothed:.2f}")
+                return self.alpha_smoothed
+        # ==========================================
         # 1. 几何势能 α_geo (Eq. 2)
         # ==========================================
         # α_geo = exp(-1/2 ξ_err^T W_task ξ_err)
@@ -407,7 +498,20 @@ class VISTKalmanFilter:
         # 从配置读取任务流形度量张量 W_task
         # W_task 是对角矩阵，对不同维度赋予不同权重
         if hasattr(self.config, 'vist_w_task'):
-            W_task = np.diag(self.config.vist_w_task)
+            w_task_config = self.config.vist_w_task
+            # 确保维度匹配：如果xi_err是3维，只使用前3个权重
+            if len(xi_err) == 3 and len(w_task_config) == 6:
+                W_task = np.diag(w_task_config[:3])  # 只使用位置权重
+            elif len(xi_err) == 6 and len(w_task_config) == 6:
+                W_task = np.diag(w_task_config)  # 使用完整权重
+            elif len(xi_err) == len(w_task_config):
+                W_task = np.diag(w_task_config)  # 维度匹配
+            else:
+                # 维度不匹配，使用默认值
+                if len(xi_err) == 6:
+                    W_task = np.diag([10.0, 10.0, 10.0, 1.0, 1.0, 1.0])
+                else:
+                    W_task = np.diag([10.0, 10.0, 10.0])
         else:
             # 默认：位置权重高，姿态权重低（因为我们主要关注位置精度）
             if len(xi_err) == 6:
@@ -583,7 +687,10 @@ class VISTKalmanFilter:
             # 微分观测：Δθ = J†·Δx
             delta_theta = J_pinv @ delta_x
 
-            return delta_theta
+            # 返回目标关节角度（绝对值）
+            q_target = q_controlled + delta_theta
+
+            return q_target
 
         except Exception as e:
             print(f"⚠️ [VIST] compute_differential_ik 错误: {e}")
@@ -646,7 +753,10 @@ class VISTKalmanFilter:
             # 8. 微分观测：Δθ = J†·δx
             delta_theta = J_pinv @ δx
 
-            return delta_theta
+            # 返回目标关节角度（绝对值）
+            q_target = q_controlled + delta_theta
+
+            return q_target
 
         except Exception as e:
             print(f"⚠️ [VIST] compute_differential_ik_with_orientation 错误: {e}")
@@ -670,9 +780,9 @@ class VISTKalmanFilter:
 
     def compute_human_delta_theta(self, target_pos, previous_target_pos):
         """
-        从人手位置变化计算人类指令增量
+        从人手位置变化计算目标关节角度
 
-        这是 VIST 的关键创新：将人手运动直接转换为关节角度增量
+        这是 VIST 的关键创新：将人手运动直接转换为关节角度
         - 使用微分 IK 将笛卡尔空间的位置变化转换为关节空间
         - 与虚拟引导观测独立，提供人类意图的直接表达
 
@@ -681,7 +791,7 @@ class VISTKalmanFilter:
             previous_target_pos: 上一帧人手目标位置 (3D)
 
         Returns:
-            human_delta_theta: 人类指令关节角度增量 (n_joints,)
+            q_target: 目标关节角度（绝对值，不是增量）
         """
         # 计算人手位置变化
         delta_x_human = target_pos - previous_target_pos
@@ -712,18 +822,22 @@ class VISTKalmanFilter:
         J_pinv = J.T @ inv(JJT + damping_matrix)
 
         # 人类指令增量：Δθ_human = J† @ Δx_human
-        human_delta_theta = J_pinv @ delta_x_human
+        delta_theta = J_pinv @ delta_x_human
 
-        return human_delta_theta
+        # 返回目标关节角度（绝对值），而不是增量
+        # 这样卡尔曼滤波器可以通过 innovation = z - H @ state 正确计算
+        q_target = self.state[:self.n_joints] + delta_theta
+
+        return q_target
 
     def compute_human_delta_theta_from_elbow(self, shoulder_pos, elbow_pos, wrist_pos, target_orientation=None):
         """
-        从肘部位置计算人类指令增量（使用几何解析解）
+        从肘部位置计算目标关节角度（使用几何解析解）
 
         这是 VIST 的肘部约束集成：
         - 使用几何解析解计算臂部配置（q1-q4）
         - 使用欧拉角分解计算腕部姿态（q5-q7）
-        - 转换为关节角度增量：Δθ = q_decoupled - q_current
+        - 返回目标关节角度（绝对值）
 
         Args:
             shoulder_pos: 肩部位置 [x, y, z] (numpy array)
@@ -732,23 +846,21 @@ class VISTKalmanFilter:
             target_orientation: 目标末端姿态（可选，四元数或旋转矩阵）
 
         Returns:
-            human_delta_theta: 人类指令关节角度增量 (n_joints,)
+            q_target: 目标关节角度（绝对值，不是增量）
         """
         if self.geometric_solver is None:
             raise ValueError("几何求解器未初始化，无法使用肘部约束")
 
         # 1. 使用几何解析解计算目标关节角度
+        # 传递alpha参数以支持动态腕部解锁
         q_decoupled = self.geometric_solver.solve(
-            shoulder_pos, elbow_pos, wrist_pos, target_orientation
+            shoulder_pos, elbow_pos, wrist_pos, target_orientation, alpha=self.alpha_smoothed
         )
 
-        # 2. 获取当前关节角度
-        q_current = self.state[:self.n_joints]
-
-        # 3. 计算增量：Δθ = q_decoupled - q_current
-        human_delta_theta = q_decoupled - q_current
-
-        return human_delta_theta
+        # 2. 直接返回目标关节角度（绝对值，不是增量）
+        # 注意：这里返回的是绝对角度，卡尔曼滤波器会通过 H 矩阵处理
+        # innovation = z - H @ state = q_decoupled - state
+        return q_decoupled
 
     def compute_biomimetic_observation(self, shoulder_pos, elbow_pos, wrist_pos, target_pos):
         """
@@ -1085,15 +1197,25 @@ class VISTKalmanFilter:
             success: 是否成功
         """
         # 1. 计算微分 IK 观测（虚拟引导）
-        # 检查是否启用姿态控制
-        use_orientation = getattr(self.config, 'vist_use_orientation_control', False)
+        # 检查是否禁用微分IK
+        disable_diff_ik = getattr(self.config, 'vist_geometric_solver_disable_differential_ik', False)
 
-        if use_orientation and target_quat is not None:
-            # 使用带姿态的微分 IK（6D雅可比 + 李代数）
-            delta_theta_virtual = self.compute_differential_ik_with_orientation(target_pos, target_quat)
+        if self.iteration_count % 50 == 0:  # 每50次迭代打印一次
+            print(f"🔧 [VIST] 微分IK状态: {'已禁用' if disable_diff_ik else '已启用'}", flush=True)
+
+        if disable_diff_ik:
+            # 禁用微分IK：使用零向量
+            delta_theta_virtual = np.zeros(self.n_joints)
         else:
-            # 使用标准微分 IK（只控制位置，3D雅可比）
-            delta_theta_virtual = self.compute_differential_ik(target_pos, target_quat)
+            # 检查是否启用姿态控制
+            use_orientation = getattr(self.config, 'vist_use_orientation_control', False)
+
+            if use_orientation and target_quat is not None:
+                # 使用带姿态的微分 IK（6D雅可比 + 李代数）
+                delta_theta_virtual = self.compute_differential_ik_with_orientation(target_pos, target_quat)
+            else:
+                # 使用标准微分 IK（只控制位置，3D雅可比）
+                delta_theta_virtual = self.compute_differential_ik(target_pos, target_quat)
 
         # 2. 计算人类指令观测
         if human_delta_theta is None:
@@ -1142,6 +1264,8 @@ class VISTKalmanFilter:
         # 6. 更新协方差
         I = np.eye(self.state_dim)
         self.P = (I - K @ self.H) @ self.P
+
+        # 注意：流形约束通过R矩阵在观测层面实现，不需要后处理投影
 
         # 7. 关节限位（只对受控关节）
         q_solution = self.state[:self.n_joints]
@@ -1289,6 +1413,64 @@ class VISTKalmanFilter:
             import traceback
             traceback.print_exc()
             return pin.neutral(self.ik_solver.model)
+
+    def _apply_manifold_projection(self, target_pos, target_quat=None):
+        """
+        应用流形约束投影：保持X、Y与目标一致，只允许Z方向自由运动
+
+        Args:
+            target_pos: 目标位置（用于获取X、Y参考）
+            target_quat: 目标姿态（用于姿态约束）
+        """
+        try:
+            # 获取当前关节配置
+            q_controlled = self.state[:self.n_joints].copy()
+            q_full = self._get_full_q_from_controlled(q_controlled)
+
+            # 计算当前末端位置
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+            ee_placement = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
+            current_pos = ee_placement.translation.copy()
+            current_rot = ee_placement.rotation.copy()
+
+            # 构造约束目标：使用目标的X、Y，保持当前的Z
+            constrained_pos = target_pos.copy()
+            constrained_pos[2] = current_pos[2]  # 保持当前Z坐标
+
+            # 姿态约束：使用目标姿态（如果提供）或保持当前姿态
+            if target_quat is not None:
+                constrained_quat = target_quat
+            else:
+                constrained_quat = pin.Quaternion(current_rot).coeffs()
+
+            # 使用IK求解器计算满足约束的关节角度
+            q_constrained, success, error = self.ik_solver.solve(
+                target_pos=constrained_pos,
+                target_quat=constrained_quat,
+                q_init=q_full,
+                max_iter=10,
+                tol=1e-3,
+                damping=1e-2
+            )
+
+            if success:
+                # 提取受控关节
+                q_controlled_new = np.zeros(self.n_joints)
+                for i, ctrl_idx in enumerate(self.ik_solver.controlled_indices):
+                    if ctrl_idx < len(q_constrained):
+                        q_controlled_new[i] = q_constrained[ctrl_idx]
+
+                # 更新状态
+                self.state[:self.n_joints] = q_controlled_new
+                print(f"   ✅ [流形约束] 投影成功 (error={error:.4f}m, target_xy=[{target_pos[0]:.3f}, {target_pos[1]:.3f}], current_z={current_pos[2]:.3f})")
+            else:
+                print(f"   ⚠️ [流形约束] 投影失败，保持原状态")
+
+        except Exception as e:
+            print(f"   ⚠️ [流形约束] 投影错误: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _get_current_end_effector_position(self):
         """获取当前末端执行器位置"""

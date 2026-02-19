@@ -180,6 +180,12 @@ class VISTController:
         debug_info['target_elbow'] = target_elbow
         debug_info['mode'] = 'basic'
 
+        # 添加肘部角度调试信息
+        if 'vector_angle' in mapper_debug:
+            debug_info['vector_angle'] = mapper_debug['vector_angle']
+            debug_info['elbow_angle_human'] = mapper_debug['elbow_angle_human']
+            debug_info['elbow_angle_motor'] = mapper_debug['elbow_angle_motor']
+
         # 2. 工作空间检查
         shoulder_pos = self.config.robot_shoulder_position
         dist_to_shoulder = np.linalg.norm(target_pos - shoulder_pos)

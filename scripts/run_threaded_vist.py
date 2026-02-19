@@ -19,7 +19,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.config.vist_config import VISTConfig
+from src.config import VISTConfig, get_config
 from src.control.vist_controller import VISTController
 from src.control.threaded_vist_controller import ThreadedVISTController
 from src.robot.robot_interface import RobotInterface

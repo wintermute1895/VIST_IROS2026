@@ -48,7 +48,7 @@ robot:
     - -1  # Joint 0: Shoulder_Pitch (反向)
     - 1   # Joint 1: Shoulder_Roll
     - -1  # Joint 2: Shoulder_Yaw (反向)
-    - 1  # Joint 3: Elbow_Pitch (反向，配合修改后的URDF)
+    - 1  # Joint 3: Elbow_Pitch (反向，让角度映射正确)
     - 1   # Joint 4: Wrist_Yaw
     - 1   # Joint 5: Wrist_Pitch
     - 1   # Joint 6: Wrist_Roll
@@ -137,6 +137,11 @@ vist_kalman:
   # 启用 VIST 卡尔曼滤波（当 ik_strategy="vist" 时生效）
   enabled: true
 
+  # 仿真参数覆盖模式
+  # 当启用时，VIST将使用ParameterOverrideManager中的参数而不是从视觉数据计算
+  # 这允许在没有相机输入的情况下测试完整的VIST控制器效果
+  simulation_use_parameter_override: true  # 启用参数覆盖模式（仿真专用）
+
   # 几何解析求解器（肘部约束集成）
   geometric_solver:
     enabled: true  # 启用几何解析求解器 - 追求构型一致性
@@ -149,17 +154,26 @@ vist_kalman:
     trust_weight: 2.0  # 几何解析解的信任权重（相对于微分IK）
                        # 通过调整 Q 矩阵实现：Q_arm *= (1.0 / trust_weight)
 
+    # 禁用微分IK（只使用几何求解器）
+    disable_differential_ik: true  # 设置为true时，完全禁用微分IK，只使用几何求解器
+                                    # 卡尔曼滤波仍然会对几何求解器的输出进行平滑处理
+
     # 腕部控制模式（4+3解耦策略）
-    wrist_control_mode: "full_dof"  # 可选: "full_dof", "constrained_horizontal", "wrist_locked"
+    wrist_control_mode: "constrained_horizontal"  # 可选: "full_dof", "constrained_horizontal", "wrist_locked"
+
+    # 动态腕部控制：在精密插入阶段自动解锁腕部
+    enable_dynamic_wrist_unlock: true  # 当α > 0.8时，自动切换到full_dof模式
+
     # 模式说明：
     # - full_dof: 全自由度欧拉角分解（默认）
     #   * J5-J7通过欧拉角分解自动匹配目标姿态
-    #   * 适合通用遥操作任务
+    #   * 适合通用遥操作任务和精密插入阶段
     # - constrained_horizontal: 约束水平模式（推荐用于桌面操作）
     #   * J5 (Wrist Yaw): 锁定为0（保持水平）
     #   * J6 (Wrist Pitch): 与J4配合约束，保持末端水平于桌面
     #   * J7 (Wrist Roll): 从目标姿态提取手腕旋转
     #   * 适合插入、抓取等桌面操作任务
+    #   * 注意：启用dynamic_wrist_unlock后，在精密插入阶段会自动切换到full_dof
     # - wrist_locked: 腕部锁定模式
     #   * J5-J7全部锁定为0
     #   * 只控制臂部配置（J1-J4），末端姿态固定
@@ -175,8 +189,8 @@ vist_kalman:
     # 2. 肘部任务：J4角度模仿
     # 3. 臂平面任务：J1-J3姿态模仿
     # 这是VIST的"完全体"：从位置追踪器进化为构型复现器
-    elbow_weight: 0.3   # 肘部角度任务权重（0-1）- 提高到50%以增强构型模仿
-    swivel_weight: 0.2  # 臂平面任务权重（0-1）- 提高到40%以增强臂平面控制
+    elbow_weight: 0.3   # 肘部角度任务权重（0-1）
+    swivel_weight: 0.2  # 臂平面任务权重（0-1）
     # 权重说明：
     # - 0.0: 完全忽略该任务，只追踪手部位置
     # - 1.0: 完全模仿人体构型，可能牺牲手部精度

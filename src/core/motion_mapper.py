@@ -358,6 +358,15 @@ class ArmMotionMapper:
         # ==========================================
         # Step 7: Debug Information
         # ==========================================
+        # 计算肘部角度信息（用于调试）
+        norm1 = np.linalg.norm(V_upper_robot)
+        norm2 = np.linalg.norm(V_fore_robot)
+        cos_angle = np.dot(V_upper_robot, V_fore_robot) / (norm1 * norm2)
+        cos_angle = np.clip(cos_angle, -1.0, 1.0)
+        vector_angle_rad = np.arccos(cos_angle)
+        vector_angle_deg = np.degrees(vector_angle_rad)
+        human_elbow_angle_deg = 180.0 - vector_angle_deg
+
         debug_info = {
             'elbow_pos': filtered_elbow,  # 使用滤波后的手肘位置
             'wrist_pos': T_wrist,
@@ -373,7 +382,11 @@ class ArmMotionMapper:
             'filtered_pos': filtered_pos,
             'filtered_quat': filtered_quat,
             'unfiltered_pos': curr_pos,
-            'unfiltered_quat': curr_quat
+            'unfiltered_quat': curr_quat,
+            # 肘部角度调试信息
+            'vector_angle': vector_angle_deg,
+            'elbow_angle_human': human_elbow_angle_deg,
+            'elbow_angle_motor': vector_angle_deg,  # 电机角度 = 向量夹角
         }
 
         return filtered_pos, filtered_quat, debug_info
