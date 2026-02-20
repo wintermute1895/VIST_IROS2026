@@ -78,6 +78,13 @@ coordinate_transform:
     [1,  0,  0]   # Z_robot = X_shoulder (上 = 上)
   ]
 
+  # TCP偏移（Tool Center Point Offset）
+  # 从末端法兰盘到工具末端（如USB插头尖端）的偏移
+  # 格式: [x, y, z, rx, ry, rz]
+  # - x, y, z: 平移偏移（米）
+  # - rx, ry, rz: 旋转偏移（弧度，可选，默认为0）
+  tcp_offset: [0.0, 0.0, 0.15]  # USB沿Z轴延伸15cm（需要实际测量）
+
   # 坐标系说明
   shoulder_frame:
     description: "Vision node output (relative to shoulder)"

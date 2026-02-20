@@ -113,6 +113,17 @@ class VISTController:
         self.safety_monitor = None
         self.target_detector = None
         self.target_socket_pos = None
+        self.coord_transform = None  # 坐标变换管理器
+
+        # 6. 初始化坐标变换管理器
+        logger.info("初始化坐标变换管理器...")
+        try:
+            from src.perception.coordinate_transform_manager import CoordinateTransformManager
+            self.coord_transform = CoordinateTransformManager(config=config)
+            logger.info("坐标变换管理器初始化完成")
+        except Exception as e:
+            logger.warning(f"坐标变换管理器初始化失败: {e}")
+            logger.warning("将在无标定模式下运行（需要手动提供基座坐标系下的目标位置）")
 
         if self.enable_intent_detection:
             logger.info("初始化意图检测器（增强模式）...")

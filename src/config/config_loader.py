@@ -90,6 +90,11 @@ class VISTConfig:
         """坐标转换矩阵 (3, 3) numpy array"""
         return np.array(self._config['coordinate_transform']['rotation_matrix'], dtype=np.float64)
 
+    @property
+    def tcp_offset(self):
+        """TCP偏移 [x, y, z, rx, ry, rz]，单位：米和弧度"""
+        return self._config['coordinate_transform'].get('tcp_offset', [0.0, 0.0, 0.15])
+
     # ==========================================
     # 控制参数
     # ==========================================
