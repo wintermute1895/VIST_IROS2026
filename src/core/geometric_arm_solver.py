@@ -210,10 +210,11 @@ class GeometricArmSolver:
 
         给定臂部配置（q1-q4）和目标末端姿态，计算腕部关节角度（q5-q7）
 
-        支持三种控制模式：
+        支持四种控制模式：
         1. full_dof: 全自由度欧拉角分解（默认）
         2. constrained_horizontal: 约束水平模式（J5锁定，J6保持水平）
         3. wrist_locked: 腕部锁定模式（J5-J7全部锁定为0）
+        4. vertical_insertion: 垂直插入模式（J5/J7锁定，J6动态约束保持垂直）
 
         动态腕部解锁（平滑过渡）：
         - 当enable_dynamic_wrist_unlock=True时
@@ -234,7 +235,11 @@ class GeometricArmSolver:
         if self.wrist_control_mode == 'wrist_locked':
             return np.zeros(3)
 
-        # 模式2: 约束水平模式（可能带动态解锁）
+        # 模式2: 垂直插入模式（USB插入专用）
+        if self.wrist_control_mode == 'vertical_insertion':
+            return self._solve_wrist_vertical_insertion(q_arm, target_orientation, alpha)
+
+        # 模式3: 约束水平模式（可能带动态解锁）
         if self.wrist_control_mode == 'constrained_horizontal':
             # 计算约束模式的解
             q_wrist_constrained = self._solve_wrist_constrained_horizontal(q_arm, target_orientation)
@@ -257,7 +262,7 @@ class GeometricArmSolver:
             else:
                 return q_wrist_constrained
 
-        # 模式3: 全自由度模式（默认）
+        # 模式4: 全自由度模式（默认）
         return self._solve_wrist_full_dof(q_arm, target_orientation)
 
     def get_elbow_debug_info(self):
@@ -384,6 +389,64 @@ class GeometricArmSolver:
         # 使用欧拉角分解，只取Roll分量
         euler_angles = Rotation.from_matrix(target_rot).as_euler('ZYX', degrees=False)
         q7 = euler_angles[2]  # Roll
+
+        return np.array([q5, q6, q7])
+
+    def _solve_wrist_vertical_insertion(self, q_arm, target_orientation=None, alpha=0.0):
+        """
+        垂直插入模式腕部求解（USB插入专用，基于意图因子的变刚度控制）
+
+        约束策略（意图调制的硬约束层）：
+        - J5 (Wrist Yaw): 锁定为0（防止Roll旋转，避免插歪）
+        - J6 (Wrist Pitch): 意图调制的变刚度控制
+          * α→0 (远距离): "硬"直臂状态，J6≈0（模仿人类自然伸展的小臂）
+          * α→1 (近距离): "软"协同状态，J6动态反解保持垂直
+        - J7 (Wrist Roll): 锁定为0（防止Yaw旋转）
+
+        核心创新：基于意图因子的变刚度冗余解析
+        ================================================
+        q6_cmd = (1-α) * q6_stiff + α * q6_vertical
+
+        其中：
+        - q6_stiff = 0: 大范围运动时的"硬"直臂构型（仿生学）
+        - q6_vertical = -π/2 - q1 - q4: 插入阶段的"软"协同构型（任务约束）
+
+        理论依据：
+        - 远距离（α→0）: 保持人类手臂自然拓扑，J6不弯折，"所见即所得"
+        - 近距离（α→1）: 任务约束主导，J1+J4+J6协同保持垂直
+        - 平滑过渡: C¹连续的同伦平滑过渡，避免状态机切换的急动
+        - 符合VIST框架: 意图因子不仅调制协方差，也调制运动学映射
+
+        Args:
+            q_arm: 臂部关节角度 [q1, q2, q3, q4]
+            target_orientation: 目标末端姿态（可选，此模式下忽略）
+            alpha: 意图因子（0-1），控制从直臂到垂直的平滑过渡
+
+        Returns:
+            q_wrist: 腕部关节角度 [q5, q6, q7]
+        """
+        # J5: 锁定为0（防止Roll）
+        q5 = 0.0
+
+        # J6: 意图调制的变刚度控制
+        # ==========================================
+        # 1. 大范围运动的"硬"直臂状态（仿生学）
+        q6_stiff_straight = 0.0  # 保持小臂与末端平齐，不弯折
+
+        # 2. 插入阶段的"软"协同状态（任务约束）
+        # 约束方程: q1 + q4 + q6 = -π/2 (垂直向下)
+        q1 = q_arm[0]  # 肩部俯仰
+        q4 = q_arm[3]  # 肘部俯仰
+        target_pitch = -np.pi / 2  # 垂直向下
+        q6_dynamic_vertical = target_pitch - q1 - q4
+
+        # 3. 基于意图因子的α-blending（核心创新）
+        # α=0: 完全直臂（硬）
+        # α=1: 完全垂直（软）
+        q6 = (1.0 - alpha) * q6_stiff_straight + alpha * q6_dynamic_vertical
+
+        # J7: 锁定为0（防止Yaw）
+        q7 = 0.0
 
         return np.array([q5, q6, q7])
 

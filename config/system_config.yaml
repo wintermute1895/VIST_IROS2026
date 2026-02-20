@@ -159,7 +159,15 @@ vist_kalman:
                                     # 卡尔曼滤波仍然会对几何求解器的输出进行平滑处理
 
     # 腕部控制模式（4+3解耦策略）
-    wrist_control_mode: "constrained_horizontal"  # 可选: "full_dof", "constrained_horizontal", "wrist_locked"
+    # 腕部控制模式
+    # - full_dof: 全自由度（J5/J6/J7完全跟随人手姿态）
+    # - constrained_horizontal: 约束水平模式（J5锁定，J6保持水平，J7跟随）
+    # - wrist_locked: 腕部锁定（J5/J6/J7全部锁定为0）
+    # - vertical_insertion: 垂直插入模式（J5/J7锁定，J6动态约束保持垂直向下）
+    #   * 适用于USB插入等精密垂直插入任务
+    #   * J1+J4+J6协同工作保持末端垂直
+    #   * 避免姿态自由度带来的插入偏差
+    wrist_control_mode: "vertical_insertion"  # 推荐用于USB插入任务
 
     # 动态腕部控制：在精密插入阶段自动解锁腕部
     enable_dynamic_wrist_unlock: true  # 当α > 0.8时，自动切换到full_dof模式
