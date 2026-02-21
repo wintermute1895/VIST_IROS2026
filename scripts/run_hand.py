@@ -40,6 +40,8 @@ if PROJECT_ROOT not in sys.path:
 # 现在可以导入我们的模块
 from src.robot.hand_driver import LinkerHandDriver
 from src.core.vision_controller import VisionController
+from src.core.camera_wrapper import CameraFactory
+from src.core.config import Config, CameraType, GraspPreset
 
 
 # ============================================================================
@@ -121,37 +123,44 @@ class HandControlSystem:
     """
 
     def __init__(self,
+                 camera_type: CameraType = CameraType.OPENCV,
                  camera_id: int = 0,
                  mock_mode: bool = False,
                  can_id: int = 0x27,
                  can_channel: str = "can0",
-                 control_freq: int = 30):
+                 control_freq: int = 30,
+                 grasp_preset: GraspPreset = GraspPreset.MEDIUM):
         """
         初始化控制系统
 
         参数：
-            camera_id: 摄像头设备ID
+            camera_type: 摄像头类型（OpenCV或RealSense）
+            camera_id: 摄像头设备ID（仅用于OpenCV）
             mock_mode: 如果为True，在无硬件模式下运行
             can_id: LinkerHand的CAN设备ID
             can_channel: CAN接口名称
             control_freq: 控制循环频率（Hz）
+            grasp_preset: 抓取预设类型（小/中/大物体）
         """
         self.logger = logging.getLogger(__name__)
         self.control_freq = control_freq
         self.target_loop_time = 1.0 / control_freq
+        self.camera_type = camera_type
+        self.grasp_preset = grasp_preset
 
         self.logger.info("=" * 70)
         self.logger.info("正在初始化手部控制系统")
         self.logger.info("=" * 70)
 
         # 初始化摄像头
-        self._init_camera(camera_id)
+        self._init_camera(camera_type, camera_id)
 
         # 初始化视觉控制器
         self.logger.info("正在初始化视觉控制器...")
         self.vision_controller = VisionController(
-            min_detection_confidence=0.5,
-            min_tracking_confidence=0.5
+            min_detection_confidence=Config.vision.MIN_DETECTION_CONFIDENCE,
+            min_tracking_confidence=Config.vision.MIN_TRACKING_CONFIDENCE,
+            grasp_preset=grasp_preset
         )
 
         # 初始化硬件驱动
@@ -165,30 +174,30 @@ class HandControlSystem:
 
         self.logger.info("=" * 70)
         self.logger.info("✅ 系统初始化成功")
-        self.logger.info(f"  摄像头ID: {camera_id}")
+        self.logger.info(f"  摄像头类型: {camera_type.value}")
         self.logger.info(f"  模拟模式: {mock_mode}")
         self.logger.info(f"  控制频率: {control_freq} Hz")
+        self.logger.info(f"  抓取预设: {grasp_preset.value}")
         self.logger.info("=" * 70)
 
-    def _init_camera(self, camera_id: int):
+    def _init_camera(self, camera_type: CameraType, camera_id: int):
         """初始化摄像头"""
-        self.logger.info(f"正在初始化摄像头 (ID: {camera_id})...")
+        self.logger.info(f"正在初始化摄像头 (类型: {camera_type.value})...")
 
-        self.cap = cv2.VideoCapture(camera_id)
+        # 使用摄像头工厂创建摄像头实例
+        self.camera = CameraFactory.create_camera(camera_type, camera_id)
 
-        # 设置摄像头属性
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        self.cap.set(cv2.CAP_PROP_FPS, 30)
-
-        if not self.cap.isOpened():
-            raise RuntimeError(f"无法打开摄像头 {camera_id}")
+        # 打开摄像头
+        if not self.camera.open():
+            raise RuntimeError(f"无法打开摄像头 (类型: {camera_type.value})")
 
         self.logger.info("✅ 摄像头初始化完成")
 
         # 创建窗口并设置为可调整大小
-        cv2.namedWindow('LinkerHand L10 - 视觉控制', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('LinkerHand L10 - 视觉控制', 640, 480)
+        cv2.namedWindow(Config.control.WINDOW_NAME, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(Config.control.WINDOW_NAME,
+                        Config.control.WINDOW_WIDTH,
+                        Config.control.WINDOW_HEIGHT)
 
     def _draw_enhanced_info_panel(self,
                                   frame: np.ndarray,
@@ -344,7 +353,13 @@ class HandControlSystem:
         """
         self.logger.info("\n" + "=" * 70)
         self.logger.info("启动控制循环")
-        self.logger.info("按 'q' 退出，'r' 重置机械手")
+        self.logger.info("按键说明:")
+        self.logger.info("  'q' - 退出")
+        self.logger.info("  'r' - 重置机械手到零位")
+        self.logger.info("  's' - 打印系统状态")
+        self.logger.info("  '1' - 切换到小物体抓取预设")
+        self.logger.info("  '2' - 切换到中等物体抓取预设")
+        self.logger.info("  '3' - 切换到大物体抓取预设")
         self.logger.info("=" * 70 + "\n")
 
         frame_count = 0
@@ -358,8 +373,8 @@ class HandControlSystem:
                 # ============================================================
                 # 步骤1：捕获图像帧
                 # ============================================================
-                ret, frame = self.cap.read()
-                if not ret:
+                ret, frame, depth_frame = self.camera.read()
+                if not ret or frame is None:
                     self.logger.error("无法从摄像头读取图像帧")
                     break
 
@@ -395,7 +410,7 @@ class HandControlSystem:
                 )
 
                 # 显示图像帧
-                cv2.imshow('LinkerHand L10 - 视觉控制', frame)
+                cv2.imshow(Config.control.WINDOW_NAME, frame)
 
                 # ============================================================
                 # 步骤5：处理键盘输入
@@ -419,6 +434,21 @@ class HandControlSystem:
                         self.logger.info("✅ 硬件已设置到IDLE位置")
                     else:
                         self.logger.warning("⚠️  硬件设置失败")
+                elif key == ord('1'):
+                    # 切换到小物体抓取预设
+                    self.logger.info("🔄 切换到小物体抓取预设")
+                    self.vision_controller.switch_grasp_preset(GraspPreset.SMALL)
+                    self.grasp_preset = GraspPreset.SMALL
+                elif key == ord('2'):
+                    # 切换到中等物体抓取预设
+                    self.logger.info("🔄 切换到中等物体抓取预设")
+                    self.vision_controller.switch_grasp_preset(GraspPreset.MEDIUM)
+                    self.grasp_preset = GraspPreset.MEDIUM
+                elif key == ord('3'):
+                    # 切换到大物体抓取预设
+                    self.logger.info("🔄 切换到大物体抓取预设")
+                    self.vision_controller.switch_grasp_preset(GraspPreset.LARGE)
+                    self.grasp_preset = GraspPreset.LARGE
                 elif key == ord('s'):
                     # 打印状态
                     self.logger.info("\n" + "=" * 70)
@@ -471,8 +501,8 @@ class HandControlSystem:
 
         # 释放摄像头
         self.logger.info("正在释放摄像头...")
-        if hasattr(self, 'cap'):
-            self.cap.release()
+        if hasattr(self, 'camera'):
+            self.camera.release()
 
         # 关闭所有OpenCV窗口
         cv2.destroyAllWindows()
@@ -492,8 +522,13 @@ def main():
         description='LinkerHand L10 基于视觉的控制系统',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
+说明：
+  所有参数都有默认值（在 src/core/config.py 中配置）
+  可以直接运行: python run_hand.py
+  也可以使用命令行参数覆盖配置文件中的值
+
 示例：
-  # 使用真实硬件运行
+  # 使用配置文件中的默认设置运行
   python run_hand.py
 
   # 在模拟模式下运行（无硬件）
@@ -502,63 +537,113 @@ def main():
   # 使用不同的摄像头
   python run_hand.py --camera 1
 
+  # 使用Intel RealSense D435i摄像头
+  python run_hand.py --camera-type realsense
+
   # 更改控制频率
   python run_hand.py --freq 20
 
+  # 使用大物体抓取预设
+  python run_hand.py --grasp-preset large
+
   # 调试模式（详细日志）
   python run_hand.py --log-level DEBUG
+
+配置文件：
+  修改 src/core/config.py 可以更改默认设置
         """
+    )
+
+    parser.add_argument(
+        '--camera-type',
+        type=str,
+        default=None,  # None表示使用配置文件中的值
+        choices=['opencv', 'realsense'],
+        help=f'摄像头类型 (默认: {Config.camera.CAMERA_TYPE.value})'
     )
 
     parser.add_argument(
         '--camera',
         type=int,
-        default=0,
-        help='摄像头设备ID (默认: 0)'
+        default=None,  # None表示使用配置文件中的值
+        help=f'摄像头设备ID (仅用于OpenCV类型，默认: {Config.camera.OPENCV_CAMERA_ID})'
     )
 
     parser.add_argument(
         '--mock',
         action='store_true',
-        help='在模拟模式下运行（无硬件）'
+        default=None,  # None表示使用配置文件中的值
+        help=f'在模拟模式下运行（无硬件） (默认: {Config.hardware.MOCK_MODE})'
     )
 
     parser.add_argument(
         '--can-id',
         type=lambda x: int(x, 0),  # 支持十六进制输入如0x27
-        default=0x27,
-        help='CAN设备ID (默认: 0x27)'
+        default=None,  # None表示使用配置文件中的值
+        help=f'CAN设备ID (默认: 0x{Config.hardware.CAN_ID:02X})'
     )
 
     parser.add_argument(
         '--can-channel',
         type=str,
-        default='can0',
-        help='CAN接口名称 (默认: can0)'
+        default=None,  # None表示使用配置文件中的值
+        help=f'CAN接口名称 (默认: {Config.hardware.CAN_CHANNEL})'
     )
 
     parser.add_argument(
         '--freq',
         type=int,
-        default=30,
-        help='控制循环频率（Hz） (默认: 30)'
+        default=None,  # None表示使用配置文件中的值
+        help=f'控制循环频率（Hz） (默认: {Config.control.CONTROL_FREQ})'
+    )
+
+    parser.add_argument(
+        '--grasp-preset',
+        type=str,
+        default=None,  # None表示使用配置文件中的值
+        choices=['small', 'medium', 'large'],
+        help=f'抓取预设类型 (默认: {Config.joint_angles.DEFAULT_GRASP_PRESET.value})'
     )
 
     parser.add_argument(
         '--log-level',
         type=str,
-        default='INFO',
+        default=None,  # None表示使用配置文件中的值
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
-        help='日志级别 (默认: INFO)'
+        help=f'日志级别 (默认: {Config.log.LOG_LEVEL})'
     )
 
     args = parser.parse_args()
 
+    # 从配置文件读取默认值，命令行参数可以覆盖
+    camera_type = CameraType.OPENCV if args.camera_type == 'opencv' else (
+        CameraType.REALSENSE if args.camera_type == 'realsense' else Config.camera.CAMERA_TYPE
+    )
+
+    camera_id = args.camera if args.camera is not None else Config.camera.OPENCV_CAMERA_ID
+
+    mock_mode = args.mock if args.mock is not None else Config.hardware.MOCK_MODE
+
+    can_id = args.can_id if args.can_id is not None else Config.hardware.CAN_ID
+
+    can_channel = args.can_channel if args.can_channel is not None else Config.hardware.CAN_CHANNEL
+
+    control_freq = args.freq if args.freq is not None else Config.control.CONTROL_FREQ
+
+    grasp_preset_map = {
+        'small': GraspPreset.SMALL,
+        'medium': GraspPreset.MEDIUM,
+        'large': GraspPreset.LARGE
+    }
+    grasp_preset = grasp_preset_map.get(args.grasp_preset, Config.joint_angles.DEFAULT_GRASP_PRESET)
+
+    log_level = args.log_level if args.log_level is not None else Config.log.LOG_LEVEL
+
     # 设置日志
     logging.basicConfig(
-        level=getattr(logging, args.log_level),
-        format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-        datefmt='%H:%M:%S'
+        level=getattr(logging, log_level),
+        format=Config.log.LOG_FORMAT,
+        datefmt=Config.log.LOG_DATE_FORMAT
     )
 
     # 打印横幅
@@ -566,27 +651,35 @@ def main():
     print("  LinkerHand L10 基于视觉的控制系统")
     print("  使用MediaPipe手部追踪的状态机控制")
     print("=" * 70)
-    print(f"摄像头ID:       {args.camera}")
-    print(f"模拟模式:       {args.mock}")
-    print(f"CAN ID:          0x{args.can_id:02X}")
-    print(f"CAN通道:     {args.can_channel}")
-    print(f"控制频率:    {args.freq} Hz")
-    print(f"日志级别:       {args.log_level}")
+    print(f"摄像头类型:     {camera_type.value}")
+    if camera_type == CameraType.OPENCV:
+        print(f"摄像头ID:       {camera_id}")
+    print(f"模拟模式:       {mock_mode}")
+    print(f"CAN ID:          0x{can_id:02X}")
+    print(f"CAN通道:     {can_channel}")
+    print(f"控制频率:    {control_freq} Hz")
+    print(f"抓取预设:       {grasp_preset.value}")
+    print(f"日志级别:       {log_level}")
     print("=" * 70)
     print("\n控制键:")
     print("  'q' - 退出")
     print("  'r' - 重置机械手到零位")
     print("  's' - 打印系统状态")
+    print("  '1' - 切换到小物体抓取预设")
+    print("  '2' - 切换到中等物体抓取预设")
+    print("  '3' - 切换到大物体抓取预设")
     print("=" * 70 + "\n")
 
     try:
         # 初始化并运行系统
         system = HandControlSystem(
-            camera_id=args.camera,
-            mock_mode=args.mock,
-            can_id=args.can_id,
-            can_channel=args.can_channel,
-            control_freq=args.freq
+            camera_type=camera_type,
+            camera_id=camera_id,
+            mock_mode=mock_mode,
+            can_id=can_id,
+            can_channel=can_channel,
+            control_freq=control_freq,
+            grasp_preset=grasp_preset
         )
 
         system.run()

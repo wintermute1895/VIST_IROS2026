@@ -19,9 +19,11 @@ import numpy as np
 import cv2
 import logging
 import os
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from enum import Enum
 from PIL import Image, ImageDraw, ImageFont
+
+from .config import Config, GraspPreset, VisualizationConfig
 
 
 def draw_chinese_text(img: np.ndarray,
@@ -48,14 +50,7 @@ def draw_chinese_text(img: np.ndarray,
 
     # 尝试加载中文字体
     font = None
-    chinese_font_paths = [
-        "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
-        "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf",
-        "/usr/share/fonts/truetype/arphic/uming.ttc",
-        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-        "/System/Library/Fonts/PingFang.ttc",  # macOS
-        "C:\\Windows\\Fonts\\msyh.ttc",  # Windows
-    ]
+    chinese_font_paths = VisualizationConfig.CHINESE_FONT_PATHS
 
     for font_path in chinese_font_paths:
         if os.path.exists(font_path):
@@ -107,80 +102,36 @@ class VisionController:
     4. 输出目标关节角度
     """
 
-    # ========================================================================
-    # 预设关节角度（10自由度）- 测试后请修改这些数值
-    # ========================================================================
-    # 关节顺序：[拇指俯仰, 拇指偏航, 食指俯仰, 中指俯仰,
-    #           无名指俯仰, 小指俯仰, 食指侧摆, 无名指侧摆,
-    #           小指侧摆, 拇指侧摆]
-    # 单位：度（将直接发送给LinkerHandDriver）
-    # ========================================================================
-
-    # IDLE状态：手完全张开
-    JOINT_ANGLES_IDLE: List[float] = [
-        255.0,  # [0] 拇指俯仰 (Thumb_Pitch)
-        255.0,  # [1] 拇指偏航 (Thumb_Yaw)
-        255.0,  # [2] 食指俯仰 (Index_Pitch)
-        255.0,  # [3] 中指俯仰 (Middle_Pitch)
-        255.0,  # [4] 无名指俯仰 (Ring_Pitch)
-        255.0,  # [5] 小指俯仰 (Pinky_Pitch)
-        255.0,  # [6] 食指侧摆 (Index_Roll)
-        255.0,  # [7] 无名指侧摆 (Ring_Roll)
-        255.0,  # [8] 小指侧摆 (Pinky_Roll)
-        255.0,  # [9] 拇指侧摆 (Thumb_Roll)
-    ]
-
-    # PRE_GRASP状态：预抓取姿态（部分闭合）
-    JOINT_ANGLES_PRE_GRASP: List[float] = [
-        188.0,  # [0] 拇指俯仰 - 待填入：测试后的数值
-        51.0,  # [1] 拇指偏航 - 待填入：测试后的数值
-        138.0,  # [2] 食指俯仰 - 待填入：测试后的数值
-        130.0,  # [3] 中指俯仰 - 待填入：测试后的数值
-        255.0,  # [4] 无名指俯仰 - 待填入：测试后的数值
-        255.0,  # [5] 小指俯仰 - 待填入：测试后的数值
-        34.0,  # [6] 食指侧摆 - 待填入：测试后的数值
-        0.0,  # [7] 无名指侧摆 - 待填入：测试后的数值
-        0.0,  # [8] 小指侧摆 - 待填入：测试后的数值
-        194.0,  # [9] 拇指侧摆 - 待填入：测试后的数值
-    ]
-
-    # GRASP状态：完全捏合/抓取（完全闭合）
-    JOINT_ANGLES_GRASP: List[float] = [
-        138.0,  # [0] 拇指俯仰 - 待填入：测试后的数值
-        60.0,  # [1] 拇指偏航 - 待填入：测试后的数值
-        127.0,  # [2] 食指俯仰 - 待填入：测试后的数值
-        118.0,  # [3] 中指俯仰 - 待填入：测试后的数值
-        255.0,  # [4] 无名指俯仰 - 待填入：测试后的数值
-        255.0,  # [5] 小指俯仰 - 待填入：测试后的数值
-        0.0,  # [6] 食指侧摆 - 待填入：测试后的数值
-        0.0,  # [7] 无名指侧摆 - 待填入：测试后的数值
-        0.0,  # [8] 小指侧摆 - 待填入：测试后的数值
-        212.0,  # [9] 拇指侧摆 - 待填入：测试后的数值
-    ]
-
-    # ========================================================================
-    # 状态机参数
-    # ========================================================================
-    RATIO_THRESHOLD_IDLE = 0.8      # ratio > 0.8 → IDLE（空闲）
-    RATIO_THRESHOLD_GRASP = 0.2     # ratio <= 0.2 → GRASP（抓取）
-    # 0.2 < ratio <= 0.8 → PRE_GRASP（预抓取）
-
-    DEBOUNCE_FRAMES = 5  # 状态切换前需要连续5帧
-
     def __init__(self,
-                 min_detection_confidence: float = 0.5,
-                 min_tracking_confidence: float = 0.5):
+                 min_detection_confidence: Optional[float] = None,
+                 min_tracking_confidence: Optional[float] = None,
+                 grasp_preset: GraspPreset = GraspPreset.MEDIUM):
         """
         初始化视觉控制器
 
         参数：
-            min_detection_confidence: MediaPipe检测置信度阈值
-            min_tracking_confidence: MediaPipe追踪置信度阈值
+            min_detection_confidence: MediaPipe检测置信度阈值（None则使用配置）
+            min_tracking_confidence: MediaPipe追踪置信度阈值（None则使用配置）
+            grasp_preset: 抓取预设类型（小/中/大物体）
         """
         self.logger = logging.getLogger(__name__)
 
+        # 使用配置文件中的参数
+        self.min_detection_confidence = min_detection_confidence or Config.vision.MIN_DETECTION_CONFIDENCE
+        self.min_tracking_confidence = min_tracking_confidence or Config.vision.MIN_TRACKING_CONFIDENCE
+
+        # 状态机阈值（从配置读取）
+        self.RATIO_THRESHOLD_IDLE = Config.vision.RATIO_THRESHOLD_IDLE
+        self.RATIO_THRESHOLD_GRASP = Config.vision.RATIO_THRESHOLD_GRASP
+        self.DEBOUNCE_FRAMES = Config.vision.DEBOUNCE_FRAMES
+        self.FORCE_IDLE_DURATION = Config.vision.FORCE_IDLE_DURATION
+
+        # 抓取预设
+        self.current_grasp_preset = grasp_preset
+        self._load_grasp_preset(grasp_preset)
+
         # 初始化MediaPipe
-        self._init_mediapipe(min_detection_confidence, min_tracking_confidence)
+        self._init_mediapipe(self.min_detection_confidence, self.min_tracking_confidence)
 
         # 状态机
         self.current_state = HandState.IDLE
@@ -195,14 +146,40 @@ class VisionController:
 
         # 强制IDLE冷却机制
         self.force_idle_frames = 0  # 剩余强制IDLE帧数
-        self.FORCE_IDLE_DURATION = 30  # 强制IDLE持续30帧
 
         self.logger.info("=" * 70)
         self.logger.info("✅ 视觉控制器初始化完成")
+        self.logger.info(f"  抓取预设: {self.current_grasp_preset.value}")
         self.logger.info(f"  防抖帧数: {self.DEBOUNCE_FRAMES}")
         self.logger.info(f"  IDLE阈值: > {self.RATIO_THRESHOLD_IDLE}")
         self.logger.info(f"  GRASP阈值: <= {self.RATIO_THRESHOLD_GRASP}")
         self.logger.info("=" * 70)
+
+    def _load_grasp_preset(self, preset: GraspPreset):
+        """
+        加载指定的抓取预设
+
+        参数：
+            preset: 抓取预设类型
+        """
+        preset_dict = Config.get_grasp_preset(preset)
+
+        self.JOINT_ANGLES_IDLE = preset_dict['idle'].copy()
+        self.JOINT_ANGLES_PRE_GRASP = preset_dict['pre_grasp'].copy()
+        self.JOINT_ANGLES_GRASP = preset_dict['grasp'].copy()
+
+        self.logger.info(f"✅ 已加载抓取预设: {preset.value}")
+
+    def switch_grasp_preset(self, preset: GraspPreset):
+        """
+        切换抓取预设
+
+        参数：
+            preset: 新的抓取预设类型
+        """
+        self.logger.info(f"🔄 切换抓取预设: {self.current_grasp_preset.value} → {preset.value}")
+        self.current_grasp_preset = preset
+        self._load_grasp_preset(preset)
 
     def _init_mediapipe(self,
                        min_detection_confidence: float,
@@ -546,7 +523,17 @@ class VisionController:
             'last_pinch_ratio': self.last_pinch_ratio,
             'frame_count': self.frame_count,
             'state_change_count': self.state_change_count,
+            'grasp_preset': self.current_grasp_preset.value,
         }
+
+    def get_current_preset(self) -> GraspPreset:
+        """
+        获取当前抓取预设
+
+        返回：
+            当前的抓取预设类型
+        """
+        return self.current_grasp_preset
 
     def close(self):
         """关闭MediaPipe资源"""
