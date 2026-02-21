@@ -15,6 +15,7 @@
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 from typing import List, Tuple, Optional
 import numpy as np
@@ -131,18 +132,35 @@ class DataCollector:
     def collect(self):
         """
         交互式数据采集
-        按 's' 保存当前位姿和图像
+        支持两种模式：
+        - manual: 按 's' 保存当前位姿和图像
+        - auto: 每隔指定时间自动保存
         按 'q' 退出
         """
+        collection_mode = config.DATA_COLLECTION_CONFIG['mode']
+        auto_interval = config.DATA_COLLECTION_CONFIG['auto_interval']
+
         print("\n" + "="*70)
         print("数据采集模式")
         print("="*70)
-        print("操作说明:")
-        print("  - 移动机器人到不同位姿")
-        print("  - 按 's' 键保存当前数据")
-        print("  - 按 'q' 键退出")
+        print(f"采集模式: {collection_mode.upper()}")
+
+        if collection_mode == 'manual':
+            print("操作说明:")
+            print("  - 移动机器人到不同位姿")
+            print("  - 按 's' 键保存当前数据")
+            print("  - 按 'q' 键退出")
+        else:  # auto mode
+            print("操作说明:")
+            print(f"  - 系统将每隔 {auto_interval} 秒自动拍照")
+            print("  - 请在拍照间隔内移动机器人到不同位姿")
+            print("  - 按 'q' 键退出")
+
         print(f"  - 最少需要 {config.CALIBRATION_PARAMS['min_samples']} 组数据")
         print("="*70 + "\n")
+
+        # 自动模式的计时器
+        last_capture_time = time.time() if collection_mode == 'auto' else None
 
         while True:
             # 捕获图像
@@ -152,9 +170,18 @@ class DataCollector:
 
             # 显示图像
             display_image = image.copy()
+
+            # 根据模式显示不同的提示信息
+            if collection_mode == 'manual':
+                info_text = f"Collected: {len(self.collected_poses)} | Press 's' to save, 'q' to quit"
+            else:  # auto mode
+                time_since_last = time.time() - last_capture_time
+                time_until_next = max(0, auto_interval - time_since_last)
+                info_text = f"Collected: {len(self.collected_poses)} | Next in: {time_until_next:.1f}s | Press 'q' to quit"
+
             cv2.putText(
                 display_image,
-                f"Collected: {len(self.collected_poses)} | Press 's' to save, 'q' to quit",
+                info_text,
                 (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.7,
@@ -166,7 +193,29 @@ class DataCollector:
             # 等待按键
             key = cv2.waitKey(1) & 0xFF
 
-            if key == ord('s'):
+            # 自动模式：检查是否到达拍照时间
+            if collection_mode == 'auto':
+                current_time = time.time()
+                if current_time - last_capture_time >= auto_interval:
+                    # 自动保存数据
+                    try:
+                        # 获取机器人位姿
+                        robot_pose = self.robot.get_pose()
+
+                        # 保存
+                        self.collected_poses.append(robot_pose)
+                        self.collected_images.append(image.copy())
+
+                        print(f"✓ 自动保存第 {len(self.collected_poses)} 组数据")
+
+                        # 重置计时器
+                        last_capture_time = current_time
+
+                    except Exception as e:
+                        print(f"✗ 保存失败: {e}")
+
+            # 手动模式：按 's' 键保存
+            if collection_mode == 'manual' and key == ord('s'):
                 # 保存数据
                 try:
                     # 获取机器人位姿
@@ -181,7 +230,8 @@ class DataCollector:
                 except Exception as e:
                     print(f"✗ 保存失败: {e}")
 
-            elif key == ord('q'):
+            # 按 'q' 键退出
+            if key == ord('q'):
                 break
 
         cv2.destroyAllWindows()
