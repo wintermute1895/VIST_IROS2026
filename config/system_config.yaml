@@ -66,6 +66,19 @@ robot:
     - 0.0      # Joint 5: Wrist_Pitch
     - 0.0      # Joint 6: Wrist_Roll
 
+  # 关节使能配置（用于单关节测试和调试）
+  # true = 关节跟随控制命令运动
+  # false = 关节锁定在初始位置不动
+  # 用途：逐个测试关节映射是否正确
+  joint_enabled:
+    - true   # Joint 0: Shoulder_Pitch
+    - true   # Joint 1: Shoulder_Roll
+    - true   # Joint 2: Shoulder_Yaw
+    - true   # Joint 3: Elbow_Pitch
+    - false   # Joint 4: Wrist_Yaw
+    - false   # Joint 5: Wrist_Pitch
+    - false   # Joint 6: Wrist_Roll
+
 # ==========================================
 # 坐标系转换
 # ==========================================
@@ -120,15 +133,28 @@ control:
   pink_elbow_priority: 0.5  # 肘部任务优先级（中）
 
   # 速度和加速度限制
-  # 真机测试安全参数（降低到仿真的 30-40%）
-  max_joint_velocity: 0.3      # rad/s (原 0.8，降低到 37.5%)
-  max_joint_acceleration: 0.8  # rad/s^2 (原 2.0，降低到 40%)
+  # 针对重负载末端优化：进一步降低以减少振荡
+  max_joint_velocity: 0.3      # rad/s (17度/秒) - 更慢更稳定
+  max_joint_acceleration: 0.5  # rad/s² (29度/秒²) - 更平滑的启停
+
+  # 速度估计方法（用于消融实验）
+  # 选项：
+  #   "kalman": 使用VIST卡尔曼滤波器的速度估计（推荐）
+  #   "numerical": 使用数值微分估计速度（基线方法）
+  #   "measured": 使用机器人SDK返回的速度测量值（如果可用）
+  velocity_estimation_method: "kalman"  # 默认使用卡尔曼滤波
+
+  # 意图因子模式（用于消融实验）
+  # 选项：
+  #   "dynamic": 根据任务状态动态计算 α（推荐，VIST完整功能）
+  #   "fixed": 固定 α 为指定值（用于消融实验）
+  intent_factor_mode: "dynamic"  # 默认使用动态意图检测
+  fixed_alpha_value: 1.0  # 当 intent_factor_mode="fixed" 时使用此值
 
   # 控制频率
-  # ⚠️ 真机注意：move_joint有轨迹规划，不能发送太频繁
-  # 建议：10-15Hz 以避免命令冲突和电机过载
-  frequency: 10  # Hz (降低到10Hz，避免与move_joint轨迹规划冲突)
-  dt: 0.1     # 1/frequency (seconds)
+  # 提高频率以减少颤动，提升平滑度
+  frequency: 20  # Hz (保持20Hz，处理能力充足)
+  dt: 0.05     # 1/frequency (seconds)
 
   # 遥操作时长
   duration: 300.0  # seconds (5 minutes)
@@ -147,7 +173,8 @@ vist_kalman:
   # 仿真参数覆盖模式
   # 当启用时，VIST将使用ParameterOverrideManager中的参数而不是从视觉数据计算
   # 这允许在没有相机输入的情况下测试完整的VIST控制器效果
-  simulation_use_parameter_override: true  # 启用参数覆盖模式（仿真专用）
+  # ⚠️ 真机测试时应设为 false，让 α 动态计算
+  simulation_use_parameter_override: false  # 关闭参数覆盖，启用动态意图检测
 
   # 几何解析求解器（肘部约束集成）
   geometric_solver:
@@ -174,7 +201,7 @@ vist_kalman:
     #   * 适用于USB插入等精密垂直插入任务
     #   * J1+J4+J6协同工作保持末端垂直
     #   * 避免姿态自由度带来的插入偏差
-    wrist_control_mode: "vertical_insertion"  # 推荐用于USB插入任务
+    wrist_control_mode: "wrist_locked"  # 推荐用于USB插入任务
 
     # 动态腕部控制：在精密插入阶段自动解锁腕部
     enable_dynamic_wrist_unlock: true  # 当α > 0.8时，自动切换到full_dof模式
@@ -354,8 +381,8 @@ network:
 # 视觉参数
 # ==========================================
 vision:
-  # 相机参数
-  width: 640
+  # 相机参数 - 平衡模式（RealSense 原生分辨率，更好的深度精度）
+  width: 848
   height: 480
   fps: 30
 
@@ -395,17 +422,15 @@ hardware:
     urdf_to_sdk: [0, 1, 2, 3, 4, 5, 6]
     sdk_to_urdf: [0, 1, 2, 3, 4, 5, 6]
 
-  # 关节符号翻转（按 URDF 顺序）
-  joint_sign_flip: [false, true, true, false, true, false, false]
+  # 关节符号翻转（已弃用 - 统一使用 robot.joint_directions）
+  # joint_sign_flip: [false, false, false, false, false, false, false]
 
   # SDK 运动控制参数
-  # 真机运动参数（针对move_joint优化）
+  # 针对重负载末端优化：进一步降低以减少振荡
   # 注意：由于joint_follow有bug，只能使用move_joint
-  # move_joint会做轨迹规划，所以需要提高速度以减少延迟
-  # ⚠️ 安全参数：降低速度和加速度以防止电机过载
-  move_joint_speed: 0.1      # 关节运动速度 (rad/s) - 降低到安全值
-  move_joint_accel: 0.1      # 关节运动加速度 (rad/s²) - 降低到安全值
-  move_joint_block: false    # 是否阻塞等待运动完成
+  move_joint_speed: 0.3     # 关节运动速度 (rad/s) - 更慢更稳定
+  move_joint_accel: 0.5     # 关节运动加速度 (rad/s²) - 更平滑的启停
+  move_joint_block: false   # 是否阻塞等待运动完成（非阻塞模式 + 状态同步修复）
 
   # 关节跟随模式（用于遥操作）
   joint_follow_mode: false    # true=高跟随模式（低延迟），false=低跟随模式（平滑）
