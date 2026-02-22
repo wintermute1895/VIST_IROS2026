@@ -133,9 +133,17 @@ control:
   pink_elbow_priority: 0.5  # 肘部任务优先级（中）
 
   # 速度和加速度限制
-  # 针对重负载末端优化：进一步降低以减少振荡
-  max_joint_velocity: 0.3      # rad/s (17度/秒) - 更慢更稳定
-  max_joint_acceleration: 0.5  # rad/s² (29度/秒²) - 更平滑的启停
+  # ✅ 2026-02-22: 只放宽J2的限制（因为只有J2触发问题）
+  # 其他关节保持保守限制以确保安全
+  # 单位：rad/s
+  max_joint_velocity: [0.7, 1.5, 1.5, 0.5, 0.5, 0.5, 0.5]  # J0-J6的速度限制
+  # J0, J1, J3-J6: 0.5 rad/s (29度/秒) - 保守限制
+  # J2 (Shoulder_Yaw): 1.5 rad/s (86度/秒) - 放宽限制，因为这个关节经常触发
+
+  # 加速度限制（单位：rad/s²）
+  max_joint_acceleration: [0.8, 1.5, 1.5, 0.8, 0.8, 0.8, 0.8]  # J0-J6的加速度限制
+  # J0, J1, J3-J6: 0.8 rad/s² (46度/秒²) - 保守限制
+  # J2: 3.0 rad/s² (172度/秒²) - 放宽限制
 
   # 速度估计方法（用于消融实验）
   # 选项：
@@ -144,17 +152,27 @@ control:
   #   "measured": 使用机器人SDK返回的速度测量值（如果可用）
   velocity_estimation_method: "kalman"  # 默认使用卡尔曼滤波
 
+  # VIST输出低通滤波器参数
+  # 用于平滑VIST输出，减少跳变，降低SafeRobotController触发频率
+  # alpha ∈ [0, 1]: 平滑系数
+  #   - 1.0: 无滤波（直接输出）
+  #   - 0.5: 中等平滑
+  #   - 0.2: 强平滑（推荐，用于抑制跳变）
+  #   - 0.1: 非常强的平滑（可能导致响应迟钝）
+  vist_output_filter_alpha: 0.2  # 推荐值：0.2（强平滑）
+
   # 意图因子模式（用于消融实验）
   # 选项：
   #   "dynamic": 根据任务状态动态计算 α（推荐，VIST完整功能）
   #   "fixed": 固定 α 为指定值（用于消融实验）
-  intent_factor_mode: "dynamic"  # 默认使用动态意图检测
-  fixed_alpha_value: 1.0  # 当 intent_factor_mode="fixed" 时使用此值
+  intent_factor_mode: "fixed"  # 使用固定α模式（回放时没有视觉数据）
+  fixed_alpha_value: 1.0  # α=1.0: 高意图，最小滤波，最大响应性
 
   # 控制频率
-  # 提高频率以减少颤动，提升平滑度
-  frequency: 20  # Hz (保持20Hz，处理能力充足)
-  dt: 0.05     # 1/frequency (seconds)
+  # 使用固定频率限制，减少高频振荡
+  # ✅ 2026-02-22: 降低到实际可达到的频率（真机实际约18-20 Hz）
+  frequency: 20  # Hz (从26降到20，匹配真机实际频率)
+  dt: 0.05       # 1/frequency (seconds) - 从0.0385改为0.05
 
   # 遥操作时长
   duration: 300.0  # seconds (5 minutes)
@@ -349,7 +367,7 @@ filtering:
   # Mapper 层滤波开关
   # true: 在 Mapper 中应用滤波（调试模式，方便可视化）
   # false: 透传原始数据给控制节点（生产模式，由 VIST 核心算法处理）
-  enable_mapper_filter: true
+  enable_mapper_filter: true  # 重新启用Mapper滤波
 
   # Mapper 滤波器类型
   # 可选值: "ema" (指数移动平均) 或 "oneeuro" (One Euro Filter)
@@ -359,8 +377,8 @@ filtering:
   ema_alpha: 0.5  # 滤波系数 (0=最大平滑, 1=无滤波)
 
   # One Euro Filter 参数
-  oneeuro_min_cutoff: 0.1  # 最小截止频率（降低以增强滤波）
-  oneeuro_beta: 0.001      # 速度系数（降低以减少对速度变化的敏感度）
+  oneeuro_min_cutoff: 0.04  # 最小截止频率（降低以增强滤波，减少目标变化率）
+  oneeuro_beta: 0.0003      # 速度系数（降低以减少对速度变化的敏感度）
   oneeuro_d_cutoff: 1.0    # 导数截止频率
 
   # 控制节点滤波（VIST 核心算法）
@@ -428,8 +446,8 @@ hardware:
   # SDK 运动控制参数
   # 针对重负载末端优化：进一步降低以减少振荡
   # 注意：由于joint_follow有bug，只能使用move_joint
-  move_joint_speed: 0.3     # 关节运动速度 (rad/s) - 更慢更稳定
-  move_joint_accel: 0.5     # 关节运动加速度 (rad/s²) - 更平滑的启停
+  move_joint_speed: 0.5     # 关节运动速度 (rad/s) - 更慢更稳定
+  move_joint_accel: 0.8     # 关节运动加速度 (rad/s²) - 更平滑的启停
   move_joint_block: false   # 是否阻塞等待运动完成（非阻塞模式 + 状态同步修复）
 
   # 关节跟随模式（用于遥操作）

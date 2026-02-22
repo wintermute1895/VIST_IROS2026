@@ -204,7 +204,7 @@ class GeometricArmSolver:
 
         return np.array([q1, q2, q3, q4])
 
-    def solve_wrist_orientation(self, q_arm, target_orientation, alpha=0.0):
+    def solve_wrist_orientation(self, q_arm, target_orientation, alpha=0.0, q_current_wrist=None):
         """
         Stage 2: 腕部姿态求解（支持多种控制模式）
 
@@ -213,7 +213,7 @@ class GeometricArmSolver:
         支持四种控制模式：
         1. full_dof: 全自由度欧拉角分解（默认）
         2. constrained_horizontal: 约束水平模式（J5锁定，J6保持水平）
-        3. wrist_locked: 腕部锁定模式（J5-J7全部锁定为0）
+        3. wrist_locked: 腕部锁定模式（J5-J7保持当前值）
         4. vertical_insertion: 垂直插入模式（J5/J7锁定，J6动态约束保持垂直）
 
         动态腕部解锁（平滑过渡）：
@@ -227,13 +227,20 @@ class GeometricArmSolver:
             q_arm: 臂部关节角度 [q1, q2, q3, q4] (numpy array)
             target_orientation: 目标末端姿态（旋转矩阵或四元数）
             alpha: 意图因子（0-1），用于动态腕部解锁
+            q_current_wrist: 当前腕部关节角度 [q5, q6, q7]（可选，用于wrist_locked模式）
 
         Returns:
             q_wrist: 腕部关节角度 [q5, q6, q7] (numpy array)
         """
-        # 模式1: 腕部锁定模式（最简单）
+        # 模式1: 腕部锁定模式（保持当前值）
         if self.wrist_control_mode == 'wrist_locked':
-            return np.zeros(3)
+            # ✅ 修复：返回当前关节角度而不是固定的0
+            # 这样SafeRobotController计算速度时：q_dot = (q_current - q_current) / dt = 0
+            if q_current_wrist is not None:
+                return q_current_wrist.copy()
+            else:
+                # 如果没有提供当前值，返回0（向后兼容）
+                return np.zeros(3)
 
         # 模式2: 垂直插入模式（USB插入专用）
         if self.wrist_control_mode == 'vertical_insertion':
@@ -450,7 +457,7 @@ class GeometricArmSolver:
 
         return np.array([q5, q6, q7])
 
-    def solve(self, shoulder_pos, elbow_pos, wrist_pos, target_orientation=None, alpha=0.0):
+    def solve(self, shoulder_pos, elbow_pos, wrist_pos, target_orientation=None, alpha=0.0, q_current=None):
         """
         完整求解：臂部配置 + 腕部姿态
 
@@ -460,6 +467,7 @@ class GeometricArmSolver:
             wrist_pos: 腕部位置 [x, y, z]
             target_orientation: 目标末端姿态（可选，如果为 None 则只求解臂部配置）
             alpha: 意图因子（0-1），用于动态腕部解锁
+            q_current: 当前关节角度 [q1, ..., q7]（可选，用于wrist_locked模式）
 
         Returns:
             q_solution: 完整的关节角度 [q1, q2, q3, q4, q5, q6, q7]
@@ -469,10 +477,15 @@ class GeometricArmSolver:
 
         # Stage 2: 腕部姿态求解
         if target_orientation is not None:
-            q_wrist = self.solve_wrist_orientation(q_arm, target_orientation, alpha)
+            # 提取当前腕部角度（如果提供）
+            q_current_wrist = q_current[4:7] if q_current is not None and len(q_current) >= 7 else None
+            q_wrist = self.solve_wrist_orientation(q_arm, target_orientation, alpha, q_current_wrist)
         else:
-            # 如果没有指定目标姿态，腕部保持中立位置
-            q_wrist = np.zeros(3)
+            # 如果没有指定目标姿态，腕部保持中立位置或当前位置
+            if q_current is not None and len(q_current) >= 7:
+                q_wrist = q_current[4:7].copy()
+            else:
+                q_wrist = np.zeros(3)
 
         # 使用关节名来明确映射，避免索引混淆
         # 创建关节角度字典

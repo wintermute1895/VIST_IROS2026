@@ -1,0 +1,1007 @@
+2026-02-22 00:46:17 | __main__             | INFO     | ================================================================================
+2026-02-22 00:46:17 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 00:46:17 | __main__             | INFO     | ================================================================================
+2026-02-22 00:46:17 | __main__             | INFO     | 加载系统配置...
+2026-02-22 00:46:17 | __main__             | INFO     | 配置加载完成
+2026-02-22 00:46:17 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 00:46:17 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 00:46:17 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 00:46:19 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 00:46:19 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 00:46:19 | __main__             | INFO     | 初始化完成！
+2026-02-22 00:47:43 | __main__             | INFO     | ================================================================================
+2026-02-22 00:47:43 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 00:47:43 | __main__             | INFO     | ================================================================================
+2026-02-22 00:47:43 | __main__             | INFO     | 加载系统配置...
+2026-02-22 00:47:43 | __main__             | INFO     | 配置加载完成
+2026-02-22 00:47:43 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 00:47:43 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 00:47:43 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 00:47:44 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 00:47:44 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 00:47:44 | __main__             | INFO     | 初始化完成！
+2026-02-22 00:49:41 | __main__             | INFO     | ================================================================================
+2026-02-22 00:49:41 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 00:49:41 | __main__             | INFO     | ================================================================================
+2026-02-22 00:49:41 | __main__             | INFO     | 加载系统配置...
+2026-02-22 00:49:41 | __main__             | INFO     | 配置加载完成
+2026-02-22 00:49:41 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 00:49:41 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 00:49:41 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 00:49:42 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 00:49:42 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 00:49:42 | __main__             | INFO     | 初始化完成！
+2026-02-22 00:50:41 | __main__             | INFO     | 关节使能配置:
+2026-02-22 00:50:41 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 00:50:41 | __main__             | INFO     |   Joint 1: 🔒 锁定
+2026-02-22 00:50:41 | __main__             | INFO     |   Joint 2: 🔒 锁定
+2026-02-22 00:50:41 | __main__             | INFO     |   Joint 3: 🔒 锁定
+2026-02-22 00:50:41 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 00:50:41 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 00:50:41 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 00:50:51 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.527m > 0.517m
+2026-02-22 00:50:51 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.527m > 0.517m)
+2026-02-22 00:50:51 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.527m > 0.517m
+2026-02-22 00:50:51 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.527m > 0.517m)
+2026-02-22 00:50:51 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.527m > 0.517m
+2026-02-22 00:50:51 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.527m > 0.517m)
+2026-02-22 00:50:51 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.524m > 0.517m
+2026-02-22 00:50:51 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.524m > 0.517m)
+2026-02-22 00:50:51 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.520m > 0.517m
+2026-02-22 00:50:51 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.520m > 0.517m)
+2026-02-22 00:50:51 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.517m > 0.517m
+2026-02-22 00:50:51 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.517m > 0.517m)
+2026-02-22 00:51:01 | __main__             | INFO     | 用户中断
+2026-02-22 00:51:03 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 01:02:36 | __main__             | INFO     | ================================================================================
+2026-02-22 01:02:36 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 01:02:36 | __main__             | INFO     | ================================================================================
+2026-02-22 01:02:36 | __main__             | INFO     | 加载系统配置...
+2026-02-22 01:02:36 | __main__             | INFO     | 配置加载完成
+2026-02-22 01:02:36 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 01:02:36 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 01:02:36 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 01:02:37 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 01:02:37 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 01:02:37 | __main__             | INFO     | 初始化完成！
+2026-02-22 01:04:27 | __main__             | INFO     | ================================================================================
+2026-02-22 01:04:27 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 01:04:27 | __main__             | INFO     | ================================================================================
+2026-02-22 01:04:27 | __main__             | INFO     | 加载系统配置...
+2026-02-22 01:04:27 | __main__             | INFO     | 配置加载完成
+2026-02-22 01:04:27 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 01:04:27 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 01:04:27 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 01:04:28 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 01:04:28 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 01:04:28 | __main__             | INFO     | 初始化完成！
+2026-02-22 01:04:54 | __main__             | INFO     | 关节使能配置:
+2026-02-22 01:04:54 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 01:04:54 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 01:04:54 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 01:04:54 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 01:04:54 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 01:04:54 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 01:04:54 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 01:05:05 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.519m > 0.517m
+2026-02-22 01:05:05 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.519m > 0.517m)
+2026-02-22 01:05:05 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.519m > 0.517m
+2026-02-22 01:05:05 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.519m > 0.517m)
+2026-02-22 01:05:05 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.518m > 0.517m
+2026-02-22 01:05:05 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.518m > 0.517m)
+2026-02-22 01:05:44 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 10:11:28 | __main__             | INFO     | ================================================================================
+2026-02-22 10:11:28 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 10:11:28 | __main__             | INFO     | ================================================================================
+2026-02-22 10:11:28 | __main__             | INFO     | 加载系统配置...
+2026-02-22 10:11:28 | __main__             | INFO     | 配置加载完成
+2026-02-22 10:11:28 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 10:11:28 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 10:11:28 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 10:11:30 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 10:11:30 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 10:11:30 | __main__             | INFO     | 初始化完成！
+2026-02-22 10:11:52 | __main__             | INFO     | 关节使能配置:
+2026-02-22 10:11:52 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 10:11:52 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 10:11:52 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 10:11:52 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 10:11:52 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 10:11:52 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 10:11:52 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 10:12:34 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 10:34:59 | __main__             | INFO     | ================================================================================
+2026-02-22 10:34:59 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 10:34:59 | __main__             | INFO     | ================================================================================
+2026-02-22 10:34:59 | __main__             | INFO     | 加载系统配置...
+2026-02-22 10:34:59 | __main__             | INFO     | 配置加载完成
+2026-02-22 10:34:59 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 10:34:59 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 10:34:59 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 10:35:00 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 10:35:00 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 10:35:00 | __main__             | INFO     | 初始化完成！
+2026-02-22 10:35:33 | __main__             | INFO     | ================================================================================
+2026-02-22 10:35:33 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 10:35:33 | __main__             | INFO     | ================================================================================
+2026-02-22 10:35:33 | __main__             | INFO     | 加载系统配置...
+2026-02-22 10:35:33 | __main__             | INFO     | 配置加载完成
+2026-02-22 10:35:33 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 10:35:33 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 10:35:33 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 10:35:34 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 10:35:34 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 10:35:34 | __main__             | INFO     | 初始化完成！
+2026-02-22 10:36:16 | __main__             | INFO     | ================================================================================
+2026-02-22 10:36:16 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 10:36:16 | __main__             | INFO     | ================================================================================
+2026-02-22 10:36:16 | __main__             | INFO     | 加载系统配置...
+2026-02-22 10:36:16 | __main__             | INFO     | 配置加载完成
+2026-02-22 10:36:16 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 10:36:16 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 10:36:16 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 10:36:17 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 10:36:17 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 10:36:17 | __main__             | INFO     | 初始化完成！
+2026-02-22 10:36:42 | __main__             | INFO     | 关节使能配置:
+2026-02-22 10:36:42 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 10:36:42 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 10:36:42 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 10:36:42 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 10:36:42 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 10:36:42 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 10:36:42 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 10:37:24 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 14:49:35 | __main__             | INFO     | ================================================================================
+2026-02-22 14:49:35 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 14:49:35 | __main__             | INFO     | ================================================================================
+2026-02-22 14:49:35 | __main__             | INFO     | 加载系统配置...
+2026-02-22 14:49:35 | __main__             | INFO     | 配置加载完成
+2026-02-22 14:49:35 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 14:49:35 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 14:49:35 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 14:49:36 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 14:49:36 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 14:49:36 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 14:49:36 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 14:49:37 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 14:49:37 | __main__             | INFO     | 初始化完成！
+2026-02-22 14:50:17 | __main__             | INFO     | ================================================================================
+2026-02-22 14:50:17 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 14:50:17 | __main__             | INFO     | ================================================================================
+2026-02-22 14:50:17 | __main__             | INFO     | 加载系统配置...
+2026-02-22 14:50:17 | __main__             | INFO     | 配置加载完成
+2026-02-22 14:50:17 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 14:50:17 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 14:50:17 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 14:50:18 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 14:50:18 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 14:50:18 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 14:50:18 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 14:50:19 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 14:50:19 | __main__             | INFO     | 初始化完成！
+2026-02-22 14:52:06 | __main__             | INFO     | ================================================================================
+2026-02-22 14:52:06 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 14:52:06 | __main__             | INFO     | ================================================================================
+2026-02-22 14:52:06 | __main__             | INFO     | 加载系统配置...
+2026-02-22 14:52:06 | __main__             | INFO     | 配置加载完成
+2026-02-22 14:52:06 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 14:52:06 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 14:52:06 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 14:52:07 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 14:52:07 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 14:52:07 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 14:52:07 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 14:52:07 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 14:52:07 | __main__             | INFO     | 初始化完成！
+2026-02-22 14:52:42 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 14:52:42 | __main__             | INFO     | 关节使能配置:
+2026-02-22 14:52:42 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 14:52:42 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 14:52:42 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 14:52:42 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 14:52:42 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 14:52:42 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 14:52:42 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 14:55:49 | __main__             | INFO     | ================================================================================
+2026-02-22 14:55:49 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 14:55:49 | __main__             | INFO     | ================================================================================
+2026-02-22 14:55:49 | __main__             | INFO     | 加载系统配置...
+2026-02-22 14:55:49 | __main__             | INFO     | 配置加载完成
+2026-02-22 14:55:49 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 14:55:49 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 14:55:49 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 14:55:50 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 14:55:50 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 14:55:50 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 14:55:50 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 14:55:52 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 14:55:52 | __main__             | INFO     | 初始化完成！
+2026-02-22 14:56:25 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 14:56:25 | __main__             | INFO     | 关节使能配置:
+2026-02-22 14:56:25 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 14:56:25 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 14:56:25 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 14:56:25 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 14:56:25 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 14:56:25 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 14:56:25 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 14:56:52 | __main__             | INFO     | 用户中断
+2026-02-22 14:56:53 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 15:02:13 | __main__             | INFO     | ================================================================================
+2026-02-22 15:02:13 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 15:02:13 | __main__             | INFO     | ================================================================================
+2026-02-22 15:02:13 | __main__             | INFO     | 加载系统配置...
+2026-02-22 15:02:13 | __main__             | INFO     | 配置加载完成
+2026-02-22 15:02:13 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 15:02:13 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 15:02:13 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 15:02:14 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 15:02:14 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 15:02:14 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 15:02:14 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 15:02:15 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 15:02:15 | __main__             | INFO     | 初始化完成！
+2026-02-22 15:02:44 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 15:02:44 | __main__             | INFO     | 关节使能配置:
+2026-02-22 15:02:44 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 15:02:44 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 15:02:44 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 15:02:44 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 15:02:44 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 15:02:44 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 15:02:44 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 15:03:09 | __main__             | INFO     | 用户中断
+2026-02-22 15:03:27 | __main__             | INFO     | ================================================================================
+2026-02-22 15:03:27 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 15:03:27 | __main__             | INFO     | ================================================================================
+2026-02-22 15:03:27 | __main__             | INFO     | 加载系统配置...
+2026-02-22 15:03:27 | __main__             | INFO     | 配置加载完成
+2026-02-22 15:03:27 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 15:03:27 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 15:03:27 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 15:03:28 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 15:03:28 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 15:03:28 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 15:03:28 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 15:03:29 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 15:03:29 | __main__             | INFO     | 初始化完成！
+2026-02-22 15:03:49 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 15:03:49 | __main__             | INFO     | 关节使能配置:
+2026-02-22 15:03:49 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 15:03:49 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 15:03:49 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 15:03:49 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 15:03:49 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 15:03:49 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 15:03:49 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 15:04:11 | __main__             | INFO     | 用户中断
+2026-02-22 15:04:12 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 15:14:27 | __main__             | INFO     | ================================================================================
+2026-02-22 15:14:27 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 15:14:27 | __main__             | INFO     | ================================================================================
+2026-02-22 15:14:27 | __main__             | INFO     | 加载系统配置...
+2026-02-22 15:14:27 | __main__             | INFO     | 配置加载完成
+2026-02-22 15:14:27 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 15:14:27 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 15:14:27 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 15:14:29 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 15:14:29 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 15:14:29 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 15:14:29 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 15:14:30 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 15:14:30 | __main__             | INFO     | 初始化完成！
+2026-02-22 15:15:10 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 15:15:10 | __main__             | INFO     | 关节使能配置:
+2026-02-22 15:15:10 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 15:15:10 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 15:15:10 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 15:15:10 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 15:15:10 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 15:15:10 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 15:15:10 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 15:31:19 | __main__             | INFO     | ================================================================================
+2026-02-22 15:31:19 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 15:31:19 | __main__             | INFO     | ================================================================================
+2026-02-22 15:31:19 | __main__             | INFO     | 加载系统配置...
+2026-02-22 15:31:19 | __main__             | INFO     | 配置加载完成
+2026-02-22 15:31:19 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 15:31:19 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 15:31:19 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 15:31:20 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 15:31:20 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 15:31:20 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 15:31:20 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 15:31:21 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 15:31:21 | __main__             | INFO     | 初始化完成！
+2026-02-22 15:31:41 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 15:31:41 | __main__             | INFO     | 关节使能配置:
+2026-02-22 15:31:41 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 15:31:41 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 15:31:41 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 15:31:41 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 15:31:41 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 15:31:41 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 15:31:41 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 15:32:03 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:03 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:03 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:03 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:03 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:03 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:03 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:03 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:03 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:03 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 15:32:04 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.518m > 0.517m
+2026-02-22 15:32:04 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.518m > 0.517m)
+2026-02-22 15:32:39 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 15:51:04 | __main__             | INFO     | ================================================================================
+2026-02-22 15:51:04 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 15:51:04 | __main__             | INFO     | ================================================================================
+2026-02-22 15:51:04 | __main__             | INFO     | 加载系统配置...
+2026-02-22 15:51:04 | __main__             | INFO     | 配置加载完成
+2026-02-22 15:51:04 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 15:51:04 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 15:51:04 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 15:51:05 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 15:51:05 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 15:51:05 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 15:51:05 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 15:51:06 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 15:51:06 | __main__             | INFO     | 初始化完成！
+2026-02-22 15:51:28 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 15:51:28 | __main__             | INFO     | 关节使能配置:
+2026-02-22 15:51:28 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 15:51:28 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 15:51:28 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 15:51:28 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 15:51:28 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 15:51:28 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 15:51:28 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 15:53:18 | __main__             | INFO     | 用户中断
+2026-02-22 15:53:19 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 15:55:46 | __main__             | INFO     | ================================================================================
+2026-02-22 15:55:46 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 15:55:46 | __main__             | INFO     | ================================================================================
+2026-02-22 15:55:46 | __main__             | INFO     | 加载系统配置...
+2026-02-22 15:55:46 | __main__             | INFO     | 配置加载完成
+2026-02-22 15:55:46 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 15:55:46 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 15:55:46 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 15:55:47 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 15:55:47 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 15:55:47 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 15:55:47 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 15:55:48 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 15:55:48 | __main__             | INFO     | 初始化完成！
+2026-02-22 15:56:16 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 15:56:16 | __main__             | INFO     | 关节使能配置:
+2026-02-22 15:56:16 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 15:56:16 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 15:56:16 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 15:56:16 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 15:56:16 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 15:56:16 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 15:56:16 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 15:56:49 | __main__             | INFO     | 用户中断
+2026-02-22 15:56:49 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 16:01:05 | __main__             | INFO     | ================================================================================
+2026-02-22 16:01:05 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:01:05 | __main__             | INFO     | ================================================================================
+2026-02-22 16:01:05 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:01:05 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:01:05 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:01:05 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:01:05 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:01:06 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:01:06 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:01:06 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:01:06 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:01:07 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:01:07 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:01:28 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 16:01:28 | __main__             | INFO     | 关节使能配置:
+2026-02-22 16:01:28 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 16:01:28 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 16:01:28 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 16:01:28 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 16:01:28 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 16:01:28 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 16:01:28 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 16:01:51 | __main__             | INFO     | 用户中断
+2026-02-22 16:01:52 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 16:04:55 | __main__             | INFO     | ================================================================================
+2026-02-22 16:04:55 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:04:55 | __main__             | INFO     | ================================================================================
+2026-02-22 16:04:55 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:04:55 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:04:55 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:04:55 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:04:55 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:04:56 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:04:56 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:04:56 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:04:56 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:04:57 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:04:57 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:05:27 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 16:05:27 | __main__             | INFO     | 关节使能配置:
+2026-02-22 16:05:27 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 16:05:27 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 16:05:27 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 16:05:27 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 16:05:27 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 16:05:27 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 16:05:27 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 16:05:49 | __main__             | INFO     | 用户中断
+2026-02-22 16:05:50 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 16:08:19 | __main__             | INFO     | ================================================================================
+2026-02-22 16:08:19 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:08:19 | __main__             | INFO     | ================================================================================
+2026-02-22 16:08:19 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:08:19 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:08:19 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:08:19 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:08:19 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:08:20 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:08:20 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:08:20 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:08:20 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:08:21 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:08:21 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:08:53 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 16:08:53 | __main__             | INFO     | 关节使能配置:
+2026-02-22 16:08:53 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 16:08:53 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 16:08:53 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 16:08:53 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 16:08:53 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 16:08:53 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 16:08:53 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 16:09:16 | __main__             | INFO     | 用户中断
+2026-02-22 16:09:17 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 16:32:14 | __main__             | INFO     | ================================================================================
+2026-02-22 16:32:14 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:32:14 | __main__             | INFO     | ================================================================================
+2026-02-22 16:32:14 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:32:14 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:32:14 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:32:14 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:32:14 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:32:16 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:32:16 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:32:16 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:32:16 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:32:17 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:32:17 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:32:39 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 16:32:39 | __main__             | INFO     | 关节使能配置:
+2026-02-22 16:32:39 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 16:32:39 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 16:32:39 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 16:32:39 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 16:32:39 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 16:32:39 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 16:32:39 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 16:33:03 | __main__             | INFO     | 用户中断
+2026-02-22 16:33:03 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 16:36:45 | __main__             | INFO     | ================================================================================
+2026-02-22 16:36:45 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:36:45 | __main__             | INFO     | ================================================================================
+2026-02-22 16:36:45 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:36:45 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:36:45 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:36:45 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:36:45 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:36:46 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:36:46 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:36:46 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:36:46 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:36:47 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:36:47 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:37:01 | __main__             | INFO     | ================================================================================
+2026-02-22 16:37:01 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:37:01 | __main__             | INFO     | ================================================================================
+2026-02-22 16:37:01 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:37:01 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:37:01 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:37:01 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:37:01 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:37:03 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:37:03 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:37:03 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:37:03 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:37:04 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:37:04 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:37:14 | __main__             | INFO     | ================================================================================
+2026-02-22 16:37:14 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:37:14 | __main__             | INFO     | ================================================================================
+2026-02-22 16:37:14 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:37:14 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:37:14 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:37:14 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:37:14 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:37:15 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:37:15 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:37:15 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:37:15 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:37:16 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:37:16 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:37:37 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 16:37:37 | __main__             | INFO     | 关节使能配置:
+2026-02-22 16:37:37 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 16:37:37 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 16:37:37 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 16:37:37 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 16:37:37 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 16:37:37 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 16:37:37 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 16:38:12 | __main__             | INFO     | 用户中断
+2026-02-22 16:38:13 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 16:40:11 | __main__             | INFO     | ================================================================================
+2026-02-22 16:40:11 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:40:11 | __main__             | INFO     | ================================================================================
+2026-02-22 16:40:11 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:40:11 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:40:11 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:40:11 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:40:11 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:40:12 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:40:12 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:40:12 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:40:12 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:40:13 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:40:13 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:40:13 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:40:13 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:40:13 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:40:13 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:40:13 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:40:13 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:40:13 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:40:14 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:40:14 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:40:24 | __main__             | INFO     | ================================================================================
+2026-02-22 16:40:24 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:40:24 | __main__             | INFO     | ================================================================================
+2026-02-22 16:40:24 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:40:24 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:40:24 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:40:24 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:40:24 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:40:26 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:40:26 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:40:26 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:40:26 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:40:27 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:40:27 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:40:49 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 16:40:49 | __main__             | INFO     | 关节使能配置:
+2026-02-22 16:40:49 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 16:40:49 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 16:40:49 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 16:40:49 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 16:40:49 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 16:40:49 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 16:40:49 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 16:41:40 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 16:50:22 | __main__             | INFO     | ================================================================================
+2026-02-22 16:50:22 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:50:22 | __main__             | INFO     | ================================================================================
+2026-02-22 16:50:22 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:50:22 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:50:22 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:50:22 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:50:22 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:50:23 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:50:23 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:50:23 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:50:23 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:50:24 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:50:24 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:50:44 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 16:50:44 | __main__             | INFO     | 关节使能配置:
+2026-02-22 16:50:44 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 16:50:44 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 16:50:44 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 16:50:44 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 16:50:44 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 16:50:44 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 16:50:44 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 16:51:05 | __main__             | INFO     | 用户中断
+2026-02-22 16:51:06 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 16:53:13 | __main__             | INFO     | ================================================================================
+2026-02-22 16:53:13 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 16:53:13 | __main__             | INFO     | ================================================================================
+2026-02-22 16:53:13 | __main__             | INFO     | 加载系统配置...
+2026-02-22 16:53:14 | __main__             | INFO     | 配置加载完成
+2026-02-22 16:53:14 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 16:53:14 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 16:53:14 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 16:53:15 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 16:53:15 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 16:53:15 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 16:53:15 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 16:53:16 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 16:53:16 | __main__             | INFO     | 初始化完成！
+2026-02-22 16:53:36 | __main__             | INFO     | 轨迹插值器状态已重置
+2026-02-22 16:53:36 | __main__             | INFO     | 关节使能配置:
+2026-02-22 16:53:36 | __main__             | INFO     |   Joint 0: ✅ 使能
+2026-02-22 16:53:36 | __main__             | INFO     |   Joint 1: ✅ 使能
+2026-02-22 16:53:36 | __main__             | INFO     |   Joint 2: ✅ 使能
+2026-02-22 16:53:36 | __main__             | INFO     |   Joint 3: ✅ 使能
+2026-02-22 16:53:36 | __main__             | INFO     |   Joint 4: 🔒 锁定
+2026-02-22 16:53:36 | __main__             | INFO     |   Joint 5: 🔒 锁定
+2026-02-22 16:53:36 | __main__             | INFO     |   Joint 6: 🔒 锁定
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.522m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.522m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.521m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.521m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.521m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.521m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.521m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.521m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.521m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.521m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.521m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.521m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.520m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.520m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.520m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.520m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.520m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.520m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.520m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.520m > 0.517m)
+2026-02-22 16:53:46 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.519m > 0.517m
+2026-02-22 16:53:46 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.519m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.519m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.519m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.519m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.519m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.519m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.519m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.518m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.518m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.518m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.518m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.518m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.518m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.518m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.518m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.517m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.517m > 0.517m)
+2026-02-22 16:53:47 | src.control.vist_controller | ERROR    | 目标位置超出工作空间: 0.517m > 0.517m
+2026-02-22 16:53:47 | __main__             | WARNING  | 控制失败: 目标位置超出工作空间 (0.517m > 0.517m)
+2026-02-22 16:53:58 | __main__             | INFO     | 用户中断
+2026-02-22 16:53:58 | __main__             | INFO     | 真机控制器已退出
+2026-02-22 17:00:38 | __main__             | INFO     | ================================================================================
+2026-02-22 17:00:38 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 17:00:38 | __main__             | INFO     | ================================================================================
+2026-02-22 17:00:38 | __main__             | INFO     | 加载系统配置...
+2026-02-22 17:00:38 | __main__             | INFO     | 配置加载完成
+2026-02-22 17:00:38 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 17:00:38 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 17:00:38 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 17:00:39 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 17:00:39 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 17:00:39 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 17:00:39 | __main__             | INFO     | 初始化完成！
+2026-02-22 17:11:44 | __main__             | INFO     | ================================================================================
+2026-02-22 17:11:44 | __main__             | INFO     | VIST 真机控制系统（重构版）
+2026-02-22 17:11:44 | __main__             | INFO     | ================================================================================
+2026-02-22 17:11:44 | __main__             | INFO     | 加载系统配置...
+2026-02-22 17:11:44 | __main__             | INFO     | 配置加载完成
+2026-02-22 17:11:44 | src.control.vist_controller | INFO     | 初始化运动映射器...
+2026-02-22 17:11:44 | src.control.vist_controller | INFO     | 运动映射器初始化完成
+2026-02-22 17:11:44 | src.control.vist_controller | INFO     | 初始化 IK 求解器...
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | IK 求解器初始化完成
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | 初始化 VIST 框架...
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | 启用几何解析求解器...
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | 几何求解器初始化完成 (trust_weight=2.0)
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | VIST Kalman Filter 初始化完成
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | 初始化安全控制器...
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | 安全控制器初始化完成
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | 初始化坐标变换管理器...
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | 坐标变换管理器初始化完成
+2026-02-22 17:11:45 | src.control.vist_controller | INFO     | VIST 控制器初始化完成 - 基础模式（直接控制）
+2026-02-22 17:11:45 | __main__             | INFO     | 轨迹插值器初始化完成
+2026-02-22 17:11:45 | __main__             | INFO     | 性能监控器初始化完成
+2026-02-22 17:11:45 | __main__             | INFO     | 初始化可视化器...
+2026-02-22 17:11:46 | __main__             | INFO     | 可视化器初始化成功: http://127.0.0.1:7001/static/
+2026-02-22 17:11:46 | __main__             | INFO     | 初始化完成！

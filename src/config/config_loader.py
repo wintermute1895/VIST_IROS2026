@@ -82,6 +82,11 @@ class VISTConfig:
         """关节零位偏移 (7,) numpy array, 单位：弧度"""
         return np.array(self._config['robot'].get('joint_offsets', [0, 0, 0, 0, 0, 0, 0]), dtype=np.float64)
 
+    @property
+    def robot_joint_enabled(self):
+        """关节使能配置 (7,) list of bool, True=使能, False=锁定"""
+        return self._config['robot'].get('joint_enabled', [True, True, True, True, True, True, True])
+
     # ==========================================
     # 坐标系转换
     # ==========================================
@@ -624,6 +629,19 @@ class VISTConfig:
     def visualization_max_trajectory_points(self):
         """最大轨迹点数量"""
         return self._config.get('visualization', {}).get('max_trajectory_points', 100)
+
+    # ==========================================
+    # 意图因子配置（消融实验）
+    # ==========================================
+    @property
+    def intent_factor_mode(self):
+        """意图因子模式: 'dynamic' 或 'fixed'"""
+        return self._config.get('vist', {}).get('intent_factor_mode', 'dynamic')
+
+    @property
+    def fixed_alpha_value(self):
+        """固定α值（当intent_factor_mode='fixed'时使用）"""
+        return self._config.get('vist', {}).get('fixed_alpha_value', 1.0)
 
     # ==========================================
     # 辅助方法

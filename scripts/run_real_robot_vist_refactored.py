@@ -23,6 +23,7 @@ sys.path.insert(0, project_root)
 from src.config import get_config
 from src.control.vist_controller import VISTController
 from src.control.trajectory_interpolator import TrajectoryInterpolator
+from src.control.filters import LowPassFilter
 from src.robot.robot_interface import RobotInterface
 from src.robot.visualizer import RobotVisualizer
 from src.utils.performance_monitor import TeleopMetrics
@@ -65,6 +66,12 @@ class RealRobotVIST:
         )
         logger.info("轨迹插值器初始化完成")
 
+        # 3.6 初始化低通滤波器（VIST输出平滑）
+        # 用于抑制VIST输出的跳变，在SafeRobotController之前工作
+        filter_alpha = getattr(self.config, 'vist_output_filter_alpha', 0.2)
+        self.vist_output_filter = LowPassFilter(alpha=filter_alpha, n_dims=7)
+        logger.info(f"VIST输出滤波器初始化完成 (alpha={filter_alpha})")
+
         # 4. 初始化性能监控器
         self.perf_metrics = TeleopMetrics()
         logger.info("性能监控器初始化完成")
@@ -102,6 +109,10 @@ class RealRobotVIST:
         self.interpolator.reset(q_init)
         logger.info("轨迹插值器状态已重置")
 
+        # 重置VIST输出滤波器状态
+        self.vist_output_filter.reset(q_init)
+        logger.info("VIST输出滤波器状态已重置")
+
         # 读取关节使能配置
         if hasattr(self.config, 'robot_joint_enabled'):
             self.joint_enabled = self.config.robot_joint_enabled
@@ -124,7 +135,12 @@ class RealRobotVIST:
         self.controller.q_current = q_full
 
         # 初始化安全控制器的当前状态
+        # ✅ 关键修复：同时初始化current和previous，避免第一帧速度计算错误
         self.controller.safety_controller.q_current = q_init.copy()
+        self.controller.safety_controller.q_previous = q_init.copy()
+        self.controller.safety_controller.q_dot_current = np.zeros(7)
+        self.controller.safety_controller.q_dot_previous = np.zeros(7)
+        self.controller.safety_controller.last_update_time = time.time()
 
     def run(self, duration=None, countdown_seconds=10, hold_position_after=False):
         """
@@ -163,17 +179,48 @@ class RealRobotVIST:
         for i in range(countdown_seconds, 0, -1):
             print(f"   {i}...", end='\r', flush=True)
             time.sleep(1)
-        print("   🚀 开始遥操作！" + " " * 20)
+        print("   🚀 倒计时结束！" + " " * 20)
 
+        # 等待第一个UDP包（确保第一帧对齐）
+        print("\n⏳ 等待第一个UDP数据包...")
+        print("   ⚠️  这确保了第一帧对齐，避免突然的大幅运动")
+        print("   ⚠️  请在另一个终端启动数据回放器")
+        print("   💡 提示：可以慢慢启动，没有时间限制\n")
+
+        first_packet = None
+        wait_count = 0
+        while first_packet is None:
+            # 直接从UDP接收器读取，避免触发robot_interface的超时警告
+            first_packet = self.robot.udp_receiver.receive()
+            if first_packet is None:
+                time.sleep(0.1)  # 100ms休眠，避免CPU占用过高
+                wait_count += 1
+                # 每10秒打印一次提示（100次 * 0.1s = 10s）
+                if wait_count % 100 == 0:
+                    print(f"   ⏳ 仍在等待... (已等待 {wait_count // 10} 秒)")
+
+        print("   ✅ 收到第一个数据包，开始控制！\n")
+
+        # 重置robot_interface的超时计数器
+        self.robot.data_timeout_count = 0
+
+        # ✅ 关键修复：重置SafeRobotController的时间戳
+        # 避免倒计时和等待UDP包期间的时间累积导致第一帧dt_actual异常
+        self.controller.safety_controller.last_update_time = time.time()
+
+        # 收到第一个包后才开始计时
         start_time = time.time()
         frame_count = 0
         success_count = 0
         last_print_time = time.time()
         last_robot_update = time.time()  # 上次更新机器人的时间
 
-        # 缓存最新的UDP数据
-        cached_keypoints = None
-        cached_timestamp = None
+        # 缓存最新的UDP数据（使用第一个包初始化）
+        if 'keypoints' in first_packet:
+            cached_keypoints = first_packet['keypoints']
+        else:
+            cached_keypoints = first_packet
+        cached_timestamp = first_packet.get('timestamp', time.time())
         last_udp_time = time.time()
 
         try:
@@ -183,8 +230,11 @@ class RealRobotVIST:
                 # ==========================================
                 # Phase 1: 非阻塞接收UDP数据（更新缓存）
                 # ==========================================
+                # ✅ 修复：直接使用UDP接收器，避免在每次循环迭代都触发超时逻辑
+                # 原来的 receive_keypoints() 会在每次调用时增加超时计数器
+                # 这导致在高频循环中快速触发超时警告
                 self.perf_metrics.monitor.start_timer("receive_keypoints")
-                packet = self.robot.receive_keypoints()
+                packet = self.robot.udp_receiver.receive()
                 self.perf_metrics.monitor.stop_timer("receive_keypoints")
 
                 if packet is not None:
@@ -200,6 +250,8 @@ class RealRobotVIST:
                         cached_keypoints = human_keypoints
                         cached_timestamp = time.time()
                         last_udp_time = time.time()
+                        # ✅ 重置超时计数器（只在成功接收数据时）
+                        self.robot.data_timeout_count = 0
 
                 # ==========================================
                 # Phase 2: 检查是否需要更新机器人
@@ -219,6 +271,22 @@ class RealRobotVIST:
 
                 # 如果没有缓存数据，跳过本次更新
                 if cached_keypoints is None:
+                    time.sleep(0.001)
+                    continue
+
+                # ✅ 检查UDP数据超时（只在实际更新机器人时检查）
+                # 这样超时检查在控制频率下进行，而不是循环频率
+                time_since_last_udp = time.time() - last_udp_time
+                udp_timeout_threshold = self.config.control_dt * self.robot.max_data_timeout
+                if time_since_last_udp > udp_timeout_threshold:
+                    if frame_count % 30 == 0:  # 每30帧打印一次，避免刷屏
+                        print(f"\n⚠️ UDP数据超时: {time_since_last_udp:.2f}s (阈值: {udp_timeout_threshold:.2f}s)")
+                    # 发送当前位置（停止运动）
+                    try:
+                        _, q_current, _ = self.robot.driver.get_state()
+                        self.robot.driver.send_command(q_current)
+                    except Exception as e:
+                        logger.warning(f"发送停止命令失败: {e}")
                     time.sleep(0.001)
                     continue
 
@@ -244,20 +312,53 @@ class RealRobotVIST:
                 self.perf_metrics.record_success()
                 success_count += 1
 
-                # 2.5 轨迹插值（平滑处理）
-                # 在 VIST 求解和关节锁定之间插入插值器
-                # 这样可以避免"咣当"现象（突然的速度/加速度变化）
-                q_interpolated = self.interpolator.interpolate(q_target)
+                # 2.4 应用低通滤波器（平滑VIST输出）
+                # ✅ 在关节锁定和安全控制器之前添加滤波
+                # 这样可以抑制VIST输出的跳变，减少SafeRobotController的触发频率
+                q_filtered = self.vist_output_filter.update(q_target)
 
-                # 3. 应用关节锁定（在发送到真机之前锁定）
-                # 注意：这里锁定的是插值后的 q_interpolated
-                # 锁定的关节保持初始位置，确保不会移动
+                # ✅ 测量实际控制周期（关键修复！）
+                # 使用实际测量的dt而不是固定配置值
+                current_time = time.time()
+                dt_actual = current_time - last_robot_update
+                # 防止异常值（第一帧或长时间暂停）
+                if dt_actual > 1.0 or dt_actual < 0.001:
+                    dt_actual = self.config.control_dt
+
+                # 2.5 应用关节锁定（⚠️ 必须在安全控制器之前！）
+                # 原因：SafeRobotController会计算速度 q_dot = (q_target - q_current) / dt
+                # 如果锁定的关节在q_target中有变化，会触发错误的速度限制
+                # 解决方案：先锁定关节，让SafeRobotController看到的q_target中锁定关节没有变化
                 import numpy as np
-                q_command = q_interpolated.copy()
-                for i in range(len(q_command)):
+                q_locked = q_filtered.copy()  # ✅ 使用滤波后的输出
+                for i in range(len(q_locked)):
                     if i < len(self.joint_enabled) and not self.joint_enabled[i]:
                         # 锁定的关节保持初始位置
-                        q_command[i] = self.q_init[i]
+                        q_locked[i] = self.q_init[i]
+
+                # 2.6 轨迹插值（平滑处理）
+                # ⚠️ 临时禁用插值器进行测试
+                # 在 VIST 求解和关节锁定之间插入插值器
+                # 这样可以避免"咣当"现象（突然的速度/加速度变化）
+                # ✅ 传递实际dt给插值器
+                # q_interpolated = self.interpolator.interpolate(q_locked, dt_actual=dt_actual)
+                # 临时直接使用q_locked，跳过插值器
+                q_interpolated = q_locked
+
+                # 2.7 安全控制器（像仿真一样在主循环中调用）
+                # ✅ 关键修复：不在VISTController内部调用，而是在主循环中调用
+                # 这样可以避免速度估计问题，保证平滑性
+                # ✅ 现在SafeRobotController接收的是锁定后的q_interpolated
+                # 锁定的关节不会触发速度限制
+                safety_status = {}
+                if hasattr(self.controller, 'safety_controller'):
+                    q_safe, safety_status = self.controller.safety_controller.process_command(q_interpolated)
+                    debug_info['safety_status'] = safety_status
+                else:
+                    q_safe = q_interpolated
+
+                # 3. 最终命令（已经锁定，直接使用）
+                q_command = q_safe
 
                 # 4. 发送到真机（blocking参数由配置文件控制：当前为false=非阻塞）
                 self.perf_metrics.monitor.start_timer("send_command")
@@ -273,12 +374,19 @@ class RealRobotVIST:
                     # 计算关节跟踪误差（命令 vs 实际）
                     q_tracking_error = np.linalg.norm(q_command - q_actual)
 
-                    # 更新安全控制器的实际状态（使用实际位置）
-                    self.controller.safety_controller.update_actual_command(q_actual)
-
                     # 同步插值器状态（使用实际位置）
                     # 这确保插值器基于真实位置进行下一步规划
+                    # 注意：先同步插值器，以便获取插值器的速度估计
                     self.interpolator.q_current = q_actual.copy()
+
+                    # 获取插值器的当前速度（基于梯形速度曲线）
+                    q_dot_interpolator = self.interpolator.get_current_velocity()
+
+                    # ✅ 关键修复：直接传递速度给安全控制器，避免重复计算
+                    # 这样可以确保速度状态一致，避免加速度计算错误
+                    self.controller.safety_controller.update_actual_command(
+                        q_actual, q_dot_actual=q_dot_interpolator
+                    )
 
                 except Exception as e:
                     # 如果读取失败，使用命令值作为备选（开环模式）
@@ -325,6 +433,7 @@ class RealRobotVIST:
                     if loop_stats:
                         status_msg += f" | 延迟: {loop_stats['mean']*1000:.1f}ms"
                         status_msg += f" | 频率: {loop_stats['frequency']:.1f}Hz"
+                        status_msg += f" | dt_actual: {dt_actual*1000:.1f}ms"
 
                     # VIST 意图因子
                     if hasattr(self.controller.vist_filter, 'alpha_smoothed'):

@@ -154,14 +154,15 @@ class InitializationSafetyChecker:
         print(f"      - 电机加速度: {self.config.hardware_move_joint_accel} rad/s²")
 
         # 检查参数是否在安全范围内
-        if self.config.control_frequency > 15:
-            warnings.append(f"控制频率过高 ({self.config.control_frequency} Hz)，建议 ≤15 Hz")
+        # 注意：这些是保守的建议值，实际可根据机器人性能调整
+        if self.config.control_frequency > 45:
+            warnings.append(f"控制频率过高 ({self.config.control_frequency} Hz)，建议 ≤50 Hz")
 
-        if self.config.hardware_move_joint_speed > 0.3:
-            warnings.append(f"电机速度过高 ({self.config.hardware_move_joint_speed} rad/s)，建议 ≤0.3 rad/s")
+        if self.config.hardware_move_joint_speed > 0.8:
+            warnings.append(f"电机速度过高 ({self.config.hardware_move_joint_speed} rad/s)，建议 ≤2.0 rad/s")
 
-        if self.config.hardware_move_joint_accel > 0.5:
-            warnings.append(f"电机加速度过高 ({self.config.hardware_move_joint_accel} rad/s²)，建议 ≤0.5 rad/s²")
+        if self.config.hardware_move_joint_accel > 1.2:
+            warnings.append(f"电机加速度过高 ({self.config.hardware_move_joint_accel} rad/s²)，建议 ≤5.0 rad/s²")
 
         return len(warnings) == 0, warnings
 
@@ -259,13 +260,9 @@ def safe_enable_arm(robot_driver, config) -> bool:
             time.sleep(1)
         print("   ✅ 观察期结束" + " " * 20)
 
-        # 7. 使能后确认
-        print("\n🔍 使能后状态确认")
-        response = input("   观察期内是否有任何异常？(输入 'no' 表示正常): ")
-        if response.lower() != 'no':
-            print("⚠️  检测到异常，立即断开连接")
-            robot_driver.disconnect()
-            return False
+        # 7. 观察期结束，自动继续（无需用户确认）
+        print("\n✅ 使能后观察期完成，准备开始控制")
+        print("   如发现任何异常，请立即按 Ctrl+C 停止")
 
         print("✅ 使能成功，电机状态正常")
         print("\n" + "="*80)

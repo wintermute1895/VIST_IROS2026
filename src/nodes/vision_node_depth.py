@@ -94,7 +94,7 @@ class VisionNodeWithDepth:
         self.mp_pose = mp.solutions.pose
         self.pose = self.mp_pose.Pose(
             static_image_mode=False,
-            model_complexity=1,  # 0=Lite, 1=Full, 2=Heavy
+            model_complexity=0,  # 0=Lite (最快), 1=Full, 2=Heavy - 改为Lite模型提速
             smooth_landmarks=True,
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5
@@ -211,14 +211,19 @@ class VisionNodeWithDepth:
         处理一帧图像 - 实现动态归零机制 + RealSense 深度
         :return: (annotated_frame, keypoints_dict) 或 (None, None) 如果失败
         """
+        # 性能监控
+        frame_start_time = time.time()
+
         # ==========================================
         # Step 1: 获取 RealSense 帧
         # ==========================================
+        realsense_start = time.time()
         try:
             frames = self.pipeline.wait_for_frames(timeout_ms=1000)
         except RuntimeError as e:
             print(f"⚠️ [VisionNodeDepth] 无法获取 RealSense 帧: {e}")
             return None, None
+        realsense_time = (time.time() - realsense_start) * 1000
 
         # 对齐深度图到 RGB 图
         aligned_frames = self.align.process(frames)
@@ -243,8 +248,17 @@ class VisionNodeWithDepth:
         # ==========================================
         # Step 3: MediaPipe Pose 处理
         # ==========================================
+        mediapipe_start = time.time()
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.pose.process(rgb_frame)
+        mediapipe_time = (time.time() - mediapipe_start) * 1000
+
+        # 每30帧打印一次性能统计
+        if self.frame_count % 30 == 0:
+            total_time = (time.time() - frame_start_time) * 1000
+            print(f"⏱️  [性能] RealSense: {realsense_time:.1f}ms | "
+                  f"MediaPipe: {mediapipe_time:.1f}ms | "
+                  f"总计: {total_time:.1f}ms ({1000/total_time:.1f} fps)")
 
         # 初始化关键点字典和深度变量
         keypoints = None
@@ -479,12 +493,9 @@ class VisionNodeWithDepth:
 
 if __name__ == "__main__":
     # 创建并运行视觉节点（带深度）
+    # 参数从配置文件自动加载（848x480 @ 30fps）
     node = VisionNodeWithDepth(
-        udp_ip="127.0.0.1",
-        udp_port=6001,
-        scale=1.0,  # 可调整灵敏度
-        width=640,
-        height=480,
-        fps=30
+        # 不指定参数，自动从 system_config.yaml 读取
+        # width, height, fps 将使用配置文件中的值
     )
     node.run(show_window=True)

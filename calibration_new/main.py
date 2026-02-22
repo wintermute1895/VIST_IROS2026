@@ -81,6 +81,10 @@ class DataCollector:
             # 启动相机
             profile = self.pipeline.start(rs_config)
 
+            # 相机预热
+            import time
+            time.sleep(2)
+
             # 获取相机内参
             if config.CAMERA_CONFIG['realsense']['use_intrinsics']:
                 color_stream = profile.get_stream(rs.stream.color)
@@ -135,7 +139,7 @@ class DataCollector:
         支持两种模式：
         - manual: 按 's' 保存当前位姿和图像
         - auto: 每隔指定时间自动保存
-        按 'q' 退出
+        按 'q' 退出或 Ctrl+C 保存并退出
         """
         collection_mode = config.DATA_COLLECTION_CONFIG['mode']
         auto_interval = config.DATA_COLLECTION_CONFIG['auto_interval']
@@ -150,11 +154,13 @@ class DataCollector:
             print("  - 移动机器人到不同位姿")
             print("  - 按 's' 键保存当前数据")
             print("  - 按 'q' 键退出")
+            print("  - 按 Ctrl+C 保存并退出")
         else:  # auto mode
             print("操作说明:")
             print(f"  - 系统将每隔 {auto_interval} 秒自动拍照")
             print("  - 请在拍照间隔内移动机器人到不同位姿")
             print("  - 按 'q' 键退出")
+            print("  - 按 Ctrl+C 保存并退出")
 
         print(f"  - 最少需要 {config.CALIBRATION_PARAMS['min_samples']} 组数据")
         print("="*70 + "\n")
@@ -162,43 +168,76 @@ class DataCollector:
         # 自动模式的计时器
         last_capture_time = time.time() if collection_mode == 'auto' else None
 
-        while True:
-            # 捕获图像
-            image = self.capture_frame()
-            if image is None:
-                continue
+        try:
+            while True:
+                # 捕获图像
+                image = self.capture_frame()
+                if image is None:
+                    continue
 
-            # 显示图像
-            display_image = image.copy()
+                # 显示图像
+                display_image = image.copy()
 
-            # 根据模式显示不同的提示信息
-            if collection_mode == 'manual':
-                info_text = f"Collected: {len(self.collected_poses)} | Press 's' to save, 'q' to quit"
-            else:  # auto mode
-                time_since_last = time.time() - last_capture_time
-                time_until_next = max(0, auto_interval - time_since_last)
-                info_text = f"Collected: {len(self.collected_poses)} | Next in: {time_until_next:.1f}s | Press 'q' to quit"
+                # 根据模式显示不同的提示信息
+                if collection_mode == 'manual':
+                    info_text = f"Collected: {len(self.collected_poses)} | Press 's' to save, 'q' to quit"
+                    # 添加第二行提示
+                    help_text = "Click this window first, then press keys (or Ctrl+C)"
+                else:  # auto mode
+                    time_since_last = time.time() - last_capture_time
+                    time_until_next = max(0, auto_interval - time_since_last)
+                    info_text = f"Collected: {len(self.collected_poses)} | Next in: {time_until_next:.1f}s | Press 'q' to quit"
+                    help_text = "Click this window first, then press 'q' to quit (or Ctrl+C)"
 
-            cv2.putText(
-                display_image,
-                info_text,
-                (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                (0, 255, 0),
-                2
-            )
-            cv2.imshow("Data Collection", display_image)
+                cv2.putText(
+                    display_image,
+                    info_text,
+                    (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    (0, 255, 0),
+                    2
+                )
+                cv2.putText(
+                    display_image,
+                    help_text,
+                    (10, 60),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (255, 255, 0),
+                    1
+                )
+                cv2.imshow("Data Collection", display_image)
 
-            # 等待按键
-            key = cv2.waitKey(1) & 0xFF
+                # 等待按键（增加等待时间以提高响应性）
+                key = cv2.waitKey(30) & 0xFF
 
-            # 自动模式：检查是否到达拍照时间
-            if collection_mode == 'auto':
-                current_time = time.time()
-                if current_time - last_capture_time >= auto_interval:
-                    # 自动保存数据
+                # 自动模式：检查是否到达拍照时间
+                if collection_mode == 'auto':
+                    current_time = time.time()
+                    if current_time - last_capture_time >= auto_interval:
+                        # 自动保存数据
+                        try:
+                            # 获取机器人位姿
+                            robot_pose = self.robot.get_pose()
+
+                            # 保存
+                            self.collected_poses.append(robot_pose)
+                            self.collected_images.append(image.copy())
+
+                            print(f"✓ 自动保存第 {len(self.collected_poses)} 组数据")
+
+                            # 重置计时器
+                            last_capture_time = current_time
+
+                        except Exception as e:
+                            print(f"✗ 保存失败: {e}")
+
+                # 手动模式：按 's' 键保存
+                if collection_mode == 'manual' and key == ord('s'):
+                    # 保存数据
                     try:
+                        print(f"\n正在保存第 {len(self.collected_poses) + 1} 组数据...")
                         # 获取机器人位姿
                         robot_pose = self.robot.get_pose()
 
@@ -206,42 +245,36 @@ class DataCollector:
                         self.collected_poses.append(robot_pose)
                         self.collected_images.append(image.copy())
 
-                        print(f"✓ 自动保存第 {len(self.collected_poses)} 组数据")
-
-                        # 重置计时器
-                        last_capture_time = current_time
+                        print(f"✓ 已保存第 {len(self.collected_poses)} 组数据")
 
                     except Exception as e:
                         print(f"✗ 保存失败: {e}")
+                        import traceback
+                        traceback.print_exc()
 
-            # 手动模式：按 's' 键保存
-            if collection_mode == 'manual' and key == ord('s'):
-                # 保存数据
-                try:
-                    # 获取机器人位姿
-                    robot_pose = self.robot.get_pose()
+                # 按 'q' 键退出
+                if key == ord('q'):
+                    print("\n检测到 'q' 键，正在退出...")
+                    break
 
-                    # 保存
-                    self.collected_poses.append(robot_pose)
-                    self.collected_images.append(image.copy())
+        except KeyboardInterrupt:
+            # 捕获 Ctrl+C
+            print("\n\n检测到 Ctrl+C，正在保存数据并退出...")
 
-                    print(f"✓ 已保存第 {len(self.collected_poses)} 组数据")
+        finally:
+            # 无论如何都要关闭窗口
+            cv2.destroyAllWindows()
 
-                except Exception as e:
-                    print(f"✗ 保存失败: {e}")
-
-            # 按 'q' 键退出
-            if key == ord('q'):
-                break
-
-        cv2.destroyAllWindows()
-
-        # 保存到文件
-        if len(self.collected_poses) >= config.CALIBRATION_PARAMS['min_samples']:
+        # 保存到文件（无论采集多少数据都保存）
+        if len(self.collected_poses) > 0:
             self._save_data()
             print(f"\n✓ 数据采集完成，共 {len(self.collected_poses)} 组")
+
+            if len(self.collected_poses) < config.CALIBRATION_PARAMS['min_samples']:
+                print(f"⚠️ 警告：数据量少于推荐值 {config.CALIBRATION_PARAMS['min_samples']} 组")
+                print(f"   建议继续采集更多数据以提高标定精度")
         else:
-            print(f"\n⚠️ 数据不足，需要至少 {config.CALIBRATION_PARAMS['min_samples']} 组")
+            print(f"\n⚠️ 未采集任何数据")
 
     def _save_data(self):
         """保存采集的数据到文件"""
@@ -367,6 +400,71 @@ def simulate_and_verify():
 # 模式 3: 标定解算
 # =============================================================================
 
+def detect_single_aruco_marker(
+    image: np.ndarray,
+    camera_matrix: np.ndarray,
+    dist_coeffs: np.ndarray
+) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+    """
+    检测单个 ArUco 标记并估计其位姿
+
+    Args:
+        image: 输入图像
+        camera_matrix: 相机内参矩阵
+        dist_coeffs: 畸变系数
+
+    Returns:
+        Tuple of (rvec, tvec) 如果检测成功，否则返回 None
+    """
+    # 获取 ArUco 字典
+    aruco_dict = cv2.aruco.getPredefinedDictionary(config.SINGLE_MARKER_CONFIG['dict_type'])
+
+    # 检测 ArUco 标记
+    detector_params = cv2.aruco.DetectorParameters()
+    detector = cv2.aruco.ArucoDetector(aruco_dict, detector_params)
+    corners, ids, rejected = detector.detectMarkers(image)
+
+    if ids is None or len(ids) == 0:
+        return None
+
+    # 查找目标标记
+    target_id = config.SINGLE_MARKER_CONFIG['marker_id']
+    marker_idx = None
+    for i, marker_id in enumerate(ids):
+        if marker_id[0] == target_id:
+            marker_idx = i
+            break
+
+    if marker_idx is None:
+        return None
+
+    # 获取标记的4个角点
+    marker_corners = corners[marker_idx][0]  # shape: (4, 2)
+
+    # 定义标记的3D坐标（标记中心为原点）
+    marker_size = config.SINGLE_MARKER_CONFIG['marker_size']
+    half_size = marker_size / 2.0
+    obj_points = np.array([
+        [-half_size, half_size, 0],   # 左上
+        [half_size, half_size, 0],    # 右上
+        [half_size, -half_size, 0],   # 右下
+        [-half_size, -half_size, 0]   # 左下
+    ], dtype=np.float32)
+
+    # 使用 solvePnP 估计位姿
+    success, rvec, tvec = cv2.solvePnP(
+        obj_points,
+        marker_corners,
+        camera_matrix,
+        dist_coeffs,
+        flags=cv2.SOLVEPNP_ITERATIVE
+    )
+
+    if not success:
+        return None
+
+    return rvec, tvec
+
 def detect_charuco_corners(
     image: np.ndarray,
     camera_matrix: np.ndarray,
@@ -388,27 +486,22 @@ def detect_charuco_corners(
     board = config.get_charuco_board()
     aruco_dict = cv2.aruco.getPredefinedDictionary(config.CHARUCO_CONFIG['dict_type'])
 
-    # 检测 ArUco 标记
+    # 检测 ArUco 标记（兼容 OpenCV 4.7+）
     detector_params = cv2.aruco.DetectorParameters()
-    corners, ids, rejected = cv2.aruco.detectMarkers(
-        image,
-        aruco_dict,
-        parameters=detector_params
-    )
+    detector = cv2.aruco.ArucoDetector(aruco_dict, detector_params)
+    corners, ids, rejected = detector.detectMarkers(image)
 
     if ids is None or len(ids) < 4:
         return None, None, None
 
-    # 插值 ChArUco 角点
-    retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
-        corners,
-        ids,
-        image,
-        board
-    )
+    # 插值 ChArUco 角点（兼容 OpenCV 4.7+）
+    charuco_detector = cv2.aruco.CharucoDetector(board)
+    charuco_corners, charuco_ids, marker_corners, marker_ids = charuco_detector.detectBoard(image)
 
-    if retval < 4:  # 至少需要 4 个角点
+    if charuco_corners is None or len(charuco_corners) < 4:  # 至少需要 4 个角点
         return None, None, None
+
+    retval = len(charuco_corners)
 
     # 亚像素优化
     if config.CALIBRATION_PARAMS['corner_refinement']:
@@ -421,15 +514,14 @@ def detect_charuco_corners(
             criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
         )
 
-    # 估计标定板位姿
-    success, rvec, tvec = cv2.aruco.estimatePoseCharucoBoard(
+    # 估计标定板位姿（使用 solvePnP）
+    obj_points = board.getChessboardCorners()[charuco_ids.flatten()]
+    success, rvec, tvec = cv2.solvePnP(
+        obj_points,
         charuco_corners,
-        charuco_ids,
-        board,
         camera_matrix,
         dist_coeffs,
-        None,
-        None
+        flags=cv2.SOLVEPNP_ITERATIVE
     )
 
     if not success:
@@ -691,12 +783,33 @@ def main():
         simulate_and_verify()
 
     elif args.mode == 'collect':
-        print("⚠️ 数据采集模式需要实现机器人接口")
-        print("请在 robot_interface.py 中实现你的机器人类，然后:")
-        print("  from robot_interface import YourRobotClass")
-        print("  robot = YourRobotClass()")
-        print("  collector = DataCollector(robot)")
-        print("  collector.collect()")
+        # 导入 LinkerArm 接口
+        try:
+            from linkerarm_interface import LinkerArmInterface
+
+            # 创建机器人接口
+            print("\n正在连接到 LinkerArm...")
+            robot = LinkerArmInterface(
+                tcp_host="192.168.10.21",  # 修改为你的机器人 IP
+                arm_side="right"             # 或 "right"
+            )
+
+            # 创建数据采集器
+            collector = DataCollector(robot)
+
+            # 开始采集
+            collector.collect()
+
+            # 断开连接
+            robot.disconnect()
+
+        except ImportError as e:
+            print(f"✗ 无法导入 LinkerArm 接口: {e}")
+            print("\n请确保:")
+            print("  1. linkerarm_interface.py 文件存在")
+            print("  2. LBot SDK 已正确安装")
+        except Exception as e:
+            print(f"✗ 数据采集失败: {e}")
 
     elif args.mode == 'calibrate':
         calibrate_from_images()

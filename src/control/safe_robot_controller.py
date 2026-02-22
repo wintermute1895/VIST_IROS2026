@@ -37,9 +37,21 @@ class SafeRobotController:
         self.config = config
         self.enable_logging = enable_logging
 
-        # 安全参数
-        self.max_velocity = config.max_joint_velocity
-        self.max_acceleration = config.max_joint_acceleration
+        # 安全参数（支持每个关节不同的限制）
+        max_vel = config.max_joint_velocity
+        max_acc = config.max_joint_acceleration
+
+        # 转换为numpy数组（支持标量或列表）
+        if isinstance(max_vel, (list, tuple, np.ndarray)):
+            self.max_velocity = np.array(max_vel)
+        else:
+            self.max_velocity = np.full(7, max_vel)
+
+        if isinstance(max_acc, (list, tuple, np.ndarray)):
+            self.max_acceleration = np.array(max_acc)
+        else:
+            self.max_acceleration = np.full(7, max_acc)
+
         self.joint_limits = config.robot_joint_limits
         self.dt = config.control_dt
 
@@ -140,19 +152,23 @@ class SafeRobotController:
 
         return q_safe, limited
 
-    def limit_velocity(self, q_target):
+    def limit_velocity(self, q_target, dt_actual=None):
         """
         限制关节速度
 
         Args:
             q_target: 目标关节角度 (7,)
+            dt_actual: 实际时间间隔（秒），如果为None则使用self.dt
 
         Returns:
             q_safe: 速度限制后的关节角度 (7,)
             limited: 是否被限制
         """
+        # 使用实际测量的时间间隔（关键修复！）
+        dt = dt_actual if dt_actual is not None else self.dt
+
         # 计算目标速度
-        q_dot_target = (q_target - self.q_current) / self.dt
+        q_dot_target = (q_target - self.q_current) / dt
 
         # 限制速度
         q_dot_safe = np.clip(q_dot_target, -self.max_velocity, self.max_velocity)
@@ -165,28 +181,40 @@ class SafeRobotController:
             # 计算被限制的关节
             limited_joints = np.where(np.abs(q_dot_target) > self.max_velocity)[0]
             print(f"⚠️ [SafeController] 速度限制: 关节 {limited_joints}")
+            print(f"   dt={dt:.6f}s")
+            # 🔍 调试：打印实际的位置值来检查单位（角度 vs 弧度）
+            print(f"   🔍 DEBUG: q_current[:3]={self.q_current[:3]}")
+            print(f"   🔍 DEBUG: q_target[:3]={q_target[:3]}")
+            # 打印每个被限制关节的max_vel
+            for j in limited_joints:
+                print(f"   J{j}: max_vel={self.max_velocity[j]:.3f} rad/s, q_dot_target={q_dot_target[j]:.3f}")
+            print(f"   q_delta={q_target[limited_joints] - self.q_current[limited_joints]}")
 
-        # 计算安全的目标角度
-        q_safe = self.q_current + q_dot_safe * self.dt
+        # 计算安全的目标角度（使用实际的dt）
+        q_safe = self.q_current + q_dot_safe * dt
 
         return q_safe, limited
 
-    def limit_acceleration(self, q_target):
+    def limit_acceleration(self, q_target, dt_actual=None):
         """
         限制关节加速度
 
         Args:
             q_target: 目标关节角度 (7,)
+            dt_actual: 实际时间间隔（秒），如果为None则使用self.dt
 
         Returns:
             q_safe: 加速度限制后的关节角度 (7,)
             limited: 是否被限制
         """
+        # 使用实际测量的时间间隔（关键修复！）
+        dt = dt_actual if dt_actual is not None else self.dt
+
         # 计算目标速度
-        q_dot_target = (q_target - self.q_current) / self.dt
+        q_dot_target = (q_target - self.q_current) / dt
 
         # 计算目标加速度
-        q_ddot_target = (q_dot_target - self.q_dot_current) / self.dt
+        q_ddot_target = (q_dot_target - self.q_dot_current) / dt
 
         # 限制加速度
         q_ddot_safe = np.clip(q_ddot_target, -self.max_acceleration, self.max_acceleration)
@@ -199,10 +227,15 @@ class SafeRobotController:
             # 计算被限制的关节
             limited_joints = np.where(np.abs(q_ddot_target) > self.max_acceleration)[0]
             print(f"⚠️ [SafeController] 加速度限制: 关节 {limited_joints}")
+            print(f"   dt={dt:.6f}s")
+            # 打印每个被限制关节的max_accel
+            for j in limited_joints:
+                print(f"   J{j}: max_accel={self.max_acceleration[j]:.3f} rad/s², q_ddot_target={q_ddot_target[j]:.3f}")
+            print(f"   q_dot_target={q_dot_target[limited_joints]}, q_dot_current={self.q_dot_current[limited_joints]}")
 
-        # 计算安全的速度和角度
-        q_dot_safe = self.q_dot_current + q_ddot_safe * self.dt
-        q_safe = self.q_current + q_dot_safe * self.dt
+        # 计算安全的速度和角度（使用实际的dt）
+        q_dot_safe = self.q_dot_current + q_ddot_safe * dt
+        q_safe = self.q_current + q_dot_safe * dt
 
         return q_safe, limited
 
@@ -212,16 +245,33 @@ class SafeRobotController:
 
         Args:
             q_target: 目标关节角度 (7,)
-            q_dot_estimated: 估计的关节速度 (7,)，可选
-                           如果提供，将使用此速度而不是数值微分
+            q_dot_estimated: 估计的关节速度 (7,)，可选（已废弃，保留参数以兼容旧代码）
+                           ⚠️ 为了保证速度/加速度计算一致性，现在完全基于位置差分计算
 
         Returns:
             q_safe: 安全的关节角度 (7,)
             safety_status: 安全状态字典
         """
-        # 如果提供了估计速度，更新当前速度
-        if q_dot_estimated is not None:
-            self.q_dot_current = np.array(q_dot_estimated).copy()
+        # ✅ 关键修复：测量实际的时间间隔
+        current_time = time.time()
+        dt_actual = current_time - self.last_update_time
+
+        # 防止异常的dt值（例如第一次调用或长时间暂停）
+        if dt_actual > 1.0 or dt_actual < 0.001:
+            print(f"⚠️ [SafeController] 异常dt值: {dt_actual:.6f}s, 使用默认值 {self.dt}s")
+            dt_actual = self.dt  # 使用默认值
+
+        # 每100帧打印一次dt_actual用于调试
+        if not hasattr(self, '_debug_frame_count'):
+            self._debug_frame_count = 0
+        self._debug_frame_count += 1
+        if self._debug_frame_count % 100 == 0:
+            print(f"🔍 [SafeController] dt_actual={dt_actual:.6f}s ({1.0/dt_actual:.1f} Hz)")
+
+        # ⚠️ 不再使用外部提供的速度估计
+        # 原因：外部速度（如卡尔曼滤波）与位置差分速度来源不一致
+        # 导致加速度计算错误，触发100%安全限制
+        # 解决方案：完全基于SafeRobotController自己维护的状态计算速度/加速度
 
         # 更新心跳时间
         self.last_command_time = time.time()
@@ -250,20 +300,32 @@ class SafeRobotController:
         # 1. 关节限位检查
         q_safe, position_limited = self.check_joint_limits(q_target)
 
-        # 2. 速度限制
-        q_safe, velocity_limited = self.limit_velocity(q_safe)
+        # 2. 速度限制（传递实际的dt）
+        q_safe, velocity_limited = self.limit_velocity(q_safe, dt_actual)
 
-        # 3. 加速度限制
-        q_safe, acceleration_limited = self.limit_acceleration(q_safe)
+        # ✅ 关键修复：在加速度限制之前先计算当前速度
+        # 这样limit_acceleration()可以使用正确的q_dot_current
+        q_dot_new = (q_safe - self.q_current) / dt_actual
+
+        # 3. 加速度限制（传递实际的dt）
+        # 注意：这里会使用self.q_dot_current（旧值）和q_dot_target（新值）计算加速度
+        # 但是我们需要先更新q_dot_current为q_dot_new
+        self.q_dot_current = q_dot_new
+        q_safe, acceleration_limited = self.limit_acceleration(q_safe, dt_actual)
 
         # 4. 再次检查关节限位（防止积分漂移）
         q_safe, _ = self.check_joint_limits(q_safe)
 
-        # 更新状态
+        # ✅ 更新状态
         self.q_previous = self.q_current.copy()
         self.q_dot_previous = self.q_dot_current.copy()
         self.q_current = q_safe.copy()
-        self.q_dot_current = (q_safe - self.q_previous) / self.dt
+
+        # 重新计算速度（基于最终的q_safe）
+        self.q_dot_current = (q_safe - self.q_previous) / dt_actual
+
+        # 更新时间戳（关键！）
+        self.last_update_time = current_time
 
         # 安全状态
         safety_status = {
@@ -313,8 +375,9 @@ class SafeRobotController:
         self.q_previous = np.zeros(7)
         self.q_dot_previous = np.zeros(7)
         self.last_command_time = time.time()
+        self.last_update_time = time.time()  # ✅ 修复：重置更新时间
 
-    def update_actual_command(self, q_actual):
+    def update_actual_command(self, q_actual, q_dot_actual=None):
         """
         更新实际发送给机器人的指令
 
@@ -324,9 +387,34 @@ class SafeRobotController:
 
         Args:
             q_actual: 实际发送给机器人的关节角度 (7,)
+            q_dot_actual: 实际的关节速度 (7,)，可选
+                         如果提供，将使用此速度而不是数值微分
         """
+        # ✅ 关键修复：测量实际的时间间隔
+        current_time = time.time()
+        dt_actual = current_time - self.last_update_time
+
+        # 防止异常的dt值
+        if dt_actual > 1.0 or dt_actual < 0.001:
+            dt_actual = self.dt
+
+        # 先保存旧状态
+        self.q_previous = self.q_current.copy()
+        self.q_dot_previous = self.q_dot_current.copy()
+
+        # 更新位置
         self.q_current = np.array(q_actual).copy()
-        self.q_dot_current = (self.q_current - self.q_previous) / self.dt
+
+        # 更新速度
+        if q_dot_actual is not None:
+            # 使用提供的速度（例如来自插值器或机器人SDK）
+            self.q_dot_current = np.array(q_dot_actual).copy()
+        else:
+            # 使用数值微分计算速度（使用实际的dt）
+            self.q_dot_current = (self.q_current - self.q_previous) / dt_actual
+
+        # 更新时间戳（关键！）
+        self.last_update_time = current_time
 
 
 # ============================================================================

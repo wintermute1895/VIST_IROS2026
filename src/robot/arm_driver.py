@@ -376,15 +376,14 @@ class RealArmDriver(BaseArmDriver):
         q_sdk = np.array(joint_positions[:self.dof])
 
         # ==========================================
-        # 应用SDK→URDF映射和符号翻转
+        # 应用SDK→URDF映射（不再使用符号翻转）
+        # 符号控制统一由 robot.joint_directions 处理
         # ==========================================
         q_urdf = np.zeros(self.dof)
         for sdk_idx in range(self.dof):
             urdf_idx = self.SDK_TO_URDF[sdk_idx]
             value = q_sdk[sdk_idx]
-            # 应用符号翻转（按URDF索引）
-            if self.JOINT_SIGN_FLIP[urdf_idx]:
-                value = -value
+            # 不再应用 JOINT_SIGN_FLIP - 统一使用 joint_directions
             q_urdf[urdf_idx] = value
 
         q_pos = q_urdf
@@ -397,7 +396,7 @@ class RealArmDriver(BaseArmDriver):
 
         return time.time(), q_pos, q_vel
 
-    def send_command(self, q_cmd_rad, use_smooth_mode=True):
+    def send_command(self, q_cmd_rad, use_smooth_mode=True, blocking=False):
         """
         发送关节控制指令（遥操作模式）
         注意：SDK 的 joint_follow 接受弧度制参数，无需转换
@@ -405,6 +404,7 @@ class RealArmDriver(BaseArmDriver):
         Args:
             q_cmd_rad: 目标关节角度（弧度）
             use_smooth_mode: True=平滑模式（慢速，有轨迹平滑），False=高速模式（快速响应）
+            blocking: 是否阻塞等待指令执行完成（默认False，遥操作模式建议True避免指令堆积）
 
         支持多种输入格式：
         1. 7维数组：直接发送（手臂关节）
@@ -430,15 +430,14 @@ class RealArmDriver(BaseArmDriver):
             return
 
         # ==========================================
-        # 应用URDF→SDK映射和符号翻转
+        # 应用URDF→SDK映射（不再使用符号翻转）
+        # 符号控制统一由 robot.joint_directions 处理
         # ==========================================
         q_sdk = np.zeros(self.dof)
         for urdf_idx in range(self.dof):
             sdk_idx = self.URDF_TO_SDK[urdf_idx]
             value = q_urdf[urdf_idx]
-            # 应用符号翻转（按URDF索引）
-            if self.JOINT_SIGN_FLIP[urdf_idx]:
-                value = -value
+            # 不再应用 JOINT_SIGN_FLIP - 统一使用 joint_directions
             q_sdk[sdk_idx] = value
 
         # 3. 转换为列表格式
@@ -464,7 +463,7 @@ class RealArmDriver(BaseArmDriver):
             q_cmd_list,
             speed=speed,   # 使用配置的速度
             accel=accel,   # 使用配置的加速度
-            block=False    # 非阻塞模式（遥操作需要高频率控制）
+            block=blocking # 阻塞模式可选（True可避免指令堆积导致的振荡）
         )
 
         if not success:
@@ -533,7 +532,14 @@ class RealArmDriver(BaseArmDriver):
                 current_pos = self.robot.get_joint_positions(self.arm_enum)
                 if current_pos is not None and len(current_pos) >= self.dof:
                     print("   发送停止指令（保持当前位置）...")
-                    self.robot.set_joint_positions(self.arm_enum, current_pos[:self.dof])
+                    # 使用 move_to_joint_target 而不是 set_joint_positions
+                    self.robot.move_to_joint_target(
+                        self.arm_enum,
+                        current_pos[:self.dof],
+                        speed=0.1,
+                        accel=0.1,
+                        block=False
+                    )
                     import time
                     time.sleep(0.1)  # 等待指令发送
             except Exception as e:

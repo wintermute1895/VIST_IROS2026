@@ -200,6 +200,7 @@ class TeleopMetrics:
     - 控制频率
     - 跟踪误差
     - 成功率
+    - 轨迹平滑度（速度、加速度、Jerk）
     """
 
     def __init__(self):
@@ -207,6 +208,11 @@ class TeleopMetrics:
         self.success_count = 0
         self.failure_count = 0
         self.tracking_errors = deque(maxlen=1000)
+
+        # 新增：轨迹平滑度指标
+        self.positions = deque(maxlen=1000)
+        self.timestamps = deque(maxlen=1000)
+        self.joint_angles = deque(maxlen=1000)
 
     def record_loop_time(self, elapsed: float):
         """记录控制循环时间"""
@@ -229,6 +235,84 @@ class TeleopMetrics:
     def record_failure(self):
         """记录失败"""
         self.failure_count += 1
+
+    def record_position(self, pos: np.ndarray, timestamp: float):
+        """
+        记录末端位置和时间戳（用于计算平滑度）
+
+        Args:
+            pos: 末端位置 [x, y, z] (numpy array)
+            timestamp: 时间戳（秒）
+        """
+        self.positions.append(pos.copy())
+        self.timestamps.append(timestamp)
+
+    def record_joint_angles(self, q: np.ndarray):
+        """
+        记录关节角度（用于计算关节运动统计）
+
+        Args:
+            q: 关节角度 (numpy array)
+        """
+        self.joint_angles.append(q.copy())
+
+    def compute_smoothness_metrics(self) -> Dict:
+        """
+        计算轨迹平滑度指标（速度、加速度、Jerk）
+
+        Returns:
+            包含平滑度指标的字典，如果数据不足则返回空字典
+        """
+        if len(self.positions) < 3 or len(self.timestamps) < 3:
+            return {}
+
+        positions = np.array(self.positions)
+        timestamps = np.array(self.timestamps)
+
+        # 计算速度（一阶导数）
+        velocities = []
+        for i in range(1, len(positions)):
+            dt = timestamps[i] - timestamps[i-1]
+            if dt > 0:
+                v = np.linalg.norm(positions[i] - positions[i-1]) / dt
+                velocities.append(v)
+
+        # 计算加速度（二阶导数）
+        accelerations = []
+        for i in range(1, len(velocities)):
+            dt = timestamps[i+1] - timestamps[i]
+            if dt > 0:
+                a = abs(velocities[i] - velocities[i-1]) / dt
+                accelerations.append(a)
+
+        # 计算Jerk（三阶导数）
+        jerks = []
+        for i in range(1, len(accelerations)):
+            dt = timestamps[i+2] - timestamps[i+1]
+            if dt > 0:
+                j = abs(accelerations[i] - accelerations[i-1]) / dt
+                jerks.append(j)
+
+        metrics = {}
+        if velocities:
+            velocities = np.array(velocities)
+            metrics['velocity_mean'] = velocities.mean()
+            metrics['velocity_max'] = velocities.max()
+            metrics['velocity_std'] = velocities.std()
+
+        if accelerations:
+            accelerations = np.array(accelerations)
+            metrics['acceleration_mean'] = accelerations.mean()
+            metrics['acceleration_max'] = accelerations.max()
+            metrics['acceleration_std'] = accelerations.std()
+
+        if jerks:
+            jerks = np.array(jerks)
+            metrics['jerk_mean'] = jerks.mean()
+            metrics['jerk_max'] = jerks.max()
+            metrics['jerk_rms'] = np.sqrt(np.mean(jerks**2))
+
+        return metrics
 
     def get_success_rate(self) -> float:
         """
@@ -262,6 +346,11 @@ class TeleopMetrics:
         stats['success_count'] = self.success_count
         stats['failure_count'] = self.failure_count
 
+        # 添加平滑度指标
+        smoothness = self.compute_smoothness_metrics()
+        if smoothness:
+            stats['smoothness'] = smoothness
+
         return stats
 
     def print_summary(self):
@@ -280,6 +369,21 @@ class TeleopMetrics:
             print(f"  平均: {errors.mean()*1000:.2f} mm")
             print(f"  标准差: {errors.std()*1000:.2f} mm")
             print(f"  最大: {errors.max()*1000:.2f} mm")
+
+        # 打印平滑度指标
+        smoothness = self.compute_smoothness_metrics()
+        if smoothness:
+            print(f"\n📉 轨迹平滑度:")
+            if 'velocity_mean' in smoothness:
+                print(f"  平均速度: {smoothness['velocity_mean']:.4f} m/s")
+                print(f"  最大速度: {smoothness['velocity_max']:.4f} m/s")
+            if 'acceleration_mean' in smoothness:
+                print(f"  平均加速度: {smoothness['acceleration_mean']:.4f} m/s²")
+                print(f"  最大加速度: {smoothness['acceleration_max']:.4f} m/s²")
+            if 'jerk_mean' in smoothness:
+                print(f"  平均Jerk: {smoothness['jerk_mean']:.4f} m/s³")
+                print(f"  最大Jerk: {smoothness['jerk_max']:.4f} m/s³")
+                print(f"  Jerk RMS: {smoothness['jerk_rms']:.4f} m/s³")
 
         print("="*70 + "\n")
 

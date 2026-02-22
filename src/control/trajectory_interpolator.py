@@ -59,12 +59,14 @@ class TrajectoryInterpolator:
         self.q_current = np.array(q_init).copy()
         self.q_dot_current = np.zeros(7)
 
-    def interpolate(self, q_target):
+    def interpolate(self, q_target, dt_actual=None):
         """
         生成下一个平滑的中间点（梯形速度曲线）
 
         Args:
             q_target: 目标关节角度 (7,)
+            dt_actual: 实际控制周期 (s)，如果为None则使用配置的dt
+                      ✅ 关键修复：使用实际测量的dt而不是固定配置值
 
         Returns:
             q_next: 下一个平滑的关节角度 (7,)
@@ -80,6 +82,9 @@ class TrajectoryInterpolator:
         - 加速度在限制范围内
         - 不会出现"咣当"现象
         """
+        # 使用实际dt或配置dt
+        dt = dt_actual if dt_actual is not None else self.dt
+
         # 第一次调用，初始化
         if self.q_current is None:
             self.q_current = np.array(q_target).copy()
@@ -87,12 +92,12 @@ class TrajectoryInterpolator:
 
         # 1. 计算期望速度（朝向目标）
         q_error = q_target - self.q_current
-        q_dot_desired = q_error / self.dt
+        q_dot_desired = q_error / dt
 
         # 2. 限制速度变化（加速度限制）- 关键步骤！
         # 这一步确保速度不会突然跳变
         q_dot_change = q_dot_desired - self.q_dot_current
-        max_change = self.max_acc * self.dt  # 一个周期内允许的最大速度变化
+        max_change = self.max_acc * dt  # 一个周期内允许的最大速度变化
         q_dot_change = np.clip(q_dot_change, -max_change, max_change)
 
         # 3. 更新速度
@@ -104,7 +109,7 @@ class TrajectoryInterpolator:
         )
 
         # 5. 计算新位置
-        q_next = self.q_current + self.q_dot_current * self.dt
+        q_next = self.q_current + self.q_dot_current * dt
         self.q_current = q_next
 
         return q_next

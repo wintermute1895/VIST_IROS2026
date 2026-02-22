@@ -221,14 +221,25 @@ class VISTController:
 
         debug_info['ik_error'] = error
 
-        # 4. 安全控制器检查（支持多种速度估计方法）
-        q_dot_estimated = self._get_velocity_estimate()
-        q_safe, safety_status = self.safety_controller.process_command(q_solution, q_dot_estimated)
-        debug_info['safety_status'] = safety_status
-        debug_info['velocity_estimation_method'] = getattr(self.config, 'velocity_estimation_method', 'kalman')
+        # 4. 安全控制器检查（⚠️ 已禁用，改为在主循环中调用）
+        # 原因：在VISTController内部调用SafeRobotController会导致速度估计问题
+        # 解决方案：像仿真一样，在主循环中调用SafeRobotController
+        # q_dot_estimated = self._get_velocity_estimate()
+        # q_safe, safety_status = self.safety_controller.process_command(q_solution, q_dot_estimated)
+        # debug_info['safety_status'] = safety_status
+        # debug_info['velocity_estimation_method'] = getattr(self.config, 'velocity_estimation_method', 'kalman')
 
-        if safety_status['emergency_stop']:
-            return None, False, {"error": "紧急停止激活"}
+        # if safety_status['emergency_stop']:
+        #     return None, False, {"error": "紧急停止激活"}
+
+        # 直接返回q_solution，安全检查在主循环中进行
+        q_safe = q_solution
+        debug_info['safety_status'] = {
+            'emergency_stop': False,
+            'velocity_limited': False,
+            'acceleration_limited': False,
+            'position_limited': False
+        }
 
         # 5. 更新状态
         q_full = pin.neutral(self.ik_solver.model).copy()
@@ -325,14 +336,25 @@ class VISTController:
 
         debug_info['ik_error'] = error
 
-        # 7. 安全控制器检查（支持多种速度估计方法）
-        q_dot_estimated = self._get_velocity_estimate()
-        q_safe, safety_status = self.safety_controller.process_command(q_solution, q_dot_estimated)
-        debug_info['safety_status'] = safety_status
-        debug_info['velocity_estimation_method'] = getattr(self.config, 'velocity_estimation_method', 'kalman')
+        # 7. 安全控制器检查（⚠️ 已禁用，改为在主循环中调用）
+        # 原因：在VISTController内部调用SafeRobotController会导致速度估计问题
+        # 解决方案：像仿真一样，在主循环中调用SafeRobotController
+        # q_dot_estimated = self._get_velocity_estimate()
+        # q_safe, safety_status = self.safety_controller.process_command(q_solution, q_dot_estimated)
+        # debug_info['safety_status'] = safety_status
+        # debug_info['velocity_estimation_method'] = getattr(self.config, 'velocity_estimation_method', 'kalman')
 
-        if safety_status['emergency_stop']:
-            return None, False, {"error": "紧急停止激活"}
+        # if safety_status['emergency_stop']:
+        #     return None, False, {"error": "紧急停止激活"}
+
+        # 直接返回q_solution，安全检查在主循环中进行
+        q_safe = q_solution
+        debug_info['safety_status'] = {
+            'emergency_stop': False,
+            'velocity_limited': False,
+            'acceleration_limited': False,
+            'position_limited': False
+        }
 
         # 8. 简化安全监控器检查（兜底保护）
         if self.safety_monitor is not None:

@@ -2,34 +2,21 @@
 UDP 通信模块
 提供 UDP 数据接收和发送功能
 
-优化方案：
-- 使用 MessagePack 替代 JSON（5-10x 性能提升）
-- 添加序列号和时间戳进行包丢失检测
-- 统计丢包率和延迟
-
-更新日期：2026-02-18
+更新日期：2026-02-21
 """
 
 import socket
 import time
+import json
 import numpy as np
 from typing import Optional, Dict, Any
 
-try:
-    import msgpack
-    MSGPACK_AVAILABLE = True
-except ImportError:
-    import json
-    MSGPACK_AVAILABLE = False
-    print("⚠️ [UDPReceiver] msgpack 未安装，使用 JSON（性能较低）")
-    print("   安装方法: pip install msgpack")
-
 
 class UDPReceiver:
-    """UDP 数据接收器（优化版）
+    """UDP 数据接收器（JSON 版本）
 
     特性：
-    - MessagePack 序列化（比 JSON 快 5-10 倍）
+    - JSON 序列化（兼容性好）
     - 包丢失检测（seq + timestamp）
     - 性能统计
     """
@@ -77,11 +64,8 @@ class UDPReceiver:
         try:
             data, addr = self.sock.recvfrom(self.buffer_size)
 
-            # 解析数据包
-            if MSGPACK_AVAILABLE:
-                packet = msgpack.unpackb(data, raw=False)
-            else:
-                packet = json.loads(data.decode('utf-8'))
+            # 解析 JSON 数据包
+            packet = json.loads(data.decode('utf-8'))
 
             # 检测包丢失
             if 'seq' in packet:
@@ -191,11 +175,8 @@ class UDPSender:
             }
             self.seq += 1
 
-            # 序列化
-            if MSGPACK_AVAILABLE:
-                message = msgpack.packb(packet, use_bin_type=True)
-            else:
-                message = json.dumps(packet).encode('utf-8')
+            # 序列化为 JSON
+            message = json.dumps(packet).encode('utf-8')
 
             self.sock.sendto(message, (self.host, self.port))
         except Exception as e:

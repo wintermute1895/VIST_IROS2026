@@ -84,18 +84,32 @@ class RobotInterface:
             self.data_timeout_count = 0
             return keypoints
 
-    def send_command(self, q_cmd):
+    def send_command(self, q_cmd, blocking=False):
         """
         发送关节角度命令到真机
 
         Args:
             q_cmd: 关节角度 (7-DoF)
+            blocking: 是否阻塞等待指令执行完成（默认False）
         """
-        self.driver.send_command(q_cmd)
+        self.driver.send_command(q_cmd, blocking=blocking)
 
     def get_state(self):
         """获取机器人当前状态"""
         return self.driver.get_state()
+
+    def hold_position(self):
+        """保持当前位置（不断开连接，不下使能）"""
+        print("\n🔒 保持当前位置...")
+        try:
+            _, q_current, _ = self.driver.get_state()
+            self.driver.send_command(q_current)
+            import time
+            time.sleep(0.1)
+            print("✅ 机器人将保持当前位置（仍处于使能状态）")
+            print("⚠️  如需下使能，请手动停止程序或使用紧急停止按钮")
+        except Exception as e:
+            print(f"⚠️ 发送保持位置指令失败: {e}")
 
     def disconnect(self):
         """断开连接"""

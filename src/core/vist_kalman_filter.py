@@ -461,7 +461,20 @@ class VISTKalmanFilter:
             alpha: 意图因子
         """
         # ==========================================
-        # 0. 检查参数覆盖模式（仿真专用）
+        # 0. 检查固定α模式（消融实验）
+        # ==========================================
+        if hasattr(self.config, 'intent_factor_mode') and self.config.intent_factor_mode == 'fixed':
+            # 使用固定α值
+            fixed_alpha = self.config.fixed_alpha_value
+            self.alpha = fixed_alpha
+            # 跳过EMA平滑，直接使用固定值
+            self.alpha_smoothed = fixed_alpha
+            if self.iteration_count % 100 == 0:  # 每100帧打印一次
+                print(f"   🔒 [固定α模式] α = {fixed_alpha:.2f}")
+            return self.alpha_smoothed
+
+        # ==========================================
+        # 0.1 检查参数覆盖模式（仿真专用）
         # ==========================================
         if hasattr(self.config, 'vist_simulation_use_parameter_override') and \
            self.config.vist_simulation_use_parameter_override:
@@ -853,8 +866,11 @@ class VISTKalmanFilter:
 
         # 1. 使用几何解析解计算目标关节角度
         # 传递alpha参数以支持动态腕部解锁
+        # ✅ 传递当前关节角度，用于wrist_locked模式
+        q_current = self.state[:self.n_joints]  # 从状态向量提取当前关节角度
         q_decoupled = self.geometric_solver.solve(
-            shoulder_pos, elbow_pos, wrist_pos, target_orientation, alpha=self.alpha_smoothed
+            shoulder_pos, elbow_pos, wrist_pos, target_orientation,
+            alpha=self.alpha_smoothed, q_current=q_current
         )
 
         # 2. 直接返回目标关节角度（绝对值，不是增量）
