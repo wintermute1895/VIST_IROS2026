@@ -24,7 +24,7 @@ from src.control.safe_robot_controller import SafeRobotController
 # 新增：意图检测和安全监控
 from src.core.intent_detector import (
     EnhancedIntentDetector,
-    IntentState,
+    IntentFactors,
     compute_human_command,
     compute_algorithm_expectation
 )
@@ -203,9 +203,9 @@ class VISTController:
         max_reach = self.config.robot_arm_lengths['upper'] + \
                     self.config.robot_arm_lengths['forearm']
 
-        if dist_to_shoulder > max_reach * 0.99:
-            logger.error(f"目标位置超出工作空间: {dist_to_shoulder:.3f}m > {max_reach*0.99:.3f}m")
-            return None, False, {"error": f"目标位置超出工作空间 ({dist_to_shoulder:.3f}m > {max_reach*0.99:.3f}m)"}
+        if dist_to_shoulder > max_reach * 0.98:
+            logger.error(f"目标位置超出工作空间: {dist_to_shoulder:.3f}m > {max_reach*0.98:.3f}m")
+            return None, False, {"error": f"目标位置超出工作空间 ({dist_to_shoulder:.3f}m > {max_reach*0.98:.3f}m)"}
 
         # 3. VIST 卡尔曼滤波求解
         q_solution, success, error = self.vist_filter.solve(
@@ -221,9 +221,11 @@ class VISTController:
 
         debug_info['ik_error'] = error
 
-        # 4. 安全控制器检查
-        q_safe, safety_status = self.safety_controller.process_command(q_solution)
+        # 4. 安全控制器检查（支持多种速度估计方法）
+        q_dot_estimated = self._get_velocity_estimate()
+        q_safe, safety_status = self.safety_controller.process_command(q_solution, q_dot_estimated)
         debug_info['safety_status'] = safety_status
+        debug_info['velocity_estimation_method'] = getattr(self.config, 'velocity_estimation_method', 'kalman')
 
         if safety_status['emergency_stop']:
             return None, False, {"error": "紧急停止激活"}
@@ -323,9 +325,11 @@ class VISTController:
 
         debug_info['ik_error'] = error
 
-        # 7. 安全控制器检查
-        q_safe, safety_status = self.safety_controller.process_command(q_solution)
+        # 7. 安全控制器检查（支持多种速度估计方法）
+        q_dot_estimated = self._get_velocity_estimate()
+        q_safe, safety_status = self.safety_controller.process_command(q_solution, q_dot_estimated)
         debug_info['safety_status'] = safety_status
+        debug_info['velocity_estimation_method'] = getattr(self.config, 'velocity_estimation_method', 'kalman')
 
         if safety_status['emergency_stop']:
             return None, False, {"error": "紧急停止激活"}
@@ -439,3 +443,37 @@ class VISTController:
             self.intent_detector.reset()
 
         logger.info("VISTController 状态已重置")
+
+    def _get_velocity_estimate(self):
+        """
+        获取关节速度估计（支持多种方法，用于消融实验）
+
+        Returns:
+            q_dot: 估计的关节速度 (7,)，如果不可用则返回None
+        """
+        method = getattr(self.config, 'velocity_estimation_method', 'kalman')
+
+        if method == 'kalman':
+            # 方法1：使用VIST卡尔曼滤波器的速度估计（推荐）
+            if hasattr(self, 'vist_filter') and self.vist_filter is not None:
+                q_dot = self.vist_filter.state[self.vist_filter.n_joints:self.vist_filter.n_joints*2]
+                return q_dot.copy()
+            else:
+                logger.warning("卡尔曼滤波器不可用，回退到数值微分")
+                return None
+
+        elif method == 'numerical':
+            # 方法2：使用数值微分（基线方法，用于对比）
+            # 返回None，让安全控制器使用数值微分
+            return None
+
+        elif method == 'measured':
+            # 方法3：使用机器人SDK返回的速度测量值（如果可用）
+            # 这需要在真机控制循环中实现
+            logger.warning("measured方法需要在真机控制循环中实现")
+            return None
+
+        else:
+            logger.warning(f"未知的速度估计方法: {method}，使用数值微分")
+            return None
+

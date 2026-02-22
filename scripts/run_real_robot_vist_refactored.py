@@ -22,6 +22,7 @@ sys.path.insert(0, project_root)
 
 from src.config import get_config
 from src.control.vist_controller import VISTController
+from src.control.trajectory_interpolator import TrajectoryInterpolator
 from src.robot.robot_interface import RobotInterface
 from src.robot.visualizer import RobotVisualizer
 from src.utils.performance_monitor import TeleopMetrics
@@ -56,6 +57,14 @@ class RealRobotVIST:
         # 3. 初始化机器人接口（硬件层）
         self.robot = RobotInterface(self.config)
 
+        # 3.5 初始化轨迹插值器（平滑层）
+        self.interpolator = TrajectoryInterpolator(
+            max_velocity=self.config.max_joint_velocity,
+            max_acceleration=self.config.max_joint_acceleration,
+            dt=self.config.control_dt
+        )
+        logger.info("轨迹插值器初始化完成")
+
         # 4. 初始化性能监控器
         self.perf_metrics = TeleopMetrics()
         logger.info("性能监控器初始化完成")
@@ -86,6 +95,25 @@ class RealRobotVIST:
         """连接到真机"""
         q_init = self.robot.connect()
 
+        # 保存初始关节位置（用于关节锁定）
+        self.q_init = q_init.copy()
+
+        # 重置轨迹插值器状态
+        self.interpolator.reset(q_init)
+        logger.info("轨迹插值器状态已重置")
+
+        # 读取关节使能配置
+        if hasattr(self.config, 'robot_joint_enabled'):
+            self.joint_enabled = self.config.robot_joint_enabled
+            logger.info("关节使能配置:")
+            for i, enabled in enumerate(self.joint_enabled):
+                status = "✅ 使能" if enabled else "🔒 锁定"
+                logger.info(f"  Joint {i}: {status}")
+        else:
+            # 默认所有关节使能
+            self.joint_enabled = [True] * len(q_init)
+            logger.info("未配置关节使能，默认所有关节使能")
+
         # 初始化控制器的当前状态
         import pinocchio as pin
         import numpy as np
@@ -98,13 +126,14 @@ class RealRobotVIST:
         # 初始化安全控制器的当前状态
         self.controller.safety_controller.q_current = q_init.copy()
 
-    def run(self, duration=None, countdown_seconds=10):
+    def run(self, duration=None, countdown_seconds=10, hold_position_after=False):
         """
         运行真机控制循环
 
         Args:
             duration: 运行时长（秒），None=从配置读取
             countdown_seconds: 启动前倒计时（秒）
+            hold_position_after: 结束后是否保持位置（True=保持使能，False=断开连接）
         """
         if duration is None:
             duration = self.config.control_duration
@@ -140,32 +169,67 @@ class RealRobotVIST:
         frame_count = 0
         success_count = 0
         last_print_time = time.time()
+        last_robot_update = time.time()  # 上次更新机器人的时间
+
+        # 缓存最新的UDP数据
+        cached_keypoints = None
+        cached_timestamp = None
+        last_udp_time = time.time()
 
         try:
             while time.time() - start_time < duration:
-                # 开始计时总循环
-                self.perf_metrics.monitor.start_timer("total_loop")
                 loop_start = time.time()
 
-                # 1. 接收人体关键点
+                # ==========================================
+                # Phase 1: 非阻塞接收UDP数据（更新缓存）
+                # ==========================================
                 self.perf_metrics.monitor.start_timer("receive_keypoints")
-                human_keypoints = self.robot.receive_keypoints()
+                packet = self.robot.receive_keypoints()
                 self.perf_metrics.monitor.stop_timer("receive_keypoints")
 
-                if human_keypoints is None:
-                    self.perf_metrics.monitor.stop_timer("total_loop")
-                    time.sleep(self.config.control_dt)
+                if packet is not None:
+                    # 提取关键点数据（兼容新旧格式）
+                    if 'keypoints' in packet:
+                        human_keypoints = packet['keypoints']
+                    else:
+                        human_keypoints = packet
+
+                    # 检查关键点是否完整
+                    if 'wrist' in human_keypoints and 'elbow' in human_keypoints:
+                        # 更新缓存
+                        cached_keypoints = human_keypoints
+                        cached_timestamp = time.time()
+                        last_udp_time = time.time()
+
+                # ==========================================
+                # Phase 2: 检查是否需要更新机器人
+                # ==========================================
+                time_since_last_update = time.time() - last_robot_update
+                should_update_robot = time_since_last_update >= self.config.control_dt
+
+                # 如果还没到更新时间，精确休眠
+                if not should_update_robot:
+                    time_until_next_update = self.config.control_dt - time_since_last_update
+                    if time_until_next_update > 0.001:
+                        # 休眠到距离目标时间还剩0.5ms
+                        sleep_time = max(0, time_until_next_update - 0.0005)
+                        if sleep_time > 0:
+                            time.sleep(sleep_time)
                     continue
 
-                # 检查关键点是否完整
-                if 'wrist' not in human_keypoints or 'elbow' not in human_keypoints:
-                    self.perf_metrics.monitor.stop_timer("total_loop")
-                    time.sleep(self.config.control_dt)
+                # 如果没有缓存数据，跳过本次更新
+                if cached_keypoints is None:
+                    time.sleep(0.001)
                     continue
+
+                # ==========================================
+                # Phase 3: 更新机器人（使用缓存的数据）
+                # ==========================================
+                self.perf_metrics.monitor.start_timer("total_loop")
 
                 # 2. VIST 控制器处理
                 self.perf_metrics.monitor.start_timer("vist_process")
-                q_safe, success, debug_info = self.controller.process(human_keypoints)
+                q_target, success, debug_info = self.controller.process(cached_keypoints)
                 self.perf_metrics.monitor.stop_timer("vist_process")
 
                 if not success:
@@ -174,31 +238,78 @@ class RealRobotVIST:
                     if frame_count % 30 == 0:
                         logger.warning(f"控制失败: {debug_info.get('error', 'Unknown')}")
                     self.perf_metrics.monitor.stop_timer("total_loop")
-                    time.sleep(self.config.control_dt)
+                    last_robot_update = time.time()  # 即使失败也更新时间，保持频率稳定
                     continue
 
                 self.perf_metrics.record_success()
                 success_count += 1
 
-                # 3. 发送到真机
+                # 2.5 轨迹插值（平滑处理）
+                # 在 VIST 求解和关节锁定之间插入插值器
+                # 这样可以避免"咣当"现象（突然的速度/加速度变化）
+                q_interpolated = self.interpolator.interpolate(q_target)
+
+                # 3. 应用关节锁定（在发送到真机之前锁定）
+                # 注意：这里锁定的是插值后的 q_interpolated
+                # 锁定的关节保持初始位置，确保不会移动
+                import numpy as np
+                q_command = q_interpolated.copy()
+                for i in range(len(q_command)):
+                    if i < len(self.joint_enabled) and not self.joint_enabled[i]:
+                        # 锁定的关节保持初始位置
+                        q_command[i] = self.q_init[i]
+
+                # 4. 发送到真机（blocking参数由配置文件控制：当前为false=非阻塞）
                 self.perf_metrics.monitor.start_timer("send_command")
-                self.robot.send_command(q_safe)
+                self.robot.send_command(q_command, blocking=self.config.hardware_move_joint_block)
                 self.perf_metrics.monitor.stop_timer("send_command")
 
-                # 4. 记录跟踪误差（如果有）
+                # 4.5 读取实际关节状态（闭环反馈）
+                # 这是关键：用实际位置而不是命令位置来更新控制器状态
+                q_tracking_error = None
+                try:
+                    _, q_actual, _ = self.robot.driver.get_state()
+
+                    # 计算关节跟踪误差（命令 vs 实际）
+                    q_tracking_error = np.linalg.norm(q_command - q_actual)
+
+                    # 更新安全控制器的实际状态（使用实际位置）
+                    self.controller.safety_controller.update_actual_command(q_actual)
+
+                    # 同步插值器状态（使用实际位置）
+                    # 这确保插值器基于真实位置进行下一步规划
+                    self.interpolator.q_current = q_actual.copy()
+
+                except Exception as e:
+                    # 如果读取失败，使用命令值作为备选（开环模式）
+                    if frame_count % 100 == 0:
+                        logger.warning(f"读取实际状态失败: {e}，使用命令值")
+                    self.controller.safety_controller.update_actual_command(q_command)
+
+                # 5. 记录跟踪误差（如果有）
                 if 'target_pos' in debug_info and 'current_pos' in debug_info:
-                    import numpy as np
                     error = np.linalg.norm(
                         np.array(debug_info['target_pos']) -
                         np.array(debug_info['current_pos'])
                     )
                     self.perf_metrics.record_tracking_error(error)
 
-                # 5. 更新可视化
+                    # 记录位置和时间戳（用于计算平滑度）
+                    self.perf_metrics.record_position(
+                        np.array(debug_info['target_pos']),
+                        time.time()
+                    )
+
+                # 记录关节角度（用于关节运动统计）
+                # 注意：记录实际发送的指令，而不是安全控制器输出的指令
+                self.perf_metrics.record_joint_angles(q_command)
+
+                # 6. 更新可视化
                 if self.visualizer is not None and self.visualizer.enable:
                     self.visualizer.update(self.controller.q_current)
 
                 frame_count += 1
+                last_robot_update = time.time()  # 更新机器人更新时间
 
                 # 停止总循环计时
                 self.perf_metrics.monitor.stop_timer("total_loop")
@@ -219,6 +330,15 @@ class RealRobotVIST:
                     if hasattr(self.controller.vist_filter, 'alpha_smoothed'):
                         status_msg += f" | 意图: {self.controller.vist_filter.alpha_smoothed:.2f}"
 
+                    # 关节跟踪误差（闭环反馈）
+                    if q_tracking_error is not None:
+                        status_msg += f" | 跟踪误差: {q_tracking_error:.4f}rad"
+
+                    # 关节锁定状态
+                    locked_joints = [i for i in range(len(self.joint_enabled)) if not self.joint_enabled[i]]
+                    if locked_joints:
+                        status_msg += f" | 🔒锁定: {locked_joints}"
+
                     # 安全状态
                     safety_status = debug_info.get('safety_status', {})
                     if any([safety_status.get('velocity_limited'),
@@ -234,11 +354,6 @@ class RealRobotVIST:
                     print(status_msg)
                     last_print_time = time.time()
 
-                # 控制频率
-                elapsed = time.time() - loop_start
-                if elapsed < self.config.control_dt:
-                    time.sleep(self.config.control_dt - elapsed)
-
         except KeyboardInterrupt:
             logger.info("用户中断")
         except Exception as e:
@@ -246,8 +361,21 @@ class RealRobotVIST:
             import traceback
             traceback.print_exc()
         finally:
-            # 断开连接
-            self.robot.disconnect()
+            # 根据参数决定是保持位置还是断开连接
+            if hold_position_after:
+                self.robot.hold_position()
+                print("\n⚠️  机器人保持当前位置，仍处于使能状态")
+                print("   按 Ctrl+C 可退出程序并断开连接")
+                try:
+                    # 保持程序运行，直到用户手动中断
+                    while True:
+                        time.sleep(1)
+                except KeyboardInterrupt:
+                    print("\n用户中断，正在断开连接...")
+                    self.robot.disconnect()
+            else:
+                # 断开连接
+                self.robot.disconnect()
 
             # 打印性能摘要
             print("\n" + "="*80)
@@ -274,10 +402,12 @@ class RealRobotVIST:
 
             # 安全控制器统计
             safety_stats = self.controller.get_safety_statistics()
-            print(f"\n🛡️  安全控制统计:")
-            print(f"  速度限制: {safety_stats['velocity_limited_count']}次")
-            print(f"  加速度限制: {safety_stats['acceleration_limited_count']}次")
-            print(f"  位置限制: {safety_stats['position_limited_count']}次")
+            if 'safety_controller' in safety_stats:
+                sc_stats = safety_stats['safety_controller']
+                print(f"\n🛡️  安全控制统计:")
+                print(f"  速度限制: {sc_stats['velocity_limited_count']}次")
+                print(f"  加速度限制: {sc_stats['acceleration_limited_count']}次")
+                print(f"  位置限制: {sc_stats['position_limited_count']}次")
 
             # 关闭可视化器
             if self.visualizer is not None:
@@ -291,10 +421,12 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="VIST 真机控制系统（重构版）")
-    parser.add_argument("--duration", type=float, default=None,
-                        help="运行时长（秒），默认从配置读取")
+    parser.add_argument("--duration", type=float, default=60.0,
+                        help="运行时长（秒），默认60秒")
     parser.add_argument("--countdown", type=int, default=10,
                         help="启动前倒计时（秒）")
+    parser.add_argument("--hold", action="store_true",
+                        help="结束后保持位置（不下使能）")
     parser.add_argument("--viz", action="store_true",
                         help="启用 MeshCat 可视化")
     parser.add_argument("--no-viz", action="store_true",
@@ -318,7 +450,8 @@ def main():
     # 运行控制循环
     controller.run(
         duration=args.duration,
-        countdown_seconds=args.countdown
+        countdown_seconds=args.countdown,
+        hold_position_after=args.hold
     )
 
 

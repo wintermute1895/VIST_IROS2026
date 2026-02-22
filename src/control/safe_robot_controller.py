@@ -206,17 +206,23 @@ class SafeRobotController:
 
         return q_safe, limited
 
-    def process_command(self, q_target):
+    def process_command(self, q_target, q_dot_estimated=None):
         """
         处理控制命令，应用所有安全限制
 
         Args:
             q_target: 目标关节角度 (7,)
+            q_dot_estimated: 估计的关节速度 (7,)，可选
+                           如果提供，将使用此速度而不是数值微分
 
         Returns:
             q_safe: 安全的关节角度 (7,)
             safety_status: 安全状态字典
         """
+        # 如果提供了估计速度，更新当前速度
+        if q_dot_estimated is not None:
+            self.q_dot_current = np.array(q_dot_estimated).copy()
+
         # 更新心跳时间
         self.last_command_time = time.time()
 
@@ -307,12 +313,20 @@ class SafeRobotController:
         self.q_previous = np.zeros(7)
         self.q_dot_previous = np.zeros(7)
         self.last_command_time = time.time()
-        self.emergency_stop = False
-        self.velocity_limited_count = 0
-        self.acceleration_limited_count = 0
-        self.position_limited_count = 0
-        self.heartbeat_violations = 0
-        print("✅ [SafeController] 控制器已重置")
+
+    def update_actual_command(self, q_actual):
+        """
+        更新实际发送给机器人的指令
+
+        当控制器输出的指令被修改后（例如应用关节锁定），
+        需要调用此方法更新安全控制器的内部状态，
+        以确保下一帧的速度/加速度计算基于正确的状态。
+
+        Args:
+            q_actual: 实际发送给机器人的关节角度 (7,)
+        """
+        self.q_current = np.array(q_actual).copy()
+        self.q_dot_current = (self.q_current - self.q_previous) / self.dt
 
 
 # ============================================================================
