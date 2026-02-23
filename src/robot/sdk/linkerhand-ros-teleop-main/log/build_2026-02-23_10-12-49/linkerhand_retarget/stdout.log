@@ -1,0 +1,21 @@
+running develop
+running egg_info
+creating linkerhand_retarget.egg-info
+writing linkerhand_retarget.egg-info/PKG-INFO
+writing dependency_links to linkerhand_retarget.egg-info/dependency_links.txt
+writing entry points to linkerhand_retarget.egg-info/entry_points.txt
+writing requirements to linkerhand_retarget.egg-info/requires.txt
+writing top-level names to linkerhand_retarget.egg-info/top_level.txt
+writing manifest file 'linkerhand_retarget.egg-info/SOURCES.txt'
+reading manifest file 'linkerhand_retarget.egg-info/SOURCES.txt'
+writing manifest file 'linkerhand_retarget.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/lib/python3.10/site-packages/linkerhand-retarget.egg-link (link to .)
+Installing handretarget script to /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/lib/linkerhand_retarget
+Installing handsimulator script to /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/lib/linkerhand_retarget
+
+Installed /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/build/linkerhand_retarget
+running symlink_data
+symbolically linking /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/build/linkerhand_retarget/package.xml -> /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/share/linkerhand_retarget
+creating /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/share/linkerhand_retarget/launch
+symbolically linking /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/build/linkerhand_retarget/resource/linkerhand_retarget -> /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/share/linkerhand_retarget/.

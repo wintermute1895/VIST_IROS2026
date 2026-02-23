@@ -1,0 +1,43 @@
+[35m[1mConsolidate compiler generated dependencies of target lbot_driver[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o[0m
+[100%] [32m[1mLinking CXX executable lbot_driver[0m
+[100%] Built target lbot_driver
+-- Install configuration: ""
+-- Execute custom install script
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/lbot_driver/lbot_driver
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/launch/lbot_start_driver.launch.py
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/config/lbot_config.yaml
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/lib_install.sh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/liblbot_api.so
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/liblbot_api.so.1
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/liblbot_api.so.1.0.3
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/liblbot_api_cpp.so
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/liblbot_api_cpp.so.1
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/liblbot_api_cpp.so.1.0.3
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_arm64/liblbot_api.so
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_arm64/liblbot_api.so.1
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_arm64/liblbot_api.so.1.0.3
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so.1
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so.1.0.3
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_x64/liblbot_api.so
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_x64/liblbot_api.so.1
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_x64/liblbot_api.so.1.0.3
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so.1
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so.1.0.3
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/ament_index/resource_index/package_run_dependencies/lbot_driver
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/ament_index/resource_index/parent_prefix_path/lbot_driver
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/environment/ament_prefix_path.sh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/environment/ament_prefix_path.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/environment/path.sh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/environment/path.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/local_setup.bash
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/local_setup.sh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/local_setup.zsh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/local_setup.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/package.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/ament_index/resource_index/packages/lbot_driver
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/cmake/lbot_driverConfig.cmake
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/cmake/lbot_driverConfig-version.cmake
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_driver/share/lbot_driver/package.xml

@@ -1,0 +1,62 @@
+[0.019s] Invoking command in '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo': AMENT_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:/opt/ros/humble CONDA_PROMPT_MODIFIER=(robot_env) LD_LIBRARY_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo -- -j16 -l16
+[0.085s] [35m[1mConsolidate compiler generated dependencies of target demo_lkrs_movel[0m
+[0.086s] [35m[1mConsolidate compiler generated dependencies of target demo_lkls_movej[0m
+[0.086s] [35m[1mConsolidate compiler generated dependencies of target demo_lkrs_movej[0m
+[0.086s] [35m[1mConsolidate compiler generated dependencies of target demo_lkls_movejp[0m
+[0.086s] [35m[1mConsolidate compiler generated dependencies of target demo_lkls_movel[0m
+[0.086s] [35m[1mConsolidate compiler generated dependencies of target demo_ik[0m
+[0.086s] [35m[1mConsolidate compiler generated dependencies of target demo_emergency_enable[0m
+[0.086s] [35m[1mConsolidate compiler generated dependencies of target demo_fk[0m
+[0.089s] [35m[1mConsolidate compiler generated dependencies of target demo_hand_l6_control[0m
+[0.091s] [35m[1mConsolidate compiler generated dependencies of target demo_joint_bridge[0m
+[0.091s] [35m[1mConsolidate compiler generated dependencies of target demo_tool_frame[0m
+[0.093s] [35m[1mConsolidate compiler generated dependencies of target demo_lkrs_movejp[0m
+[0.093s] [35m[1mConsolidate compiler generated dependencies of target demo_hand_l10_control[0m
+[0.108s] [  7%] Built target demo_lkrs_movej
+[0.108s] [ 15%] Built target demo_lkls_movejp
+[0.109s] [ 23%] Built target demo_lkrs_movel
+[0.112s] [ 30%] Built target demo_ik
+[0.112s] [ 38%] Built target demo_lkls_movej
+[0.112s] [ 46%] Built target demo_lkls_movel
+[0.113s] [ 53%] Built target demo_fk
+[0.113s] [ 65%] Built target demo_joint_bridge
+[0.113s] [ 73%] Built target demo_lkrs_movejp
+[0.113s] [ 76%] Built target demo_tool_frame
+[0.114s] [ 84%] Built target demo_hand_l6_control
+[0.117s] [100%] Built target demo_hand_l10_control
+[0.117s] [100%] Built target demo_emergency_enable
+[0.137s] Invoked command in '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo' returned '0': AMENT_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:/opt/ros/humble CONDA_PROMPT_MODIFIER=(robot_env) LD_LIBRARY_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo -- -j16 -l16
+[0.139s] Invoking command in '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo': AMENT_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:/opt/ros/humble CONDA_PROMPT_MODIFIER=(robot_env) LD_LIBRARY_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/cmake --install /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo
+[0.151s] -- Install configuration: ""
+[0.152s] -- Execute custom install script
+[0.152s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkrs_movel
+[0.161s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkrs_movej
+[0.170s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkrs_movejp
+[0.179s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkls_movel
+[0.186s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkls_movej
+[0.197s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkls_movejp
+[0.209s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_fk
+[0.223s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_ik
+[0.235s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_tool_frame
+[0.243s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_emergency_enable
+[0.252s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_hand_l6_control
+[0.261s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_hand_l10_control
+[0.270s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_joint_bridge
+[0.278s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/launch/demo_teleop.launch.py
+[0.288s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/launch/lbot_start_demo.launch.py
+[0.299s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/ament_index/resource_index/package_run_dependencies/lbot_demo
+[0.314s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/ament_index/resource_index/parent_prefix_path/lbot_demo
+[0.327s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/environment/ament_prefix_path.sh
+[0.340s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/environment/ament_prefix_path.dsv
+[0.352s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/environment/path.sh
+[0.361s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/environment/path.dsv
+[0.370s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/local_setup.bash
+[0.381s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/local_setup.sh
+[0.395s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/local_setup.zsh
+[0.410s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/local_setup.dsv
+[0.425s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/package.dsv
+[0.435s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/ament_index/resource_index/packages/lbot_demo
+[0.447s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/cmake/lbot_demoConfig.cmake
+[0.456s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/cmake/lbot_demoConfig-version.cmake
+[0.463s] -- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/package.xml
+[0.473s] Invoked command in '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo' returned '0': AMENT_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:/opt/ros/humble CONDA_PROMPT_MODIFIER=(robot_env) LD_LIBRARY_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/cmake --install /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo

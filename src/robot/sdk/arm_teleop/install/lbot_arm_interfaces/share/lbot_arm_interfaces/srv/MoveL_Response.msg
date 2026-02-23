@@ -1,0 +1,1 @@
+/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_cmake/srv/MoveL_Response.msg

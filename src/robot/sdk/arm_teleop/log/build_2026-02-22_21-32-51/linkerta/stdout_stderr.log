@@ -1,0 +1,22 @@
+[35m[1mConsolidate compiler generated dependencies of target linkerta_node[0m
+[100%] Built target linkerta_node
+-- Install configuration: ""
+-- Execute custom install script
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/lib/linkerta/linkerta_node
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/launch/run.launch.py
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/config/lta.yaml
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/ament_index/resource_index/package_run_dependencies/linkerta
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/ament_index/resource_index/parent_prefix_path/linkerta
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/environment/ament_prefix_path.sh
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/environment/ament_prefix_path.dsv
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/environment/path.sh
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/environment/path.dsv
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/local_setup.bash
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/local_setup.sh
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/local_setup.zsh
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/local_setup.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/package.dsv
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/ament_index/resource_index/packages/linkerta
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/cmake/linkertaConfig.cmake
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/cmake/linkertaConfig-version.cmake
+-- Up-to-date symlink: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta/share/linkerta/package.xml

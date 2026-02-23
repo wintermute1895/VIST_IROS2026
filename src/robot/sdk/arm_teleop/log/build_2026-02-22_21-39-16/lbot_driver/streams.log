@@ -1,0 +1,709 @@
+[0.017s] Invoking command in '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver': AMENT_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:/opt/ros/humble CONDA_PROMPT_MODIFIER=(robot_env) LD_LIBRARY_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver -- -j16 -l16
+[0.087s] [35m[1mConsolidate compiler generated dependencies of target lbot_driver[0m
+[0.114s] [ 50%] [32mBuilding CXX object CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o[0m
+[2.758s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:[m[K In member function ‘[01m[Kvoid lbot_driver::LeftArmServiceNode::create_services()[m[K’:
+[2.758s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:410:80:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::MoveJ>(const char [20], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::MoveJ_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveJ_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.758s]   410 |  [01;31m[Kthis->create_service<lbot_arm_interfaces::srv::MoveJ>([m[K
+[2.758s]       |  [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.758s] 
+[2.758s]   411 | [01;31m[Kint",[m[K
+[2.758s]       | [01;31m[K~~~~~[m[K                                                  
+[2.758s] 
+[2.758s]   412 | [01;31m[KmServiceNode::move_joint_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.758s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.758s] 
+[2.758s]   413 | [01;31m[Kback_group_)[m[K;
+[2.758s]       | [01;31m[K~~~~~~~~~~~~[m[K                                           
+[2.758s] 
+[2.758s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.758s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.758s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.759s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.759s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.759s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.759s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.759s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.759s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.759s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:413:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.759s]   413 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.759s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.760s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:415:80:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::MoveJP>(const char [19], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::MoveJP_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveJP_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.760s]   415 | [01;31m[Kthis->create_service<lbot_arm_interfaces::srv::MoveJP>([m[K
+[2.760s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.760s] 
+[2.760s]   416 | [01;31m[Kse",[m[K
+[2.760s]       | [01;31m[K~~~~[m[K                                                   
+[2.760s] 
+[2.760s]   417 | [01;31m[KmServiceNode::move_pose_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.760s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.760s] 
+[2.760s]   418 | [01;31m[Kback_group_)[m[K;
+[2.760s]       | [01;31m[K~~~~~~~~~~~~[m[K                                           
+[2.760s] 
+[2.761s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.761s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.761s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.761s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.761s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.761s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.761s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.761s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.761s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.761s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:418:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.761s]   418 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.761s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.761s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:420:81:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::MoveL>(const char [21], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::MoveL_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveL_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.761s]   420 |  [01;31m[Kthis->create_service<lbot_arm_interfaces::srv::MoveL>([m[K
+[2.761s]       |  [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.762s] 
+[2.762s]   421 | [01;31m[Kear",[m[K
+[2.762s]       | [01;31m[K~~~~~[m[K                                                  
+[2.762s] 
+[2.762s]   422 | [01;31m[KServiceNode::move_linear_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.762s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.762s] 
+[2.762s]   423 | [01;31m[Kack_group_)[m[K;
+[2.762s]       | [01;31m[K~~~~~~~~~~~[m[K                                            
+[2.762s] 
+[2.762s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.762s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.762s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.762s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.762s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.762s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.762s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.762s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.762s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.762s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:423:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.762s]   423 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.762s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.763s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:426:100:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::ForwardKinematics>(const char [28], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::ForwardKinematics_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::ForwardKinematics_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.763s]   426 | [01;31m[Ke_service<lbot_arm_interfaces::srv::ForwardKinematics>([m[K
+[2.763s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.763s] 
+[2.763s]   427 | 
+[2.763s]       |                                                        
+[2.763s] 
+[2.763s]   428 | [01;31m[Kd_kinematics_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.763s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.763s] 
+[2.763s]   429 | 
+[2.763s]       |                                                        
+[2.763s] 
+[2.763s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.763s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.763s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.763s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.763s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.763s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.763s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.763s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.763s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.763s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:429:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.763s]   429 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.764s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.764s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:431:100:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::InverseKinematics>(const char [28], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::InverseKinematics_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::InverseKinematics_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.764s]   431 | [01;31m[Ke_service<lbot_arm_interfaces::srv::InverseKinematics>([m[K
+[2.764s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.764s] 
+[2.764s]   432 | 
+[2.764s]       |                                                        
+[2.764s] 
+[2.764s]   433 | [01;31m[Ke_kinematics_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.764s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.764s] 
+[2.764s]   434 | 
+[2.764s]       |                                                        
+[2.764s] 
+[2.765s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.765s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.765s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.765s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.765s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.765s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.765s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.765s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.765s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.765s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:434:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.765s]   434 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.765s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.766s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:437:87:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::SetFrame>(const char [24], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::SetFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetFrame_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.766s]   437 | [01;31m[Kis->create_service<lbot_arm_interfaces::srv::SetFrame>([m[K
+[2.766s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.766s] 
+[2.766s]   438 | [01;31m[K",[m[K
+[2.766s]       | [01;31m[K~~[m[K                                                     
+[2.766s] 
+[2.766s]   439 | [01;31m[KeNode::set_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.766s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.766s] 
+[2.766s]   440 | [01;31m[Koup_)[m[K;
+[2.766s]       | [01;31m[K~~~~~[m[K                                                  
+[2.766s] 
+[2.766s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.766s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.766s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.766s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.767s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.767s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.767s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.767s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.767s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.767s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:440:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.767s]   440 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.767s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.768s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:442:87:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::GetFrame>(const char [24], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::GetFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetFrame_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.768s]   442 | [01;31m[Kis->create_service<lbot_arm_interfaces::srv::GetFrame>([m[K
+[2.768s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.768s] 
+[2.768s]   443 | [01;31m[K",[m[K
+[2.768s]       | [01;31m[K~~[m[K                                                     
+[2.768s] 
+[2.768s]   444 | [01;31m[KeNode::get_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.768s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.768s] 
+[2.768s]   445 | [01;31m[Koup_)[m[K;
+[2.768s]       | [01;31m[K~~~~~[m[K                                                  
+[2.768s] 
+[2.768s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.768s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.768s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.768s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.769s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.769s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.769s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.769s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.769s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.769s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:445:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.769s]   445 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.769s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.770s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:447:102:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::GetCurrentFrame>(const char [32], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::GetCurrentFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetCurrentFrame_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.770s]   447 | [01;31m[Kate_service<lbot_arm_interfaces::srv::GetCurrentFrame>([m[K
+[2.770s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.770s] 
+[2.770s]   448 | 
+[2.770s]       |                                                        
+[2.770s] 
+[2.770s]   449 | [01;31m[Kent_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.770s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.770s] 
+[2.770s]   450 | 
+[2.770s]       |                                                        
+[2.770s] 
+[2.770s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.770s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.770s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.770s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.770s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.770s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.770s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.770s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.770s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.770s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:450:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.770s]   450 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.771s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.771s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:452:93:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::ChangeFrame>(const char [27], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::ChangeFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::ChangeFrame_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.771s]   452 | [01;31m[K>create_service<lbot_arm_interfaces::srv::ChangeFrame>([m[K
+[2.771s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.771s] 
+[2.771s]   453 | 
+[2.771s]       |                                                        
+[2.771s] 
+[2.771s]   454 | [01;31m[K:change_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.771s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.771s] 
+[2.771s]   455 | 
+[2.771s]       |                                                        
+[2.771s] 
+[2.771s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.771s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.771s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.771s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.772s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.772s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.772s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.772s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.772s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.772s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:455:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.772s]   455 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.772s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.772s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:457:93:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::DeleteFrame>(const char [27], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::DeleteFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::DeleteFrame_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.772s]   457 | [01;31m[K>create_service<lbot_arm_interfaces::srv::DeleteFrame>([m[K
+[2.772s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.772s] 
+[2.772s]   458 | 
+[2.772s]       |                                                        
+[2.772s] 
+[2.772s]   459 | [01;31m[K:delete_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.773s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.773s] 
+[2.773s]   460 | 
+[2.773s]       |                                                        
+[2.773s] 
+[2.773s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.773s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.773s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.773s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.773s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.773s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.773s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.773s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.773s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.773s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:460:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.773s]   460 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.773s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.773s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:462:96:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::GetAllFrames>(const char [29], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::GetAllFrames_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetAllFrames_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.773s]   462 | [01;31m[Kcreate_service<lbot_arm_interfaces::srv::GetAllFrames>([m[K
+[2.773s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.774s] 
+[2.774s]   463 | 
+[2.774s]       |                                                        
+[2.774s] 
+[2.774s]   464 | [01;31m[Kt_all_tool_frames_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.774s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.774s] 
+[2.774s]   465 | 
+[2.774s]       |                                                        
+[2.774s] 
+[2.774s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.774s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.774s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.774s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.774s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.774s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.774s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.774s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.774s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.774s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:465:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.774s]   465 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.774s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.775s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:468:80:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::SetZero>(const char [18], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::SetZero_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetZero_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.775s]   468 | [01;31m[Khis->create_service<lbot_arm_interfaces::srv::SetZero>([m[K
+[2.775s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.775s] 
+[2.775s]   469 | [01;31m[Ko",[m[K
+[2.775s]       | [01;31m[K~~~[m[K                                                    
+[2.775s] 
+[2.775s]   470 | [01;31m[KmServiceNode::set_zero_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.775s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.775s] 
+[2.775s]   471 | [01;31m[Kback_group_)[m[K;
+[2.775s]       | [01;31m[K~~~~~~~~~~~~[m[K                                           
+[2.775s] 
+[2.775s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.775s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.775s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.775s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.776s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.776s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.776s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.776s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.776s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.776s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:471:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.776s]   471 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.776s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.777s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:472:84:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::SetEnable>(const char [20], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::SetEnable_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetEnable_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.777s]   472 | [01;31m[Ks->create_service<lbot_arm_interfaces::srv::SetEnable>([m[K
+[2.777s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.777s] 
+[2.777s]   473 | [01;31m[K,[m[K
+[2.777s]       | [01;31m[K~[m[K                                                      
+[2.777s] 
+[2.777s]   474 | [01;31m[KviceNode::set_enable_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.777s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.777s] 
+[2.777s]   475 | [01;31m[K_group_)[m[K;
+[2.777s]       | [01;31m[K~~~~~~~~[m[K                                               
+[2.777s] 
+[2.777s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.777s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.777s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.777s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.777s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.777s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.777s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.777s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.777s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.777s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:475:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.777s]   475 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.777s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.778s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:476:90:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::LeftArmServiceNode::create_service<lbot_arm_interfaces::srv::SetEmergency>(const char [28], std::_Bind_helper<false, void (lbot_driver::LeftArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::SetEmergency_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetEmergency_Response_<std::allocator<void> > >), lbot_driver::LeftArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.778s]   476 | [01;31m[Kcreate_service<lbot_arm_interfaces::srv::SetEmergency>([m[K
+[2.778s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.778s] 
+[2.778s]   477 | [01;31m[Kp",[m[K
+[2.778s]       | [01;31m[K~~~[m[K                                                    
+[2.778s] 
+[2.778s]   478 | [01;31m[Kde::set_emergency_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.778s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.778s] 
+[2.778s]   479 | [01;31m[K_)[m[K;
+[2.778s]       | [01;31m[K~~[m[K                                                     
+[2.779s] 
+[2.779s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.779s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.779s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.779s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.779s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.779s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.779s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.779s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.779s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.779s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:479:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.779s]   479 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.779s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.909s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:[m[K In member function ‘[01m[Kvoid lbot_driver::RightArmServiceNode::create_services()[m[K’:
+[2.910s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1038:80:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::MoveJ>(const char [21], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::MoveJ_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveJ_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.910s]  1038 |  [01;31m[Kthis->create_service<lbot_arm_interfaces::srv::MoveJ>([m[K
+[2.910s]       |  [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.910s] 
+[2.910s]  1039 | [01;31m[Koint",[m[K
+[2.910s]       | [01;31m[K~~~~~~[m[K                                                 
+[2.910s] 
+[2.910s]  1040 | [01;31m[KrmServiceNode::move_joint_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.910s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.910s] 
+[2.910s]  1041 | [01;31m[Kback_group_)[m[K;
+[2.910s]       | [01;31m[K~~~~~~~~~~~~[m[K                                           
+[2.910s] 
+[2.910s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.910s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.910s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.910s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.910s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.910s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.910s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.910s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.910s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.910s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1041:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.910s]  1041 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.910s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.911s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1043:80:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::MoveJP>(const char [20], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::MoveJP_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveJP_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.911s]  1043 | [01;31m[Kthis->create_service<lbot_arm_interfaces::srv::MoveJP>([m[K
+[2.911s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.911s] 
+[2.911s]  1044 | [01;31m[Kose",[m[K
+[2.911s]       | [01;31m[K~~~~~[m[K                                                  
+[2.911s] 
+[2.911s]  1045 | [01;31m[KrmServiceNode::move_pose_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.911s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.911s] 
+[2.911s]  1046 | [01;31m[Kback_group_)[m[K;
+[2.912s]       | [01;31m[K~~~~~~~~~~~~[m[K                                           
+[2.912s] 
+[2.912s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.912s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.912s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.912s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.912s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.912s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.912s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.912s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.912s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.912s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1046:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.912s]  1046 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.912s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.913s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1048:81:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::MoveL>(const char [22], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::MoveL_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveL_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.913s]  1048 |  [01;31m[Kthis->create_service<lbot_arm_interfaces::srv::MoveL>([m[K
+[2.913s]       |  [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.913s] 
+[2.913s]  1049 | [01;31m[Knear",[m[K
+[2.913s]       | [01;31m[K~~~~~~[m[K                                                 
+[2.913s] 
+[2.913s]  1050 | [01;31m[KmServiceNode::move_linear_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.913s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.913s] 
+[2.913s]  1051 | [01;31m[Kack_group_)[m[K;
+[2.913s]       | [01;31m[K~~~~~~~~~~~[m[K                                            
+[2.913s] 
+[2.913s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.913s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.913s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.913s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.913s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.913s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.913s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.913s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.913s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.913s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1051:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.913s]  1051 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.913s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.914s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1054:100:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::ForwardKinematics>(const char [29], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::ForwardKinematics_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::ForwardKinematics_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.914s]  1054 | [01;31m[Ke_service<lbot_arm_interfaces::srv::ForwardKinematics>([m[K
+[2.914s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.914s] 
+[2.914s]  1055 | 
+[2.914s]       |                                                        
+[2.914s] 
+[2.914s]  1056 | [01;31m[Krd_kinematics_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.914s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.915s] 
+[2.915s]  1057 | 
+[2.915s]       |                                                        
+[2.915s] 
+[2.915s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.915s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.915s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.915s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.915s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.915s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.915s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.915s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.915s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.915s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1057:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.915s]  1057 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.915s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.916s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1059:100:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::InverseKinematics>(const char [29], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::InverseKinematics_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::InverseKinematics_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.916s]  1059 | [01;31m[Ke_service<lbot_arm_interfaces::srv::InverseKinematics>([m[K
+[2.916s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.916s] 
+[2.916s]  1060 | 
+[2.916s]       |                                                        
+[2.916s] 
+[2.916s]  1061 | [01;31m[Kse_kinematics_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.916s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.916s] 
+[2.916s]  1062 | 
+[2.916s]       |                                                        
+[2.916s] 
+[2.916s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.916s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.916s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.916s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.916s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.916s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.916s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.916s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.916s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.916s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1062:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.916s]  1062 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.916s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.918s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1065:87:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::SetFrame>(const char [25], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::SetFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetFrame_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.918s]  1065 | [01;31m[Kis->create_service<lbot_arm_interfaces::srv::SetFrame>([m[K
+[2.918s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.918s] 
+[2.918s]  1066 | [01;31m[Ke",[m[K
+[2.918s]       | [01;31m[K~~~[m[K                                                    
+[2.918s] 
+[2.918s]  1067 | [01;31m[KceNode::set_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.918s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.918s] 
+[2.918s]  1068 | [01;31m[Koup_)[m[K;
+[2.918s]       | [01;31m[K~~~~~[m[K                                                  
+[2.918s] 
+[2.918s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.918s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.918s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.918s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.918s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.918s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.918s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.918s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.918s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.918s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1068:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.918s]  1068 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.918s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.920s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1070:87:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::GetFrame>(const char [25], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::GetFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetFrame_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.920s]  1070 | [01;31m[Kis->create_service<lbot_arm_interfaces::srv::GetFrame>([m[K
+[2.920s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.920s] 
+[2.920s]  1071 | [01;31m[Ke",[m[K
+[2.920s]       | [01;31m[K~~~[m[K                                                    
+[2.920s] 
+[2.920s]  1072 | [01;31m[KceNode::get_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.920s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.920s] 
+[2.920s]  1073 | [01;31m[Koup_)[m[K;
+[2.920s]       | [01;31m[K~~~~~[m[K                                                  
+[2.920s] 
+[2.920s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.920s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.920s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.920s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.920s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.920s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.920s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.921s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.921s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.921s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1073:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.921s]  1073 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.921s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.922s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1075:102:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::GetCurrentFrame>(const char [33], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::GetCurrentFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetCurrentFrame_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.922s]  1075 | [01;31m[Kate_service<lbot_arm_interfaces::srv::GetCurrentFrame>([m[K
+[2.922s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.922s] 
+[2.922s]  1076 | 
+[2.922s]       |                                                        
+[2.922s] 
+[2.922s]  1077 | [01;31m[Krent_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.922s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.922s] 
+[2.922s]  1078 | 
+[2.922s]       |                                                        
+[2.922s] 
+[2.922s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.922s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.922s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.923s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.923s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.923s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.923s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.923s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.923s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.923s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1078:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.923s]  1078 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.923s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.924s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1080:93:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::ChangeFrame>(const char [28], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::ChangeFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::ChangeFrame_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.924s]  1080 | [01;31m[K>create_service<lbot_arm_interfaces::srv::ChangeFrame>([m[K
+[2.924s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.924s] 
+[2.924s]  1081 | 
+[2.924s]       |                                                        
+[2.924s] 
+[2.924s]  1082 | [01;31m[K::change_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.924s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.924s] 
+[2.924s]  1083 | 
+[2.924s]       |                                                        
+[2.924s] 
+[2.924s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.924s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.924s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.924s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.924s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.924s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.924s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.925s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.925s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.925s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1083:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.925s]  1083 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.925s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.926s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1085:93:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::DeleteFrame>(const char [28], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::DeleteFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::DeleteFrame_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.926s]  1085 | [01;31m[K>create_service<lbot_arm_interfaces::srv::DeleteFrame>([m[K
+[2.926s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.926s] 
+[2.926s]  1086 | 
+[2.926s]       |                                                        
+[2.926s] 
+[2.926s]  1087 | [01;31m[K::delete_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.926s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.926s] 
+[2.926s]  1088 | 
+[2.926s]       |                                                        
+[2.926s] 
+[2.926s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.926s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.926s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.926s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.926s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.926s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.926s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.926s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.926s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.926s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1088:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.926s]  1088 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.926s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.927s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1090:96:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::GetAllFrames>(const char [30], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::GetAllFrames_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetAllFrames_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.927s]  1090 | [01;31m[Kcreate_service<lbot_arm_interfaces::srv::GetAllFrames>([m[K
+[2.927s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.928s] 
+[2.928s]  1091 | 
+[2.928s]       |                                                        
+[2.928s] 
+[2.928s]  1092 | [01;31m[Ket_all_tool_frames_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.928s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.928s] 
+[2.928s]  1093 | 
+[2.928s]       |                                                        
+[2.928s] 
+[2.928s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.928s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.928s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.928s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.928s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.928s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.928s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.928s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.928s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.928s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1093:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.928s]  1093 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.928s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.929s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1096:80:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::SetZero>(const char [19], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::SetZero_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetZero_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.929s]  1096 | [01;31m[Khis->create_service<lbot_arm_interfaces::srv::SetZero>([m[K
+[2.929s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.929s] 
+[2.929s]  1097 | [01;31m[Kro",[m[K
+[2.929s]       | [01;31m[K~~~~[m[K                                                   
+[2.929s] 
+[2.929s]  1098 | [01;31m[KrmServiceNode::set_zero_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.929s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.929s] 
+[2.929s]  1099 | [01;31m[Kback_group_)[m[K;
+[2.929s]       | [01;31m[K~~~~~~~~~~~~[m[K                                           
+[2.929s] 
+[2.929s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.929s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.929s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.929s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.930s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.930s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.930s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.930s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.930s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.930s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1099:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.930s]  1099 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.930s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.930s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1100:84:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::SetEnable>(const char [21], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::SetEnable_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetEnable_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.930s]  1100 | [01;31m[Ks->create_service<lbot_arm_interfaces::srv::SetEnable>([m[K
+[2.931s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.931s] 
+[2.931s]  1101 | [01;31m[K",[m[K
+[2.931s]       | [01;31m[K~~[m[K                                                     
+[2.931s] 
+[2.931s]  1102 | [01;31m[KrviceNode::set_enable_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.931s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.931s] 
+[2.931s]  1103 | [01;31m[K_group_)[m[K;
+[2.931s]       | [01;31m[K~~~~~~~~[m[K                                               
+[2.931s] 
+[2.931s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.931s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.931s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.931s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.931s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.931s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.931s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.931s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.931s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.931s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1103:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.931s]  1103 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.931s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[2.932s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1104:90:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Klbot_driver::RightArmServiceNode::create_service<lbot_arm_interfaces::srv::SetEmergency>(const char [29], std::_Bind_helper<false, void (lbot_driver::RightArmServiceNode::*)(std::shared_ptr<lbot_arm_interfaces::srv::SetEmergency_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetEmergency_Response_<std::allocator<void> > >), lbot_driver::RightArmServiceNode*, const std::_Placeholder<1>&, const std::_Placeholder<2>&>::type, rclcpp::QoS&, rclcpp::CallbackGroup::SharedPtr&)[m[K’
+[2.932s]  1104 | [01;31m[Kcreate_service<lbot_arm_interfaces::srv::SetEmergency>([m[K
+[2.932s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[m[K
+[2.932s] 
+[2.932s]  1105 | [01;31m[Kop",[m[K
+[2.932s]       | [01;31m[K~~~~[m[K                                                   
+[2.932s] 
+[2.932s]  1106 | [01;31m[Kode::set_emergency_callback, this, std::placeholders::_1, std::placeholders::_2),[m[K
+[2.932s]       | [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[2.932s] 
+[2.932s]  1107 | [01;31m[K_)[m[K;
+[2.932s]       | [01;31m[K~~[m[K                                                     
+[2.932s] 
+[2.932s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28[m[K,
+[2.932s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22[m[K,
+[2.932s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[2.932s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/include/lbot_driver/lbot_driver.h:19[m[K,
+[2.932s]                  from [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:15[m[K:
+[2.933s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class ServiceT, class CallbackT> typename rclcpp::Service<ServiceT>::SharedPtr rclcpp::Node::create_service(const string&, CallbackT&&, const rmw_qos_profile_t&, rclcpp::CallbackGroup::SharedPtr)[m[K’
+[2.933s]   267 |   [01;36m[Kcreate_service[m[K(
+[2.933s]       |   [01;36m[K^~~~~~~~~~~~~~[m[K
+[2.933s] [01m[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:267:3:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[2.933s] [01m[K/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp:1107:9:[m[K [01;36m[Knote: [m[K  cannot convert ‘[01m[Kservice_qos[m[K’ (type ‘[01m[Krclcpp::QoS[m[K’) to type ‘[01m[Kconst rmw_qos_profile_t&[m[K’ {aka ‘[01m[Kconst rmw_qos_profile_s&[m[K’}
+[2.933s]  1107 |         [01;36m[Kservice_qos[m[K, callback_group_);
+[2.933s]       |         [01;36m[K^~~~~~~~~~~[m[K
+[6.495s] gmake[2]: *** [CMakeFiles/lbot_driver.dir/build.make:76：CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o] 错误 1
+[6.496s] gmake[1]: *** [CMakeFiles/Makefile2:137：CMakeFiles/lbot_driver.dir/all] 错误 2
+[6.496s] gmake: *** [Makefile:146：all] 错误 2
+[6.498s] Invoked command in '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver' returned '2': AMENT_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces:/opt/ros/humble CONDA_PROMPT_MODIFIER=(robot_env) LD_LIBRARY_PATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver -- -j16 -l16

@@ -1,0 +1,16 @@
+running develop
+running egg_info
+writing linkerhand_retarget.egg-info/PKG-INFO
+writing dependency_links to linkerhand_retarget.egg-info/dependency_links.txt
+writing entry points to linkerhand_retarget.egg-info/entry_points.txt
+writing requirements to linkerhand_retarget.egg-info/requires.txt
+writing top-level names to linkerhand_retarget.egg-info/top_level.txt
+reading manifest file 'linkerhand_retarget.egg-info/SOURCES.txt'
+writing manifest file 'linkerhand_retarget.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/lib/python3.10/site-packages/linkerhand-retarget.egg-link (link to .)
+Installing handretarget script to /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/lib/linkerhand_retarget
+Installing handsimulator script to /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/install/linkerhand_retarget/lib/linkerhand_retarget
+
+Installed /home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/build/linkerhand_retarget
+running symlink_data

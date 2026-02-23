@@ -1,0 +1,1 @@
+Invoking command in '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta

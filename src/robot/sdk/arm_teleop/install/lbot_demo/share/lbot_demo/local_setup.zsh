@@ -1,0 +1,1 @@
+/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo/ament_cmake_environment_hooks/local_setup.zsh

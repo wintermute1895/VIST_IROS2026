@@ -1,0 +1,1 @@
+/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_introspection_cpp/lbot_arm_interfaces/msg/detail/lbot_frame__rosidl_typesupport_introspection_cpp.hpp

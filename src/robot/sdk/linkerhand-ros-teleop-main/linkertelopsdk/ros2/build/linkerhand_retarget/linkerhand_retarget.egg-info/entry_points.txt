@@ -1,0 +1,4 @@
+[console_scripts]
+handretarget = linkerhand_retarget.handretarget:main
+handsimulator = linkerhand_retarget.handsimulator:main
+

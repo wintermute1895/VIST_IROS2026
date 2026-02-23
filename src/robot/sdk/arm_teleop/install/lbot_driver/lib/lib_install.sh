@@ -1,0 +1,1 @@
+/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/lib/lib_install.sh

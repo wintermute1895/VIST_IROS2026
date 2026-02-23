@@ -1,0 +1,58 @@
+[35m[1mConsolidate compiler generated dependencies of target demo_lkrs_movel[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_lkls_movej[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_lkrs_movej[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_lkls_movejp[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_lkls_movel[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_ik[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_emergency_enable[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_fk[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_hand_l6_control[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_joint_bridge[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_tool_frame[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_lkrs_movejp[0m
+[35m[1mConsolidate compiler generated dependencies of target demo_hand_l10_control[0m
+[  7%] Built target demo_lkrs_movej
+[ 15%] Built target demo_lkls_movejp
+[ 23%] Built target demo_lkrs_movel
+[ 30%] Built target demo_ik
+[ 38%] Built target demo_lkls_movej
+[ 46%] Built target demo_lkls_movel
+[ 53%] Built target demo_fk
+[ 65%] Built target demo_joint_bridge
+[ 73%] Built target demo_lkrs_movejp
+[ 76%] Built target demo_tool_frame
+[ 84%] Built target demo_hand_l6_control
+[100%] Built target demo_hand_l10_control
+[100%] Built target demo_emergency_enable
+-- Install configuration: ""
+-- Execute custom install script
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkrs_movel
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkrs_movej
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkrs_movejp
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkls_movel
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkls_movej
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_lkls_movejp
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_fk
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_ik
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_tool_frame
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_emergency_enable
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_hand_l6_control
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_hand_l10_control
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/lib/lbot_demo/demo_joint_bridge
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/launch/demo_teleop.launch.py
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/launch/lbot_start_demo.launch.py
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/ament_index/resource_index/package_run_dependencies/lbot_demo
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/ament_index/resource_index/parent_prefix_path/lbot_demo
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/environment/ament_prefix_path.sh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/environment/ament_prefix_path.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/environment/path.sh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/environment/path.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/local_setup.bash
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/local_setup.sh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/local_setup.zsh
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/local_setup.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/package.dsv
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/ament_index/resource_index/packages/lbot_demo
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/cmake/lbot_demoConfig.cmake
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/cmake/lbot_demoConfig-version.cmake
+-- Symlinking: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_demo/share/lbot_demo/package.xml

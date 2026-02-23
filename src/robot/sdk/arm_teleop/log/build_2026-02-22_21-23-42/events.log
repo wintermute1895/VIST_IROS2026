@@ -1,0 +1,141 @@
+[0.000000] (-) TimerEvent: {}
+[0.000185] (lbot_arm_interfaces) JobQueued: {'identifier': 'lbot_arm_interfaces', 'dependencies': OrderedDict()}
+[0.000351] (linkerta) JobQueued: {'identifier': 'linkerta', 'dependencies': OrderedDict()}
+[0.000374] (lbot_demo) JobQueued: {'identifier': 'lbot_demo', 'dependencies': OrderedDict([('lbot_arm_interfaces', '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces')])}
+[0.000847] (lbot_driver) JobQueued: {'identifier': 'lbot_driver', 'dependencies': OrderedDict([('lbot_arm_interfaces', '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces')])}
+[0.000913] (lbot_teleop) JobQueued: {'identifier': 'lbot_teleop', 'dependencies': OrderedDict([('lbot_arm_interfaces', '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces')])}
+[0.000955] (lbot_arm_interfaces) JobStarted: {'identifier': 'lbot_arm_interfaces'}
+[0.007295] (linkerta) JobStarted: {'identifier': 'linkerta'}
+[0.009978] (lbot_arm_interfaces) JobProgress: {'identifier': 'lbot_arm_interfaces', 'progress': 'cmake'}
+[0.010305] (lbot_arm_interfaces) Command: {'cmd': ['/usr/bin/cmake', '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces'], 'cwd': '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces', 'env': OrderedDict([('GJS_DEBUG_TOPICS', 'JS ERROR;JS LOG'), ('LESSOPEN', '| /usr/bin/lesspipe %s'), ('VSCODE_CWD', '/home/ilex'), ('VSCODE_ESM_ENTRYPOINT', 'vs/workbench/api/node/extensionHostProcess'), ('CONDA_PROMPT_MODIFIER', '(base)'), ('LANGUAGE', 'zh_CN:zh:en_US:en'), ('USER', 'ilex'), ('CLAUDE_CODE_ENTRYPOINT', 'claude-vscode'), ('LC_TIME', 'zh_CN.UTF-8'), ('VSCODE_NLS_CONFIG', '{"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/tcf.json","messagesFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/c9d77990917f3102ada88be140d28b038d1dd7c7/nls.messages.json","corruptMarkerFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"1163c9980a28fc39b33ca5c1eafd6f05.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/tcf.json","_cacheRoot":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn","_resolvedLanguagePackCoreLocation":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/c9d77990917f3102ada88be140d28b038d1dd7c7","_corruptedFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/corrupted.info"}'), ('GIT_EDITOR', 'true'), ('VSCODE_HANDLES_UNCAUGHT_ERRORS', 'true'), ('XDG_SESSION_TYPE', 'x11'), ('CLAUDE_AGENT_SDK_VERSION', '0.2.49'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/ilex'), ('CHROME_DESKTOP', 'code.desktop'), ('CONDA_SHLVL', '1'), ('OLDPWD', '/home/ilex/Dev/VIST'), ('DESKTOP_SESSION', 'ubuntu-xorg'), ('VSCODE_IPC_HOOK', '/run/user/1000/vscode-79a07115-1.10-main.sock'), ('GIO_LAUNCHED_DESKTOP_FILE', '/usr/share/applications/code.desktop'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('LC_MONETARY', 'zh_CN.UTF-8'), ('MANAGERPID', '2129'), ('GLFW_IM_MODULE', 'ibus'), ('SYSTEMD_EXEC_PID', '2399'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('_CONDA_ROOT', '/home/ilex/miniforge3'), ('GIO_LAUNCHED_DESKTOP_FILE_PID', '5100'), ('VSCODE_CRASH_REPORTER_PROCESS_TYPE', 'extensionHost'), ('MANDATORY_PATH', '/usr/share/gconf/ubuntu-xorg.mandatory.path'), ('ROS_DISTRO', 'humble'), ('GTK_IM_MODULE', 'ibus'), ('LOGNAME', 'ilex'), ('JOURNAL_STREAM', '8:25720'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('DEFAULTS_PATH', '/usr/share/gconf/ubuntu-xorg.default.path'), ('USERNAME', 'ilex'), ('ANTHROPIC_BASE_URL', 'https://ai-in.one'), ('OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE', 'delta'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('FC_FONTATIONS', '1'), ('ROS_LOCALHOST_ONLY', '0'), ('WINDOWPATH', '2'), ('MCP_CONNECTION_NONBLOCKING', 'true'), ('PATH', '/home/ilex/miniforge3/envs/robot_env/bin:/opt/ros/humble/bin:/home/ilex/miniforge3/bin:/home/ilex/miniforge3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin'), ('SESSION_MANAGER', 'local/ilex22:@/tmp/.ICE-unix/2372,unix/ilex22:/tmp/.ICE-unix/2372'), ('INVOCATION_ID', '2c40b7447a6f42a1b8f1c4d2a2683c5e'), ('COREPACK_ENABLE_AUTO_PIN', '0'), ('XDG_MENU_PREFIX', 'gnome-'), ('LC_ADDRESS', 'zh_CN.UTF-8'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('GDK_BACKEND', 'x11'), ('MAMBA_ROOT_PREFIX', '/home/ilex/miniforge3'), ('DISPLAY', ':0'), ('NoDefaultCurrentDirectoryInExePath', '1'), ('LANG', 'zh_CN.UTF-8'), ('XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('LC_TELEPHONE', 'zh_CN.UTF-8'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu-xorg'), ('XAUTHORITY', '/run/user/1000/gdm/Xauthority'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('XML_CATALOG_FILES', 'file:///home/ilex/miniforge3/etc/xml/catalog file:///etc/xml/catalog'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('CONDA_PYTHON_EXE', '/home/ilex/miniforge3/bin/python'), ('SHELL', '/bin/bash'), ('LC_NAME', 'zh_CN.UTF-8'), ('ANTHROPIC_AUTH_TOKEN', 'sk-061dc27ae6995fa30b47e96a84feb57db50ca658bb3d07ec8a687d9f5a560914'), ('QT_ACCESSIBILITY', '1'), ('ELECTRON_RUN_AS_NODE', '1'), ('GDMSESSION', 'ubuntu-xorg'), ('CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING', 'true'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('CONDA_DEFAULT_ENV', 'base'), ('CLAUDECODE', '1'), ('LC_MEASUREMENT', 'zh_CN.UTF-8'), ('GPG_AGENT_INFO', '/run/user/1000/gnupg/S.gpg-agent:0:1'), ('GJS_DEBUG_OUTPUT', 'stderr'), ('_CONDA_EXE', '/home/ilex/miniforge3/bin/conda'), ('MAMBA_EXE', '/home/ilex/miniforge3/bin/mamba'), ('LC_IDENTIFICATION', 'zh_CN.UTF-8'), ('VIRTUAL_ENV', '/home/ilex/miniforge3/envs/robot_env'), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu-xorg:/etc/xdg'), ('CONDA_EXE', '/home/ilex/miniforge3/bin/conda'), ('VSCODE_CODE_CACHE_PATH', '/home/ilex/.config/Code/CachedData/c9d77990917f3102ada88be140d28b038d1dd7c7'), ('XDG_DATA_DIRS', '/usr/share/ubuntu-xorg:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', '1'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('LC_NUMERIC', 'zh_CN.UTF-8'), ('CONDA_PREFIX', '/home/ilex/miniforge3'), ('LC_PAPER', 'zh_CN.UTF-8'), ('COLCON', '1'), ('VSCODE_PID', '5100'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[0.012411] (linkerta) JobProgress: {'identifier': 'linkerta', 'progress': 'cmake'}
+[0.012620] (linkerta) Command: {'cmd': ['/usr/bin/cmake', '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta', '-DAMENT_CMAKE_SYMLINK_INSTALL=1', '-DCMAKE_INSTALL_PREFIX=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/linkerta'], 'cwd': '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta', 'env': OrderedDict([('GJS_DEBUG_TOPICS', 'JS ERROR;JS LOG'), ('LESSOPEN', '| /usr/bin/lesspipe %s'), ('VSCODE_CWD', '/home/ilex'), ('VSCODE_ESM_ENTRYPOINT', 'vs/workbench/api/node/extensionHostProcess'), ('CONDA_PROMPT_MODIFIER', '(base)'), ('LANGUAGE', 'zh_CN:zh:en_US:en'), ('USER', 'ilex'), ('CLAUDE_CODE_ENTRYPOINT', 'claude-vscode'), ('LC_TIME', 'zh_CN.UTF-8'), ('VSCODE_NLS_CONFIG', '{"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/tcf.json","messagesFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/c9d77990917f3102ada88be140d28b038d1dd7c7/nls.messages.json","corruptMarkerFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"1163c9980a28fc39b33ca5c1eafd6f05.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/tcf.json","_cacheRoot":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn","_resolvedLanguagePackCoreLocation":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/c9d77990917f3102ada88be140d28b038d1dd7c7","_corruptedFile":"/home/ilex/.config/Code/clp/1163c9980a28fc39b33ca5c1eafd6f05.zh-cn/corrupted.info"}'), ('GIT_EDITOR', 'true'), ('VSCODE_HANDLES_UNCAUGHT_ERRORS', 'true'), ('XDG_SESSION_TYPE', 'x11'), ('CLAUDE_AGENT_SDK_VERSION', '0.2.49'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/ilex'), ('CHROME_DESKTOP', 'code.desktop'), ('CONDA_SHLVL', '1'), ('OLDPWD', '/home/ilex/Dev/VIST'), ('DESKTOP_SESSION', 'ubuntu-xorg'), ('VSCODE_IPC_HOOK', '/run/user/1000/vscode-79a07115-1.10-main.sock'), ('GIO_LAUNCHED_DESKTOP_FILE', '/usr/share/applications/code.desktop'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('LC_MONETARY', 'zh_CN.UTF-8'), ('MANAGERPID', '2129'), ('GLFW_IM_MODULE', 'ibus'), ('SYSTEMD_EXEC_PID', '2399'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('_CONDA_ROOT', '/home/ilex/miniforge3'), ('GIO_LAUNCHED_DESKTOP_FILE_PID', '5100'), ('VSCODE_CRASH_REPORTER_PROCESS_TYPE', 'extensionHost'), ('MANDATORY_PATH', '/usr/share/gconf/ubuntu-xorg.mandatory.path'), ('ROS_DISTRO', 'humble'), ('GTK_IM_MODULE', 'ibus'), ('LOGNAME', 'ilex'), ('JOURNAL_STREAM', '8:25720'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('DEFAULTS_PATH', '/usr/share/gconf/ubuntu-xorg.default.path'), ('USERNAME', 'ilex'), ('ANTHROPIC_BASE_URL', 'https://ai-in.one'), ('OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE', 'delta'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('FC_FONTATIONS', '1'), ('ROS_LOCALHOST_ONLY', '0'), ('WINDOWPATH', '2'), ('MCP_CONNECTION_NONBLOCKING', 'true'), ('PATH', '/home/ilex/miniforge3/envs/robot_env/bin:/opt/ros/humble/bin:/home/ilex/miniforge3/bin:/home/ilex/miniforge3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin'), ('SESSION_MANAGER', 'local/ilex22:@/tmp/.ICE-unix/2372,unix/ilex22:/tmp/.ICE-unix/2372'), ('INVOCATION_ID', '2c40b7447a6f42a1b8f1c4d2a2683c5e'), ('COREPACK_ENABLE_AUTO_PIN', '0'), ('XDG_MENU_PREFIX', 'gnome-'), ('LC_ADDRESS', 'zh_CN.UTF-8'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('GDK_BACKEND', 'x11'), ('MAMBA_ROOT_PREFIX', '/home/ilex/miniforge3'), ('DISPLAY', ':0'), ('NoDefaultCurrentDirectoryInExePath', '1'), ('LANG', 'zh_CN.UTF-8'), ('XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('LC_TELEPHONE', 'zh_CN.UTF-8'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu-xorg'), ('XAUTHORITY', '/run/user/1000/gdm/Xauthority'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('XML_CATALOG_FILES', 'file:///home/ilex/miniforge3/etc/xml/catalog file:///etc/xml/catalog'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('CONDA_PYTHON_EXE', '/home/ilex/miniforge3/bin/python'), ('SHELL', '/bin/bash'), ('LC_NAME', 'zh_CN.UTF-8'), ('ANTHROPIC_AUTH_TOKEN', 'sk-061dc27ae6995fa30b47e96a84feb57db50ca658bb3d07ec8a687d9f5a560914'), ('QT_ACCESSIBILITY', '1'), ('ELECTRON_RUN_AS_NODE', '1'), ('GDMSESSION', 'ubuntu-xorg'), ('CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING', 'true'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('CONDA_DEFAULT_ENV', 'base'), ('CLAUDECODE', '1'), ('LC_MEASUREMENT', 'zh_CN.UTF-8'), ('GPG_AGENT_INFO', '/run/user/1000/gnupg/S.gpg-agent:0:1'), ('GJS_DEBUG_OUTPUT', 'stderr'), ('_CONDA_EXE', '/home/ilex/miniforge3/bin/conda'), ('MAMBA_EXE', '/home/ilex/miniforge3/bin/mamba'), ('LC_IDENTIFICATION', 'zh_CN.UTF-8'), ('VIRTUAL_ENV', '/home/ilex/miniforge3/envs/robot_env'), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu-xorg:/etc/xdg'), ('CONDA_EXE', '/home/ilex/miniforge3/bin/conda'), ('VSCODE_CODE_CACHE_PATH', '/home/ilex/.config/Code/CachedData/c9d77990917f3102ada88be140d28b038d1dd7c7'), ('XDG_DATA_DIRS', '/usr/share/ubuntu-xorg:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', '1'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('LC_NUMERIC', 'zh_CN.UTF-8'), ('CONDA_PREFIX', '/home/ilex/miniforge3'), ('LC_PAPER', 'zh_CN.UTF-8'), ('COLCON', '1'), ('VSCODE_PID', '5100'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[0.099669] (-) TimerEvent: {}
+[0.158902] (lbot_arm_interfaces) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.159643] (linkerta) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.199744] (-) TimerEvent: {}
+[0.232380] (lbot_arm_interfaces) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[0.232640] (linkerta) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[0.239210] (linkerta) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.239266] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.294701] (linkerta) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.295757] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.299055] (linkerta) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.299347] (linkerta) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.299819] (-) TimerEvent: {}
+[0.299931] (linkerta) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.300674] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.300816] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.301036] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.302244] (linkerta) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.302842] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.376238] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.381829] (linkerta) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.383904] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.384097] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.384432] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.386164] (linkerta) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.386339] (linkerta) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.386713] (linkerta) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.390241] (linkerta) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.390409] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.400000] (-) TimerEvent: {}
+[0.500232] (-) TimerEvent: {}
+[0.600424] (-) TimerEvent: {}
+[0.700554] (-) TimerEvent: {}
+[0.733267] (linkerta) StdoutLine: {'line': b'-- Found Python3: /home/ilex/miniforge3/envs/robot_env/bin/python3 (found version "3.10.19") found components: Interpreter \n'}
+[0.734100] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Found Python3: /home/ilex/miniforge3/envs/robot_env/bin/python3 (found version "3.10.19") found components: Interpreter \n'}
+[0.780369] (linkerta) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[0.788214] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Override CMake install command with custom implementation using symlinks instead of copying resources\n'}
+[0.800626] (-) TimerEvent: {}
+[0.805767] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Found geometry_msgs: 4.9.0 (/opt/ros/humble/share/geometry_msgs/cmake)\n'}
+[0.805967] (linkerta) StdoutLine: {'line': b'-- Looking for pthread.h\n'}
+[0.842142] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.8 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[0.846247] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.8 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[0.855438] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.8 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[0.867562] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.883111] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.898046] (linkerta) StdoutLine: {'line': b'-- Looking for pthread.h - found\n'}
+[0.898475] (linkerta) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n'}
+[0.900763] (-) TimerEvent: {}
+[0.922771] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Found sensor_msgs: 4.9.0 (/opt/ros/humble/share/sensor_msgs/cmake)\n'}
+[0.940482] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)\n'}
+[0.986404] (linkerta) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n'}
+[0.987443] (linkerta) StdoutLine: {'line': b'-- Found Threads: TRUE  \n'}
+[0.989911] (linkerta) StdoutLine: {'line': b'-- Found rclcpp: 16.0.17 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[1.000885] (-) TimerEvent: {}
+[1.020404] (linkerta) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.8 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[1.023229] (linkerta) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.8 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[1.031990] (linkerta) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.8 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[1.040532] (linkerta) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[1.052204] (linkerta) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[1.062656] (lbot_arm_interfaces) StderrLine: {'line': b'CMake Error at /opt/ros/humble/share/rosidl_adapter/cmake/rosidl_adapt_interfaces.cmake:59 (message):\n'}
+[1.062986] (lbot_arm_interfaces) StderrLine: {'line': b'  execute_process(/home/ilex/miniforge3/envs/robot_env/bin/python3 -m\n'}
+[1.063030] (lbot_arm_interfaces) StderrLine: {'line': b'  rosidl_adapter --package-name lbot_arm_interfaces --arguments-file\n'}
+[1.063061] (lbot_arm_interfaces) StderrLine: {'line': b'  /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_adapter__arguments__lbot_arm_interfaces.json\n'}
+[1.063090] (lbot_arm_interfaces) StderrLine: {'line': b'  --output-dir\n'}
+[1.063118] (lbot_arm_interfaces) StderrLine: {'line': b'  /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_adapter/lbot_arm_interfaces\n'}
+[1.063149] (lbot_arm_interfaces) StderrLine: {'line': b'  --output-file\n'}
+[1.063176] (lbot_arm_interfaces) StderrLine: {'line': b'  /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_adapter/lbot_arm_interfaces.idls)\n'}
+[1.063206] (lbot_arm_interfaces) StderrLine: {'line': b'  returned error code 1:\n'}
+[1.063231] (lbot_arm_interfaces) StderrLine: {'line': b'\n'}
+[1.063259] (lbot_arm_interfaces) StderrLine: {'line': b'  Traceback (most recent call last):\n'}
+[1.063285] (lbot_arm_interfaces) StderrLine: {'line': b'\n'}
+[1.063310] (lbot_arm_interfaces) StderrLine: {'line': b'    File "/home/ilex/miniforge3/envs/robot_env/lib/python3.10/runpy.py", line 196, in _run_module_as_main\n'}
+[1.063337] (lbot_arm_interfaces) StderrLine: {'line': b'      return _run_code(code, main_globals, None,\n'}
+[1.063363] (lbot_arm_interfaces) StderrLine: {'line': b'    File "/home/ilex/miniforge3/envs/robot_env/lib/python3.10/runpy.py", line 86, in _run_code\n'}
+[1.063389] (lbot_arm_interfaces) StderrLine: {'line': b'      exec(code, run_globals)\n'}
+[1.063415] (lbot_arm_interfaces) StderrLine: {'line': b'    File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/__main__.py", line 19, in <module>\n'}
+[1.063442] (lbot_arm_interfaces) StderrLine: {'line': b'      sys.exit(main())\n'}
+[1.063467] (lbot_arm_interfaces) StderrLine: {'line': b'    File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/main.py", line 53, in main\n'}
+[1.063503] (lbot_arm_interfaces) StderrLine: {'line': b'      abs_idl_file = convert_to_idl(\n'}
+[1.063533] (lbot_arm_interfaces) StderrLine: {'line': b'    File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/__init__.py", line 23, in convert_to_idl\n'}
+[1.063560] (lbot_arm_interfaces) StderrLine: {'line': b'      from rosidl_adapter.srv import convert_srv_to_idl\n'}
+[1.063585] (lbot_arm_interfaces) StderrLine: {'line': b'    File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/srv/__init__.py", line 16, in <module>\n'}
+[1.063610] (lbot_arm_interfaces) StderrLine: {'line': b'      from rosidl_adapter.resource import expand_template\n'}
+[1.063635] (lbot_arm_interfaces) StderrLine: {'line': b'    File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/resource/__init__.py", line 19, in <module>\n'}
+[1.063659] (lbot_arm_interfaces) StderrLine: {'line': b'      import em\n'}
+[1.063683] (lbot_arm_interfaces) StderrLine: {'line': b'\n'}
+[1.063709] (lbot_arm_interfaces) StderrLine: {'line': b"  ModuleNotFoundError: No module named 'em'\n"}
+[1.063743] (lbot_arm_interfaces) StderrLine: {'line': b'\n'}
+[1.063768] (lbot_arm_interfaces) StderrLine: {'line': b'Call Stack (most recent call first):\n'}
+[1.063795] (lbot_arm_interfaces) StderrLine: {'line': b'  /opt/ros/humble/share/rosidl_cmake/cmake/rosidl_generate_interfaces.cmake:130 (rosidl_adapt_interfaces)\n'}
+[1.063820] (lbot_arm_interfaces) StderrLine: {'line': b'  CMakeLists.txt:26 (rosidl_generate_interfaces)\n'}
+[1.063846] (lbot_arm_interfaces) StderrLine: {'line': b'\n'}
+[1.063873] (lbot_arm_interfaces) StderrLine: {'line': b'\n'}
+[1.063900] (lbot_arm_interfaces) StdoutLine: {'line': b'-- Configuring incomplete, errors occurred!\n'}
+[1.063938] (lbot_arm_interfaces) StdoutLine: {'line': b'See also "/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles/CMakeOutput.log".\n'}
+[1.075149] (lbot_arm_interfaces) CommandEnded: {'returncode': 1}
+[1.090070] (linkerta) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[1.101028] (-) TimerEvent: {}
+[1.104634] (lbot_arm_interfaces) JobEnded: {'identifier': 'lbot_arm_interfaces', 'rc': 1}
+[1.105129] (linkerta) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.9 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[1.175754] (linkerta) StdoutLine: {'line': b'-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  \n'}
+[1.194731] (linkerta) StdoutLine: {'line': b'-- Found FastRTPS: /opt/ros/humble/include  \n'}
+[1.201179] (-) TimerEvent: {}
+[1.218608] (linkerta) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[1.269207] (linkerta) StdoutLine: {'line': b'-- Found sensor_msgs: 4.9.0 (/opt/ros/humble/share/sensor_msgs/cmake)\n'}
+[1.301387] (-) TimerEvent: {}
+[1.313764] (linkerta) StderrLine: {'line': b'Traceback (most recent call last):\n'}
+[1.314072] (linkerta) StderrLine: {'line': b'  File "/opt/ros/humble/share/ament_cmake_core/cmake/core/package_xml_2_cmake.py", line 22, in <module>\n'}
+[1.314106] (linkerta) StderrLine: {'line': b'    from catkin_pkg.package import parse_package_string\n'}
+[1.314133] (linkerta) StderrLine: {'line': b"ModuleNotFoundError: No module named 'catkin_pkg'\n"}
+[1.317783] (linkerta) StderrLine: {'line': b'CMake Error at /opt/ros/humble/share/ament_cmake_core/cmake/core/ament_package_xml.cmake:95 (message):\n'}
+[1.318194] (linkerta) StderrLine: {'line': b'  execute_process(/home/ilex/miniforge3/envs/robot_env/bin/python3\n'}
+[1.318271] (linkerta) StderrLine: {'line': b'  /opt/ros/humble/share/ament_cmake_core/cmake/core/package_xml_2_cmake.py\n'}
+[1.318336] (linkerta) StderrLine: {'line': b'  /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/package.xml\n'}
+[1.318402] (linkerta) StderrLine: {'line': b'  /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/ament_cmake_core/package.cmake)\n'}
+[1.318462] (linkerta) StderrLine: {'line': b'  returned error code 1\n'}
+[1.318538] (linkerta) StderrLine: {'line': b'Call Stack (most recent call first):\n'}
+[1.318603] (linkerta) StderrLine: {'line': b'  /opt/ros/humble/share/ament_cmake_core/cmake/core/ament_package_xml.cmake:49 (_ament_package_xml)\n'}
+[1.318664] (linkerta) StderrLine: {'line': b'  /opt/ros/humble/share/ament_cmake_core/cmake/core/ament_package.cmake:63 (ament_package_xml)\n'}
+[1.318722] (linkerta) StderrLine: {'line': b'  CMakeLists.txt:54 (ament_package)\n'}
+[1.318781] (linkerta) StderrLine: {'line': b'\n'}
+[1.318841] (linkerta) StderrLine: {'line': b'\n'}
+[1.318904] (linkerta) StdoutLine: {'line': b'-- Configuring incomplete, errors occurred!\n'}
+[1.318972] (linkerta) StdoutLine: {'line': b'See also "/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles/CMakeOutput.log".\n'}
+[1.333296] (linkerta) JobEnded: {'identifier': 'linkerta', 'rc': 'SIGINT'}
+[1.343950] (lbot_demo) JobSkipped: {'identifier': 'lbot_demo'}
+[1.343991] (lbot_driver) JobSkipped: {'identifier': 'lbot_driver'}
+[1.344000] (lbot_teleop) JobSkipped: {'identifier': 'lbot_teleop'}
+[1.344008] (-) EventReactorShutdown: {}

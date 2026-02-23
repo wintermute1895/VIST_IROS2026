@@ -1,0 +1,9 @@
+source;share/linkerhand_retarget/hook/pythonpath.ps1
+source;share/linkerhand_retarget/hook/pythonpath.dsv
+source;share/linkerhand_retarget/hook/pythonpath.sh
+source;share/linkerhand_retarget/hook/ament_prefix_path.ps1
+source;share/linkerhand_retarget/hook/ament_prefix_path.dsv
+source;share/linkerhand_retarget/hook/ament_prefix_path.sh
+source;../../build/linkerhand_retarget/share/linkerhand_retarget/hook/pythonpath_develop.ps1
+source;../../build/linkerhand_retarget/share/linkerhand_retarget/hook/pythonpath_develop.dsv
+source;../../build/linkerhand_retarget/share/linkerhand_retarget/hook/pythonpath_develop.sh
