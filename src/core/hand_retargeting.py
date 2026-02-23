@@ -1,10 +1,19 @@
 import numpy as np
 import yaml
 import os
+import sys
 import json
 import socket
 import time
 from scipy.spatial.transform import Rotation as R
+
+# 添加external_sdk路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+dex_retargeting_path = os.path.join(project_root, "external_sdk", "dex_retargeting")
+if dex_retargeting_path not in sys.path:
+    sys.path.insert(0, dex_retargeting_path)
+
 from dex_retargeting.retargeting_config import RetargetingConfig
 from dex_retargeting.kinematics_adaptor import MimicJointKinematicAdaptor
 

@@ -10,9 +10,10 @@ from abc import ABC, abstractmethod
 # ==========================================
 SDK_LOADED = False
 try:
-    # 构造 SDK 路径: src/robot/sdk/linkerarm
+    # 构造 SDK 路径: external_sdk/linkerarm
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    sdk_path = os.path.join(current_dir, "sdk", "linkerarm")
+    project_root = os.path.dirname(os.path.dirname(current_dir))
+    sdk_path = os.path.join(project_root, "external_sdk", "linkerarm")
 
     # 把 SDK 路径加入 Python 搜索路径，确保能找到 libs/ 下的 .so
     if sdk_path not in sys.path:
