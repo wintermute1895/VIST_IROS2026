@@ -1,5 +1,8 @@
 #!/bin/bash
-# 快速录制视觉数据（使用默认配置）
+# 快速录制脚本（用于测试）
+# 功能：快速录制控制数据，用于测试和调试
+# 输出：data/collection/quick_test/session_*/episode_*/
+#
 # 用法: bash scripts/quick_record.sh [时长秒数]
 
 set -e
@@ -8,6 +11,7 @@ set -e
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 # 项目根目录
@@ -17,57 +21,92 @@ cd "$PROJECT_ROOT"
 # 默认配置
 DURATION=${1:-30}  # 默认30秒
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-DATA_DIR="${PROJECT_ROOT}/data/vision_recordings/rec_${TIMESTAMP}"
+DATA_DIR="${PROJECT_ROOT}/data/collection/quick_test/session_${TIMESTAMP}/episode_000000"
 mkdir -p "$DATA_DIR"
+ROSBAG_DIR="$DATA_DIR/rosbag"
 
-echo -e "${CYAN}开始录制视觉数据...${NC}"
+echo ""
+echo -e "${CYAN}========================================${NC}"
+echo -e "${CYAN}快速录制测试${NC}"
+echo -e "${CYAN}========================================${NC}"
 echo -e "  时长: ${DURATION}秒"
 echo -e "  数据目录: $DATA_DIR"
+echo ""
+
+# Source ROS2环境
+if [ -f "/opt/ros/humble/setup.bash" ]; then
+    source /opt/ros/humble/setup.bash
+fi
+
+if [ -f "${PROJECT_ROOT}/external_sdk/arm_teleop/install/setup.bash" ]; then
+    source "${PROJECT_ROOT}/external_sdk/arm_teleop/install/setup.bash"
+fi
+
+# 检查控制节点
+echo -e "${YELLOW}检查控制节点状态...${NC}"
+if ros2 node list 2>/dev/null | grep -q "linkerta_node\|lbot_driver\|teleop_bridge"; then
+    echo -e "${GREEN}✓ 检测到运行的控制节点${NC}"
+else
+    echo -e "${RED}错误：未检测到运行的控制节点！${NC}"
+    echo -e "${YELLOW}请先启动控制系统${NC}"
+    exit 1
+fi
+echo ""
+
+# 默认录制话题
+TOPICS="/robot1/right_arm/joint_states /right_arm_joint_control"
+
+echo -e "${YELLOW}录制话题:${NC}"
+echo "$TOPICS" | tr ' ' '\n' | sed 's/^/  - /'
 echo ""
 
 # 清理函数
 cleanup() {
     echo ""
     echo -e "${YELLOW}停止录制...${NC}"
-    pkill -f "vision_node_depth.py" || true
-    pkill -f "vist_ros2_bridge.py" || true
-    pkill -f "high_freq_resampler" || true
     pkill -f "ros2 bag record" || true
+
+    # 生成元数据
+    if [ -d "$ROSBAG_DIR" ] && [ -n "$(ls -A $ROSBAG_DIR 2>/dev/null)" ]; then
+        echo -e "${YELLOW}生成元数据...${NC}"
+        python3 scripts/generate_episode_metadata.py "$ROSBAG_DIR" \
+            --task quick_test 2>/dev/null || echo -e "${YELLOW}  ⚠️  元数据生成失败${NC}"
+
+        # 验证时间同步
+        if [ -f "$ROSBAG_DIR/metadata.yaml" ]; then
+            echo -e "${YELLOW}验证时间同步...${NC}"
+            python3 scripts/validate_time_sync.py "$ROSBAG_DIR" 2>/dev/null || echo -e "${YELLOW}  ⚠️  时间同步验证失败${NC}"
+        fi
+    fi
+
     echo -e "${GREEN}✓ 录制完成${NC}"
     echo -e "${GREEN}数据保存在: $DATA_DIR${NC}"
 }
 
 trap cleanup EXIT INT TERM
 
-# 启动视觉节点
-echo -e "${YELLOW}启动视觉节点...${NC}"
-python3 src/nodes/vision_node_depth.py > "$DATA_DIR/vision_node.log" 2>&1 &
-sleep 3
+# 开始rosbag录制
+echo -e "${YELLOW}开始rosbag录制...${NC}"
+ros2 bag record -o "$ROSBAG_DIR" $TOPICS > "$DATA_DIR/rosbag.log" 2>&1 &
+RECORD_PID=$!
 
-# 启动视觉桥接
-echo -e "${YELLOW}启动视觉桥接...${NC}"
-python3 scripts/vist_ros2_bridge.py > "$DATA_DIR/vision_bridge.log" 2>&1 &
-sleep 3
-
-# 启动高频重采样节点（插值到200Hz）
-echo -e "${YELLOW}启动高频重采样节点...${NC}"
-ros2 launch lbot_teleop high_freq_resampler.launch.py > "$DATA_DIR/resampler.log" 2>&1 &
-sleep 3
-
-# 启动rosbag录制
-echo -e "${YELLOW}启动数据录制...${NC}"
-BAG_DIR="${DATA_DIR}/rosbag"
-# 不要提前创建目录，让ros2 bag record自己创建
-# 注意：录制实际发送给真机驱动的话题（经过插值后的200Hz指令）
-ros2 bag record -o "$BAG_DIR" /robot1/right_arm/joint_follow > "$DATA_DIR/rosbag.log" 2>&1 &
 sleep 2
 
-echo ""
-echo -e "${GREEN}录制进行中...${NC}"
-echo -e "${CYAN}请在摄像头前做动作${NC}"
+# 检查录制进程
+if ! kill -0 $RECORD_PID 2>/dev/null; then
+    echo -e "${RED}错误：rosbag录制启动失败${NC}"
+    cat "$DATA_DIR/rosbag.log"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ 录制已启动 (PID: $RECORD_PID)${NC}"
 echo ""
 
 # 倒计时
+echo -e "${CYAN}录制进行中...${NC}"
+echo -e "${YELLOW}请操作机器人或遥操作设备${NC}"
+echo ""
+
 for ((i=$DURATION; i>0; i--)); do
     echo -ne "\r剩余时间: ${i}秒  "
     sleep 1
@@ -75,3 +114,18 @@ done
 
 echo ""
 echo -e "${GREEN}✓ 录制完成！${NC}"
+
+# 停止录制
+pkill -f "ros2 bag record" || true
+wait $RECORD_PID 2>/dev/null || true
+
+echo ""
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}快速录制完成！${NC}"
+echo -e "${GREEN}========================================${NC}"
+echo ""
+echo -e "${CYAN}下一步:${NC}"
+echo "  1. 查看数据: ls -lh $DATA_DIR"
+echo "  2. 查看元数据: cat $DATA_DIR/metadata.json"
+echo "  3. 查看同步报告: cat $DATA_DIR/sync_validation_report.json"
+echo ""

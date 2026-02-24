@@ -510,3 +510,18 @@ data_logging:
   # 是否启用性能监控
   enable_performance_monitoring: true
 
+
+# ============================================
+# 视觉控制测试配置（2026-02-24添加）
+# ============================================
+
+# ROS2发布配置
+simulation_enable_ros2_publish: true
+
+# 简单滤波器配置（EMA）
+enable_simple_filter: true
+simple_filter_alpha: 0.3  # 推荐值: 0.2-0.4
+
+# 高频发布配置
+high_freq_publish_enabled: true
+high_freq_interpolation: "linear"  # "linear" 或 "cubic"

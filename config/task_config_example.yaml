@@ -1,0 +1,57 @@
+# VIST 任务配置文件示例
+# 用于Episode管理器
+
+# 任务基本信息
+task_info:
+  name: "vision_control_test"
+  description: "视觉控制系统测试"
+  operator: "研究员"
+
+# 相机配置
+cameras:
+  - name: "overhead"
+    role: "intent_detection"
+    topic: "/camera/color/image_raw"
+    fps: 30
+  # - name: "wrist"
+  #   role: "manipulation"
+  #   topic: "/wrist_camera/color/image_raw"
+  #   fps: 30
+
+# 要录制的话题
+topics:
+  # 相机话题
+  - "/camera/color/image_raw"
+  - "/camera/depth/image_rect_raw"
+  - "/camera/color/camera_info"
+
+  # 控制话题
+  - "/vision_right_joint_control"
+  - "/right_arm_joint_control"
+
+  # 机器人状态话题
+  - "/robot1/right_arm/joint_states"
+  - "/robot1/right_arm/joint_follow"
+
+  # 可选：外骨骼话题
+  # - "/exo_right_joint_states"
+
+# 控制参数
+control_params:
+  control_frequency: 25  # Hz
+  camera_fps: 30         # Hz
+  max_episode_duration: 60  # 秒
+
+# 数据质量要求
+quality_requirements:
+  min_sync_quality: "good"  # excellent/good/acceptable
+  max_time_diff_ms: 33      # 最大时间差（毫秒）
+  min_duration_sec: 10      # 最小Episode时长
+  max_duration_sec: 120     # 最大Episode时长
+
+# 自动化选项
+automation:
+  auto_validate: true       # 自动验证数据质量
+  auto_convert: false       # 自动转换为训练格式
+  auto_cleanup: false       # 自动清理低质量数据
+  quality_threshold: "B"    # 质量阈值（A/B/C/D/F）

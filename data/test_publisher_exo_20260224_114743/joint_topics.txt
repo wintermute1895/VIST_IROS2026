@@ -1,3 +1,0 @@
-/joint_error_code
-/left_arm_joint_control
-/right_arm_joint_control

@@ -1,0 +1,20 @@
+{
+  "command": {
+    "label": "视觉控制（250Hz+EMA）",
+    "topic": "/vision_control/joint_follow",
+    "metrics": {
+      "frequency": 235.98311916808657,
+      "avg_velocity": 0.004385683481454392,
+      "max_velocity": 1.3268376588989446,
+      "rms_velocity": 1.3968531069785353,
+      "avg_acceleration": 0.022183476757732024,
+      "max_acceleration": 18.359162231624573,
+      "rms_acceleration": 43.88010781566686,
+      "avg_jerk": 1.245784197214306,
+      "max_jerk": 927.5669402821562,
+      "rms_jerk": 2962.449330013452,
+      "num_samples": 47843,
+      "duration": 202.7348403930664
+    }
+  }
+}

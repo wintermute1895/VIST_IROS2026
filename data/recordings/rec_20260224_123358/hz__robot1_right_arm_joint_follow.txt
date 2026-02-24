@@ -1,1 +1,0 @@
-The message type 'lbot_arm_interfaces/msg/FollowJoint' is invalid

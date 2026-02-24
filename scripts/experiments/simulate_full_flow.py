@@ -28,7 +28,7 @@ import meshcat.transformations as tf
 import pinocchio as pin
 
 # 添加项目根目录到路径
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, project_root)
 
 from src.core.motion_mapper import ArmMotionMapper
@@ -38,6 +38,11 @@ from src.communication.udp_receiver import UDPReceiver
 from src.control.trajectory_interpolator import TrajectoryInterpolator
 from src.utils.data_logger import VISTDataLogger
 from src.utils.performance_monitor import TeleopMetrics
+
+# 添加ROS2发布和高频插值支持
+sys.path.insert(0, os.path.join(project_root, 'scripts'))
+from simulation_ros2_publisher import SimulationPublisherWrapper
+from high_frequency_publisher import HighFrequencyPublisher
 
 
 class FullFlowSimulator:
@@ -66,7 +71,7 @@ class FullFlowSimulator:
 
         # 3. 初始化 IK 求解器
         print("\n🧠 初始化 IK 求解器...")
-        urdf_path = os.path.join(project_root, "config", "lkls73_o2_dual_arm_description.urdf")
+        urdf_path = os.path.join(project_root, "config", "urdf", "lkls73_o2_dual_arm_description.urdf")
         self.ik_solver = PinocchioIKSolver(
             urdf_path=urdf_path,
             end_effector_frame="Right_Wrist_Roll_Link"
@@ -238,6 +243,45 @@ class FullFlowSimulator:
 
         print("\n✅ 初始化完成！")
         print("\n" + "=" * 80)
+
+        # 9. 初始化ROS2发布器和高频插值
+        print("\n📡 初始化ROS2高频发布系统...")
+
+        # 9.1 创建基础ROS2发布器
+        enable_ros2 = getattr(self.config, 'simulation_enable_ros2_publish', True)
+        publish_rate = getattr(self.config, 'vision_fps', 30.0)
+
+        self.ros2_publisher = SimulationPublisherWrapper(
+            publish_rate=publish_rate,
+            enable_ros2=enable_ros2
+        )
+
+        # 9.2 创建高频发布器（250Hz）
+        if enable_ros2 and self.ros2_publisher.node is not None:
+            target_freq = 250.0  # 目标频率
+            interpolation = 'linear'  # 简单线性插值
+
+            self.high_freq_pub = HighFrequencyPublisher(
+                ros2_publisher=self.ros2_publisher,
+                target_freq=target_freq,
+                interpolation=interpolation
+            )
+            print(f"✅ 高频发布系统初始化完成")
+            print(f"   主循环频率: {publish_rate} Hz")
+            print(f"   发布频率: {target_freq} Hz")
+            print(f"   插值方法: {interpolation}")
+        else:
+            self.high_freq_pub = None
+            print("⚠️  ROS2发布已禁用，跳过高频发布器")
+
+        # 9.3 初始化简单滤波器（EMA - 指数移动平均）
+        self.enable_simple_filter = getattr(self.config, 'enable_simple_filter', True)
+        if self.enable_simple_filter:
+            self.filter_alpha = getattr(self.config, 'simple_filter_alpha', 0.3)
+            self.q_filtered = None
+            print(f"✅ 简单滤波器已启用 (EMA, α={self.filter_alpha})")
+        else:
+            print("⚠️  简单滤波器已禁用")
 
     def _setup_scene(self):
         """设置可视化场景"""
@@ -444,6 +488,13 @@ class FullFlowSimulator:
         last_print_time = time.time()
         last_robot_update = time.time()  # 上次更新机械臂的时间
 
+        # 启动高频发布器
+        if hasattr(self, 'high_freq_pub') and self.high_freq_pub is not None:
+            init_q = self.q_current[self.ik_solver.controlled_indices]
+            self.high_freq_pub.start(q_init=init_q)
+            print("✅ 高频发布器已启动 (250Hz)")
+            print()
+
         # 缓存最新的UDP数据（使用第一个包初始化）
         if 'keypoints' in first_packet:
             cached_keypoints = first_packet['keypoints']
@@ -637,6 +688,22 @@ class FullFlowSimulator:
 
                             # VIST 返回受控关节角度（7维），需要扩展到完整模型（14维）
                             if self.config.ik_strategy == "vist":
+                                # 应用简单滤波（EMA）
+                                if hasattr(self, 'enable_simple_filter') and self.enable_simple_filter:
+                                    if self.q_filtered is None:
+                                        self.q_filtered = q_solution.copy()
+                                    else:
+                                        # EMA滤波: q_filtered = α * q_new + (1-α) * q_old
+                                        self.q_filtered = (self.filter_alpha * q_solution +
+                                                          (1 - self.filter_alpha) * self.q_filtered)
+                                    q_to_publish = self.q_filtered
+                                else:
+                                    q_to_publish = q_solution
+
+                                # 更新高频发布器（250Hz插值发布）
+                                if hasattr(self, 'high_freq_pub') and self.high_freq_pub is not None:
+                                    self.high_freq_pub.update_target(q_to_publish)
+
                                 # 步骤1: 使用轨迹插值器生成平滑的中间点
                                 # ✅ 传递实际dt给插值器
                                 if hasattr(self, 'interpolator'):
@@ -816,6 +883,17 @@ class FullFlowSimulator:
             print("\n\n⏹️ 用户中断")
 
         finally:
+            # 清理高频发布器
+            if hasattr(self, 'high_freq_pub') and self.high_freq_pub is not None:
+                print("\n🔌 停止高频发布器...")
+                self.high_freq_pub.stop()
+
+            # 清理ROS2发布器
+            if hasattr(self, 'ros2_publisher'):
+                print("🔌 关闭ROS2发布器...")
+                self.ros2_publisher.shutdown()
+
+            # 关闭UDP接收器
             self.udp_receiver.close()
 
             # 关闭角度显示窗口

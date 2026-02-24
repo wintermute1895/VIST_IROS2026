@@ -1,0 +1,218 @@
+# VIST 完整配置文件
+# 用于配置化数据采集、分析和控制
+
+# ============================================
+# 任务基本信息
+# ============================================
+task_info:
+  name: "pick_and_place"
+  description: "抓取和放置任务"
+  operator: "研究员"
+  notes: "测试视觉控制系统"
+
+# ============================================
+# 录制配置
+# ============================================
+recording:
+  # 是否启用录制
+  enabled: true
+
+  # 录制时长（秒）
+  duration: 30
+
+  # 录制话题配置
+  topics:
+    # 相机话题
+    camera:
+      enabled: true
+      topics:
+        - "/camera/color/image_raw"
+        - "/camera/depth/image_rect_raw"
+        - "/camera/color/camera_info"
+
+    # 控制话题
+    control:
+      enabled: true
+      topics:
+        - "/vision_right_joint_control"      # 视觉控制输出
+        - "/right_arm_joint_control"         # 遥操作控制输出
+
+    # 机器人状态话题
+    robot_state:
+      enabled: true
+      topics:
+        - "/robot1/right_arm/joint_states"   # 真机状态反馈
+        - "/robot1/right_arm/joint_follow"   # 真机控制指令
+
+    # 外骨骼话题（可选）
+    exoskeleton:
+      enabled: false
+      topics:
+        - "/exo_right_joint_states"
+
+  # 自动化选项
+  automation:
+    auto_validate: true          # 自动验证数据质量
+    auto_generate_metadata: true # 自动生成元数据
+    auto_analyze: false          # 自动分析（录制后）
+
+# ============================================
+# 控制配置
+# ============================================
+control:
+  # 控制模式
+  mode: "vision"  # vision | teleoperation | hybrid | none
+
+  # 是否连接真机
+  use_real_robot: true
+
+  # 控制参数
+  params:
+    control_frequency: 25  # Hz
+    camera_fps: 30         # Hz
+    interpolation: true    # 是否启用插值
+    safety_check: true     # 是否启用安全检查
+
+  # 真机配置
+  robot:
+    ip: "192.168.1.100"
+    port: 8080
+    timeout: 5.0
+
+  # 视觉控制配置
+  vision:
+    enabled: true
+    hand_tracking: true
+    target_detection: true
+    intent_calculation: true
+
+  # 遥操作配置
+  teleoperation:
+    enabled: false
+    device: "exoskeleton"  # exoskeleton | keyboard | joystick
+
+# ============================================
+# 分析配置
+# ============================================
+analysis:
+  # 是否启用分析
+  enabled: true
+
+  # 分析指标
+  metrics:
+    # 频率分析
+    frequency:
+      enabled: true
+      min_frequency: 1.0    # 最小频率阈值 (Hz)
+      expected_frequencies:
+        camera: 30
+        control: 25
+        robot_state: 50
+
+    # 时间同步分析
+    time_sync:
+      enabled: true
+      reference_topic: "/camera/color/image_raw"  # 参考话题（通常是相机）
+      thresholds:
+        excellent: 0.010   # 10ms
+        good: 0.033        # 33ms
+        acceptable: 0.100  # 100ms
+        poor: 0.200        # 200ms
+
+    # 数据完整性检查
+    integrity:
+      enabled: true
+      check_empty_topics: true
+      check_low_frequency: true
+      check_metadata: true
+
+    # 轨迹分析
+    trajectory:
+      enabled: true
+      smooth_window: 5      # 平滑窗口
+      detect_anomalies: true
+
+    # 性能指标
+    performance:
+      enabled: false
+      calculate_latency: true
+      calculate_jitter: true
+      calculate_throughput: true
+
+  # 可视化配置
+  visualization:
+    enabled: true
+    generate_plots: true
+    plot_formats: ["png", "pdf"]
+    dpi: 150
+
+  # 报告配置
+  reporting:
+    enabled: true
+    formats: ["json", "markdown", "html"]
+    include_plots: true
+
+# ============================================
+# 数据质量要求
+# ============================================
+quality:
+  # 最低质量标准
+  min_sync_quality: "good"      # excellent | good | acceptable
+  max_time_diff_ms: 33          # 最大时间差（毫秒）
+  min_duration_sec: 10          # 最小Episode时长
+  max_duration_sec: 120         # 最大Episode时长
+  min_message_count: 100        # 最小消息数
+
+  # 自动清理
+  auto_cleanup:
+    enabled: false
+    remove_failed: false        # 删除失败的录制
+    remove_low_quality: false   # 删除低质量数据
+    quality_threshold: "C"      # 质量阈值
+
+# ============================================
+# 输出配置
+# ============================================
+output:
+  # 基础目录
+  base_dir: "data/collection"
+
+  # 目录结构
+  structure:
+    use_task_name: true
+    use_session_id: true
+    use_episode_id: true
+
+  # 文件格式
+  formats:
+    rosbag: true
+    hdf5: false
+    numpy: false
+
+  # 压缩
+  compression:
+    enabled: false
+    format: "zstd"  # zstd | lz4 | none
+
+# ============================================
+# 高级选项
+# ============================================
+advanced:
+  # Episode管理
+  use_episode_manager: true
+
+  # 并行处理
+  parallel_analysis: false
+  num_workers: 4
+
+  # 调试选项
+  debug:
+    enabled: false
+    verbose: false
+    save_logs: true
+
+  # 性能优化
+  performance:
+    buffer_size: 1024
+    batch_size: 100
+    use_cache: true

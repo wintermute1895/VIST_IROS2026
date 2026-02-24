@@ -1,0 +1,20 @@
+{
+  "exo_output": {
+    "label": "遥操臂输出（原始）",
+    "topic": "/right_arm_joint_control",
+    "metrics": {
+      "frequency": 241.74935324466705,
+      "avg_velocity": 6.852296507986466e-13,
+      "max_velocity": 0.6134224721000341,
+      "rms_velocity": 0.1299027345938135,
+      "avg_acceleration": 3.950617610826157e-11,
+      "max_acceleration": 8.431678194530967,
+      "rms_acceleration": 2.147229523304245,
+      "avg_jerk": 1.6232576481517436e-05,
+      "max_jerk": 616.710905304791,
+      "rms_jerk": 170.13105160628112,
+      "num_samples": 4470,
+      "duration": 18.486088752746582
+    }
+  }
+}
