@@ -1,0 +1,24 @@
+{
+  "/right_arm_joint_control": {
+    "frequency": 241.9809526558025,
+    "avg_velocity": 0.5415250500135375,
+    "max_velocity": 74.12327449093802,
+    "avg_acceleration": 15445.17123737456,
+    "max_acceleration": 3837115.923692469,
+    "avg_jerk": 2456359680.335924,
+    "max_jerk": 913158567973.3168,
+    "num_samples": 4479,
+    "duration": 18.50558876991272
+  },
+  "/robot1/right_arm/joint_states": {
+    "frequency": 50.01033403674906,
+    "avg_velocity": 0.18851825029702524,
+    "max_velocity": 38.10624488212073,
+    "avg_acceleration": 18.67256931368173,
+    "max_acceleration": 2216.0745942996937,
+    "avg_jerk": 1692.915411853892,
+    "max_jerk": 244086.22424240492,
+    "num_samples": 926,
+    "duration": 18.496177196502686
+  }
+}

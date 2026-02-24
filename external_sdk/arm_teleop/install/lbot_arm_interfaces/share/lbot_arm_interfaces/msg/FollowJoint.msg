@@ -1,1 +1,2 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/msg/FollowJoint.msg
+float32[] joints
+bool follow

@@ -1,1 +1,5 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_cmake/srv/MoveJ_Request.msg
+float32[] joints
+float32 speed
+float32 acce
+bool block
+

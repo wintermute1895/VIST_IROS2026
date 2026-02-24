@@ -1,1 +1,5 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_cmake/srv/GetCurrentFrame_Response.msg
+
+string name
+lbot_arm_interfaces/LbotFrame frame
+bool success
+

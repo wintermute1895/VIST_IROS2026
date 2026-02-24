@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta
 
 # Utility rule file for linkerta_uninstall.
 
@@ -67,7 +67,7 @@ include CMakeFiles/linkerta_uninstall.dir/compiler_depend.make
 include CMakeFiles/linkerta_uninstall.dir/progress.make
 
 CMakeFiles/linkerta_uninstall:
-	/usr/bin/cmake -P /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
+	/usr/bin/cmake -P /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
 
 linkerta_uninstall: CMakeFiles/linkerta_uninstall
 linkerta_uninstall: CMakeFiles/linkerta_uninstall.dir/build.make
@@ -82,6 +82,6 @@ CMakeFiles/linkerta_uninstall.dir/clean:
 .PHONY : CMakeFiles/linkerta_uninstall.dir/clean
 
 CMakeFiles/linkerta_uninstall.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles/linkerta_uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles/linkerta_uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/linkerta_uninstall.dir/depend
 

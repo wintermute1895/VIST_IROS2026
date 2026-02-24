@@ -1,1 +1,1 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/lbot_demo
+rclcpp;std_msgs;sensor_msgs;geometry_msgs;tf2;tf2_geometry_msgs;lbot_arm_interfaces;ament_lint_auto;ament_lint_common

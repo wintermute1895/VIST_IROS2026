@@ -13,15 +13,32 @@ data_files = [
     ('share/ament_index/resource_index/packages',
      ['resource/' + package_name]),
     ('share/' + package_name, ['package.xml']),
-    (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+    (os.path.join('share', package_name, 'launch'), glob('linkerhand_retarget/launch/*.launch.py')),
 ]
 
+# Install resource directory
 rescoure_dir = 'resource'
 for dirpath, dirnames, filenames in os.walk(rescoure_dir):
     share_path = os.path.relpath(dirpath,rescoure_dir)
     for filename in filenames:
         file_path = os.path.join(dirpath,filename)
         data_files.append((os.path.join('share',package_name,share_path),[file_path]))
+
+# Install config directory
+config_dir = os.path.join(package_name, 'config')
+for dirpath, dirnames, filenames in os.walk(config_dir):
+    share_path = os.path.relpath(dirpath, package_name)
+    for filename in filenames:
+        file_path = os.path.join(dirpath, filename)
+        data_files.append((os.path.join('share', package_name, share_path), [file_path]))
+
+# Install assets directory
+assets_dir = os.path.join(package_name, 'assets')
+for dirpath, dirnames, filenames in os.walk(assets_dir):
+    share_path = os.path.relpath(dirpath, package_name)
+    for filename in filenames:
+        file_path = os.path.join(dirpath, filename)
+        data_files.append((os.path.join('share', package_name, share_path), [file_path]))
         
 setup(
     name=package_name,

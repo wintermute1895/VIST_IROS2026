@@ -1,0 +1,6 @@
+========================================
+话题消息数量统计
+========================================
+
+Topic information: Topic: /joint_error_code | Type: std_msgs/msg/String | Count: 1130 | Serialization Format: cdr	                   Topic: /left_arm_joint_control | Type: sensor_msgs/msg/JointState | Count: 1130 | Serialization Format: cdr
+                   Topic: /right_arm_joint_control | Type: sensor_msgs/msg/JointState | Count: 1130 | Serialization Format: cdr	

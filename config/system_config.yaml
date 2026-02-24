@@ -6,7 +6,7 @@
 # ==========================================
 robot_model:
   # URDF 文件名
-  urdf_file: "lkls73_o2_dual_arm_description.urdf"
+  urdf_file: "urdf/lkls73_o2_dual_arm_description.urdf"
 
   # 末端执行器名称
   end_effector_frames:
@@ -493,4 +493,20 @@ enhanced_features:
 
   # 最大速度限制（用于简化安全监控器）
   max_velocity: 0.10  # 10 cm/s
+
+# ==========================================
+# 数据记录和性能监控
+# ==========================================
+data_logging:
+  # 是否启用数据记录（仿真和真机通用）
+  enable_logging: true
+
+  # 实验名称（可选，留空则自动生成）
+  experiment_name: ""
+
+  # 数据保存目录
+  data_dir: "data/experiments"
+
+  # 是否启用性能监控
+  enable_performance_monitoring: true
 

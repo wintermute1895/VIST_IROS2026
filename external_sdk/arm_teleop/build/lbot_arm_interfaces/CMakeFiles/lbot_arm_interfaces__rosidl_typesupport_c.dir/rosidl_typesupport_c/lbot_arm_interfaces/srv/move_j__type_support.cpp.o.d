@@ -1,5 +1,5 @@
 CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/lbot_arm_interfaces/srv/move_j__type_support.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_c/lbot_arm_interfaces/srv/move_j__type_support.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_c/lbot_arm_interfaces/srv/move_j__type_support.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/11/cstddef \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
@@ -15,7 +15,7 @@ CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/lb
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/message_type_support_struct.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/visibility_control.h \
  /opt/ros/humble/include/rosidl_typesupport_interface/rosidl_typesupport_interface/macros.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/move_j__struct.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/move_j__struct.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
@@ -26,8 +26,8 @@ CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/lb
  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/primitives_sequence.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/move_j__type_support.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/rosidl_generator_c__visibility_control.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/move_j__type_support.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/rosidl_generator_c__visibility_control.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/service_type_support_struct.h \
  /opt/ros/humble/include/rosidl_typesupport_c/rosidl_typesupport_c/identifier.h \
  /opt/ros/humble/include/rosidl_typesupport_c/rosidl_typesupport_c/visibility_control.h \

@@ -9,6 +9,8 @@ from abc import ABC, abstractmethod
 # 1. 尝试导入 LinkerArm SDK (安全导入)
 # ==========================================
 SDK_LOADED = False
+lbot_api = None  # 全局 API 对象引用
+
 try:
     # 构造 SDK 路径: external_sdk/linkerarm
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,11 +19,12 @@ try:
 
     # 把 SDK 路径加入 Python 搜索路径，确保能找到 libs/ 下的 .so
     if sdk_path not in sys.path:
-        sys.path.append(sdk_path)
+        sys.path.insert(0, sdk_path)
 
     # 引用 lbot 包（从 __init__.py 导入）
-    from lbot import LbotRobot, LbotArm
+    from lbot import LbotRobot, LbotArm, api as lbot_api
     SDK_LOADED = True
+    print(f"✅ [ArmDriver] LinkerArm SDK loaded successfully from {sdk_path}")
 except ImportError as e:
     print(f"⚠️ [ArmDriver] Warning: LinkerArm SDK not found or failed to load. Real hardware mode unavailable.")
     print(f"   Debug Info: {e}")
@@ -352,8 +355,7 @@ class RealArmDriver(BaseArmDriver):
 
         # 方法2：如果回调缓存为空，直接调用底层API
         if joint_positions is None:
-            # 局部导入api（避免模块级导入影响SDK初始化）
-            from lbot import api as lbot_api
+            # 使用顶层导入的 lbot_api
             state = lbot_api.get_current_state()
             if state:
                 if self.arm_enum.value == 0:  # LEFT_ARM
@@ -448,7 +450,6 @@ class RealArmDriver(BaseArmDriver):
         # ⚠️ 重要：使用 move_joint 而不是 joint_follow
         # 原因：joint_follow API 有严重的控制错乱bug（详见 docs/SDK_BUG_REPORT_joint_follow.md）
         # move_joint 经过测试，控制精度 ±0.03°，完全可靠
-        from lbot import api as lbot_api
 
         # 从配置读取速度和加速度参数
         if self.config is not None:
@@ -505,7 +506,6 @@ class RealArmDriver(BaseArmDriver):
         q_cmd_list = q_arm.tolist()
 
         # 使用SDK的move_joint方法（带速度控制）
-        from lbot import api as lbot_api
         success = lbot_api.move_joint(self.arm_enum, q_cmd_list, speed, accel, block)
 
         if not success:

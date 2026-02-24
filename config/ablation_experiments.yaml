@@ -1,0 +1,199 @@
+# VIST消融实验配置
+# 用于系统性对比不同滤波策略的性能
+
+experiments:
+  # ==========================================
+  # Baseline: 直接透传（无滤波）
+  # ==========================================
+  baseline:
+    name: "Baseline (无滤波)"
+    description: "直接透传遥操臂数据，不经过任何滤波处理"
+    filter_type: "passthrough"
+    enable_distance_factor: false
+    enable_velocity_factor: false
+    enable_alignment_factor: false
+    enable_conflict_detection: false
+    expected_jerk: "未知（取决于遥操臂输出）"
+    论文标签: "Direct Teleoperation"
+
+  # ==========================================
+  # 实验1: EMA滤波（简单平滑）
+  # ==========================================
+  ema_filter:
+    name: "EMA滤波"
+    description: "指数移动平均滤波，简单的低通滤波器"
+    filter_type: "ema"
+    ema_alpha: 0.3
+    enable_distance_factor: false
+    enable_velocity_factor: false
+    enable_alignment_factor: false
+    enable_conflict_detection: false
+    expected_jerk: "中等（取决于alpha值）"
+    论文标签: "EMA Smoothing"
+
+  # ==========================================
+  # 实验2: One Euro滤波（自适应平滑）
+  # ==========================================
+  one_euro_filter:
+    name: "One Euro滤波"
+    description: "自适应低通滤波器，平衡延迟和平滑度"
+    filter_type: "one_euro"
+    one_euro_min_cutoff: 1.0
+    one_euro_beta: 0.007
+    enable_distance_factor: false
+    enable_velocity_factor: false
+    enable_alignment_factor: false
+    enable_conflict_detection: false
+    expected_jerk: "较低（自适应调整）"
+    论文标签: "One Euro Filter"
+
+  # ==========================================
+  # 实验3: VIST卡尔曼滤波（无意图检测）
+  # ==========================================
+  vist_kalman_only:
+    name: "VIST卡尔曼（α=1.0）"
+    description: "只使用卡尔曼滤波，意图因子固定为1.0"
+    filter_type: "vist_kalman"
+    enable_distance_factor: false
+    enable_velocity_factor: false
+    enable_alignment_factor: false
+    enable_conflict_detection: false
+    fixed_alpha: 1.0
+    expected_jerk: "低（卡尔曼平滑）"
+    论文标签: "Kalman Filter Only"
+
+  # ==========================================
+  # 实验4: VIST完整算法（卡尔曼+意图）
+  # ==========================================
+  vist_full:
+    name: "VIST完整算法"
+    description: "卡尔曼滤波 + 动态意图检测（距离+速度+对齐）"
+    filter_type: "vist_kalman"
+    enable_distance_factor: true
+    enable_velocity_factor: true
+    enable_alignment_factor: true
+    enable_conflict_detection: false
+    expected_jerk: "最低（意图驱动自适应）"
+    论文标签: "VIST (Ours)"
+
+  # ==========================================
+  # 实验5: VIST+冲突检测
+  # ==========================================
+  vist_full_with_conflict:
+    name: "VIST+冲突检测"
+    description: "完整VIST + 人机冲突检测"
+    filter_type: "vist_kalman"
+    enable_distance_factor: true
+    enable_velocity_factor: true
+    enable_alignment_factor: true
+    enable_conflict_detection: true
+    expected_jerk: "最低（意图驱动+安全保护）"
+    论文标签: "VIST + Conflict Detection"
+
+  # ==========================================
+  # 消融实验：只用距离因子
+  # ==========================================
+  vist_distance_only:
+    name: "VIST（仅距离因子）"
+    description: "只使用距离因子，不考虑速度和对齐"
+    filter_type: "vist_kalman"
+    enable_distance_factor: true
+    enable_velocity_factor: false
+    enable_alignment_factor: false
+    enable_conflict_detection: false
+    expected_jerk: "中低（部分意图信息）"
+    论文标签: "VIST (Distance Only)"
+
+  # ==========================================
+  # 消融实验：只用速度因子
+  # ==========================================
+  vist_velocity_only:
+    name: "VIST（仅速度因子）"
+    description: "只使用速度因子，不考虑距离和对齐"
+    filter_type: "vist_kalman"
+    enable_distance_factor: false
+    enable_velocity_factor: true
+    enable_alignment_factor: false
+    enable_conflict_detection: false
+    expected_jerk: "中低（部分意图信息）"
+    论文标签: "VIST (Velocity Only)"
+
+  # ==========================================
+  # 消融实验：只用对齐因子
+  # ==========================================
+  vist_alignment_only:
+    name: "VIST（仅对齐因子）"
+    description: "只使用对齐因子，不考虑距离和速度"
+    filter_type: "vist_kalman"
+    enable_distance_factor: false
+    enable_velocity_factor: false
+    enable_alignment_factor: true
+    enable_conflict_detection: false
+    expected_jerk: "中低（部分意图信息）"
+    论文标签: "VIST (Alignment Only)"
+
+# ==========================================
+# 实验执行顺序（推荐）
+# ==========================================
+execution_order:
+  - baseline              # 先测baseline，建立基准
+  - ema_filter           # 简单滤波对比
+  - one_euro_filter      # 自适应滤波对比
+  - vist_kalman_only     # 卡尔曼滤波对比
+  - vist_distance_only   # 消融实验：单因子
+  - vist_velocity_only   # 消融实验：单因子
+  - vist_alignment_only  # 消融实验：单因子
+  - vist_full            # 完整VIST
+  - vist_full_with_conflict  # VIST+冲突检测
+
+# ==========================================
+# 评估指标
+# ==========================================
+metrics:
+  primary:
+    - "99% Jerk (rad/s³)"           # 主要指标：平滑度
+    - "RMS Jerk (rad/s³)"           # 主要指标：平滑度
+    - "跟踪误差 RMS (rad)"          # 主要指标：精度
+
+  secondary:
+    - "99% 速度 (rad/s)"
+    - "99% 加速度 (rad/s²)"
+    - "时间延迟 (ms)"
+    - "轨迹相关系数"
+
+# ==========================================
+# 论文表格格式
+# ==========================================
+paper_table_columns:
+  - "Method"
+  - "Jerk (99%)"
+  - "Jerk (RMS)"
+  - "Tracking Error"
+  - "Correlation"
+  - "Delay (ms)"
+
+# ==========================================
+# 预期结果假设（用于验证）
+# ==========================================
+expected_results:
+  jerk_ranking:  # 从高到低（越低越好）
+    - baseline
+    - ema_filter
+    - one_euro_filter
+    - vist_distance_only
+    - vist_velocity_only
+    - vist_alignment_only
+    - vist_kalman_only
+    - vist_full
+    - vist_full_with_conflict
+
+  tracking_error_ranking:  # 从高到低（越低越好）
+    - baseline
+    - ema_filter
+    - one_euro_filter
+    - vist_kalman_only
+    - vist_distance_only
+    - vist_velocity_only
+    - vist_alignment_only
+    - vist_full
+    - vist_full_with_conflict

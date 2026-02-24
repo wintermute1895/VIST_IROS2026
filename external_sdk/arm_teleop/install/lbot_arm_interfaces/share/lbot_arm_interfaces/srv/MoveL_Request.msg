@@ -1,1 +1,6 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_cmake/srv/MoveL_Request.msg
+geometry_msgs/Vector3 position
+geometry_msgs/Vector3 euler
+float32 speed
+float32 acce
+bool block
+

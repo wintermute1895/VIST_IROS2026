@@ -402,7 +402,7 @@ LeftArmServiceNode::LeftArmServiceNode(const std::string& node_name) : rclcpp::N
 }
 
 void LeftArmServiceNode::create_services() {
-    rclcpp::QoS service_qos = rclcpp::ServicesQoS();
+    rmw_qos_profile_t service_qos = rmw_qos_profile_services_default;
     auto sub_opt = rclcpp::SubscriptionOptions();
     sub_opt.callback_group = callback_group_subscribers_;
 
@@ -410,73 +410,73 @@ void LeftArmServiceNode::create_services() {
     move_joint_service_ = this->create_service<lbot_arm_interfaces::srv::MoveJ>(
         "left_arm/move_joint",
         std::bind(&LeftArmServiceNode::move_joint_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     move_pose_service_ = this->create_service<lbot_arm_interfaces::srv::MoveJP>(
         "left_arm/move_pose",
         std::bind(&LeftArmServiceNode::move_pose_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     move_linear_service_ = this->create_service<lbot_arm_interfaces::srv::MoveL>(
         "left_arm/move_linear",
         std::bind(&LeftArmServiceNode::move_linear_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     // 运动学计算服务
     forward_kinematics_service_ = this->create_service<lbot_arm_interfaces::srv::ForwardKinematics>(
         "left_arm/forward_kinematics",
         std::bind(&LeftArmServiceNode::forward_kinematics_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     inverse_kinematics_service_ = this->create_service<lbot_arm_interfaces::srv::InverseKinematics>(
         "left_arm/inverse_kinematics",
         std::bind(&LeftArmServiceNode::inverse_kinematics_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     // 工具坐标系管理服务
     set_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::SetFrame>(
         "left_arm/set_tool_frame",
         std::bind(&LeftArmServiceNode::set_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     get_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::GetFrame>(
         "left_arm/get_tool_frame",
         std::bind(&LeftArmServiceNode::get_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     get_current_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::GetCurrentFrame>(
         "left_arm/get_current_tool_frame",
         std::bind(&LeftArmServiceNode::get_current_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     change_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::ChangeFrame>(
         "left_arm/change_tool_frame",
         std::bind(&LeftArmServiceNode::change_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     delete_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::DeleteFrame>(
         "left_arm/delete_tool_frame",
         std::bind(&LeftArmServiceNode::delete_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     get_all_tool_frames_service_ = this->create_service<lbot_arm_interfaces::srv::GetAllFrames>(
         "left_arm/get_all_tool_frames",
         std::bind(&LeftArmServiceNode::get_all_tool_frames_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     // 零点设置服务
     set_zero_service_ = this->create_service<lbot_arm_interfaces::srv::SetZero>(
         "left_arm/set_zero",
         std::bind(&LeftArmServiceNode::set_zero_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
     set_enable_service_ = this->create_service<lbot_arm_interfaces::srv::SetEnable>(
         "left_arm/set_enable",
         std::bind(&LeftArmServiceNode::set_enable_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
     set_emergency_service_ = this->create_service<lbot_arm_interfaces::srv::SetEmergency>(
         "left_arm/set_emergency_stop",
         std::bind(&LeftArmServiceNode::set_emergency_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     // 灵巧手设置Topic回调函数
     left_hand_l6_joint_sub_ = this->create_subscription<std_msgs::msg::UInt8MultiArray>(
@@ -1030,7 +1030,7 @@ RightArmServiceNode::RightArmServiceNode(const std::string& node_name) : rclcpp:
 }
 
 void RightArmServiceNode::create_services() {
-    rclcpp::QoS service_qos = rclcpp::ServicesQoS();
+    rmw_qos_profile_t service_qos = rmw_qos_profile_services_default;
     auto sub_opt = rclcpp::SubscriptionOptions();
     sub_opt.callback_group = callback_group_subscribers_;
 
@@ -1038,73 +1038,73 @@ void RightArmServiceNode::create_services() {
     move_joint_service_ = this->create_service<lbot_arm_interfaces::srv::MoveJ>(
         "right_arm/move_joint",
         std::bind(&RightArmServiceNode::move_joint_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     move_pose_service_ = this->create_service<lbot_arm_interfaces::srv::MoveJP>(
         "right_arm/move_pose",
         std::bind(&RightArmServiceNode::move_pose_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     move_linear_service_ = this->create_service<lbot_arm_interfaces::srv::MoveL>(
         "right_arm/move_linear",
         std::bind(&RightArmServiceNode::move_linear_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     // 运动学计算服务
     forward_kinematics_service_ = this->create_service<lbot_arm_interfaces::srv::ForwardKinematics>(
         "right_arm/forward_kinematics",
         std::bind(&RightArmServiceNode::forward_kinematics_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     inverse_kinematics_service_ = this->create_service<lbot_arm_interfaces::srv::InverseKinematics>(
         "right_arm/inverse_kinematics",
         std::bind(&RightArmServiceNode::inverse_kinematics_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     // 工具坐标系管理服务
     set_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::SetFrame>(
         "right_arm/set_tool_frame",
         std::bind(&RightArmServiceNode::set_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     get_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::GetFrame>(
         "right_arm/get_tool_frame",
         std::bind(&RightArmServiceNode::get_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
     
     get_current_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::GetCurrentFrame>(
         "right_arm/get_current_tool_frame",
         std::bind(&RightArmServiceNode::get_current_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     change_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::ChangeFrame>(
         "right_arm/change_tool_frame",
         std::bind(&RightArmServiceNode::change_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     delete_tool_frame_service_ = this->create_service<lbot_arm_interfaces::srv::DeleteFrame>(
         "right_arm/delete_tool_frame",
         std::bind(&RightArmServiceNode::delete_tool_frame_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     get_all_tool_frames_service_ = this->create_service<lbot_arm_interfaces::srv::GetAllFrames>(
         "right_arm/get_all_tool_frames",
         std::bind(&RightArmServiceNode::get_all_tool_frames_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     // 零点设置服务
     set_zero_service_ = this->create_service<lbot_arm_interfaces::srv::SetZero>(
         "right_arm/set_zero",
         std::bind(&RightArmServiceNode::set_zero_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
     set_enable_service_ = this->create_service<lbot_arm_interfaces::srv::SetEnable>(
         "right_arm/set_enable",
         std::bind(&RightArmServiceNode::set_enable_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
     set_emergency_service_ = this->create_service<lbot_arm_interfaces::srv::SetEmergency>(
         "right_arm/set_emergency_stop",
         std::bind(&RightArmServiceNode::set_emergency_callback, this, std::placeholders::_1, std::placeholders::_2),
-        service_qos.get_rmw_qos_profile(), callback_group_);
+        service_qos, callback_group_);
 
     // 灵巧手设置Topic回调函数
     right_hand_l6_joint_sub_ = this->create_subscription<std_msgs::msg::UInt8MultiArray>(

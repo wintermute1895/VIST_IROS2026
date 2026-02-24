@@ -1,0 +1,45 @@
+# 高频重采样节点配置文件
+# 用于解决跨时钟域抖动问题
+
+high_freq_resampler_node:
+  ros__parameters:
+    # ========== Topic配置 ==========
+    # 输入: 低频视觉指令 (20-30Hz)
+    vision_left_topic: "/left_arm_joint_control"
+    vision_right_topic: "/right_arm_joint_control"
+
+    # 输出: 高频平滑指令 (200Hz)
+    driver_left_topic: "/robot1/left_arm/joint_follow"
+    driver_right_topic: "/robot1/right_arm/joint_follow"
+
+    # ========== 频率与滤波参数 ==========
+    # 输出频率 (Hz) - 建议 100-200Hz
+    output_freq_hz: 200.0
+
+    # EMA平滑系数 (0.0-1.0)
+    # - 越小越平滑,但延迟越大
+    # - 越大响应越快,但平滑效果越差
+    # - 推荐范围: 0.2-0.4 (遥操作场景)
+    ema_alpha: 0.3
+
+    # ========== 安全限制 ==========
+    # 最大关节速度 (rad/s) - 防止速度过大
+    max_joint_velocity: 2.0
+
+    # 速度突变检测阈值 (rad/s) - 超过此值会打印警告
+    velocity_spike_threshold: 5.0
+
+    # 视觉信号超时时间 (秒) - 超时后保持当前位置
+    timeout_sec: 0.5
+
+    # 是否启用速度限制
+    enable_velocity_limit: true
+
+    # ========== 底层驱动参数 ==========
+    # 发送给底层的follow参数
+    # - false: 低跟随模式 (底层有平滑,但我们已经做了平滑,可以用false增加双重保险)
+    # - true:  高跟随模式 (底层无平滑,完全依赖我们的平滑)
+    follow_mode: false
+
+    # 是否将角度转换为弧度 (视觉输出是角度,底层需要弧度)
+    convert_to_radians: true

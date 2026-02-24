@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = -DRCUTILS_ENABLE_FAULT_INJECTION -DROS_PACKAGE_NAME=\"lbot_arm_interfaces\" -Dlbot_arm_interfaces__rosidl_generator_py_EXPORTS
 
-C_INCLUDES = -I/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c -I/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_py -I/home/ilex/miniforge3/envs/robot_env/include/python3.10 -I/home/ilex/miniforge3/envs/robot_env/lib/python3.10/site-packages/numpy/core/include -isystem /opt/ros/humble/include/std_msgs -isystem /opt/ros/humble/include/builtin_interfaces -isystem /opt/ros/humble/include/rosidl_runtime_c -isystem /opt/ros/humble/include/rcutils -isystem /opt/ros/humble/include/rosidl_typesupport_interface -isystem /opt/ros/humble/include/geometry_msgs -isystem /opt/ros/humble/include/sensor_msgs
+C_INCLUDES = -I/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c -I/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_py -I/home/ilex/miniforge3/envs/robot_env/include/python3.10 -I/home/ilex/miniforge3/envs/robot_env/lib/python3.10/site-packages/numpy/core/include -isystem /opt/ros/humble/include/std_msgs -isystem /opt/ros/humble/include/builtin_interfaces -isystem /opt/ros/humble/include/rosidl_runtime_c -isystem /opt/ros/humble/include/rcutils -isystem /opt/ros/humble/include/rosidl_typesupport_interface -isystem /opt/ros/humble/include/geometry_msgs -isystem /opt/ros/humble/include/sensor_msgs
 
 C_FLAGS = -fPIC -Wall -Wextra -std=gnu99
 

@@ -1,1 +1,7 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/ForwardKinematics.srv
+float32[] joints
+
+---
+geometry_msgs/Vector3 position
+geometry_msgs/Vector3 euler
+
+bool success

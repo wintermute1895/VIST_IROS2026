@@ -2,10 +2,10 @@
 VIST 控制器
 封装 VIST 算法逻辑（纯算法，不涉及硬件）
 
-更新日期：2026-02-10
+更新日期：2026-02-23
 新增功能：
 - 意图检测与冲突检测（EnhancedIntentDetector）
-- 简化安全监控（SimplifiedSafetyMonitor）
+- 安全控制（SafeRobotController）
 - 目标检测（AprilTag/ArUco）
 - 5 阶段状态机控制流程
 - 统一日志系统
@@ -21,14 +21,13 @@ from src.core.vist_kalman_filter import VISTKalmanFilter
 from src.core.geometric_arm_solver import GeometricArmSolver
 from src.control.safe_robot_controller import SafeRobotController
 
-# 新增：意图检测和安全监控
+# 新增：意图检测
 from src.core.intent_detector import (
     EnhancedIntentDetector,
     IntentFactors,
     compute_human_command,
     compute_algorithm_expectation
 )
-from src.core.safety_monitor_simplified import SimplifiedSafetyMonitor
 from src.perception.target_detector import create_target_detector
 
 # 日志系统
@@ -110,7 +109,6 @@ class VISTController:
 
         # 5. 初始化增强功能（如果启用）
         self.intent_detector = None
-        self.safety_monitor = None
         self.target_detector = None
         self.target_socket_pos = None
         self.coord_transform = None  # 坐标变换管理器
@@ -129,12 +127,6 @@ class VISTController:
             logger.info("初始化意图检测器（增强模式）...")
             self.intent_detector = EnhancedIntentDetector(config)
             logger.info("意图检测器初始化完成")
-
-            # 初始化简化安全监控器
-            logger.info("初始化简化安全监控器...")
-            config_max_velocity = getattr(config, 'max_velocity', 0.10)
-            self.safety_monitor = SimplifiedSafetyMonitor(config_max_velocity)
-            logger.info("简化安全监控器初始化完成")
 
         if self.enable_target_detection:
             logger.info("初始化目标检测器...")
@@ -356,24 +348,7 @@ class VISTController:
             'position_limited': False
         }
 
-        # 8. 简化安全监控器检查（兜底保护）
-        if self.safety_monitor is not None:
-            # 计算末端速度（简化）
-            end_effector_velocity = (target_pos - self.current_pos) * 30  # 假设 30Hz
-
-            safe_velocity, is_safe, safety_msg = self.safety_monitor.check(
-                self.current_pos,
-                end_effector_velocity
-            )
-
-            if not is_safe:
-                logger.warning(f"安全监控器触发: {safety_msg}")
-                return None, False, {"error": f"安全监控器: {safety_msg}"}
-
-            if safety_msg:  # 有警告消息
-                debug_info['safety_warning'] = safety_msg
-
-        # 9. 更新状态
+        # 8. 更新状态
         q_full = pin.neutral(self.ik_solver.model).copy()
         for i, ctrl_idx in enumerate(self.ik_solver.controlled_indices):
             if i < len(q_safe) and ctrl_idx < len(q_full):
@@ -438,14 +413,9 @@ class VISTController:
 
     def get_safety_statistics(self):
         """获取安全控制统计信息"""
-        stats = {
+        return {
             'safety_controller': self.safety_controller.get_statistics()
         }
-
-        if self.safety_monitor is not None:
-            stats['safety_monitor'] = self.safety_monitor.get_stats()
-
-        return stats
 
     def get_intent_state(self):
         """获取当前意图状态"""

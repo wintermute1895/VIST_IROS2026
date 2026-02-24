@@ -1,0 +1,55 @@
+# Multi-camera configuration for RealSense cameras
+# 多相机配置文件 - 支持D435i和D405
+
+multi_camera_manager:
+  ros__parameters:
+    # Publishing rate (Hz)
+    publish_rate: 30.0
+
+    # Camera configurations
+    # 注意：需要填入实际的相机序列号
+    camera_configs:
+      # 第一个相机 - D435i (用于MediaPipe骨骼捕捉)
+      - serial_number: "your_d435i_serial_1"  # 替换为实际序列号
+        camera_name: "mediapipe_camera"
+        enable_color: true
+        enable_depth: true
+        color_width: 640
+        color_height: 480
+        color_fps: 30
+        depth_width: 640
+        depth_height: 480
+        depth_fps: 30
+        description: "用于MediaPipe人体骨骼捕捉和意图计算"
+
+      # 第二个相机 - D435i (安装在机器人头顶)
+      - serial_number: "your_d435i_serial_2"  # 替换为实际序列号
+        camera_name: "robot_head_camera"
+        enable_color: true
+        enable_depth: true
+        color_width: 1280
+        color_height: 720
+        color_fps: 30
+        depth_width: 1280
+        depth_height: 720
+        depth_fps: 30
+        description: "机器人头顶相机，用于数据采集和模型训练"
+
+      # 第三个相机 - D405 (近距离精细操作)
+      - serial_number: "your_d405_serial"  # 替换为实际序列号
+        camera_name: "hand_camera"
+        enable_color: true
+        enable_depth: true
+        color_width: 640
+        color_height: 480
+        color_fps: 30
+        depth_width: 640
+        depth_height: 480
+        depth_fps: 30
+        description: "D405近距离相机，用于手部精细操作"
+
+# 如何获取相机序列号：
+# 1. 连接所有相机到电脑
+# 2. 运行命令: rs-enumerate-devices
+# 3. 记录每个相机的Serial Number
+# 4. 将序列号填入上面的配置中

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta
 
 # Include any dependencies generated for this target.
 include CMakeFiles/linkerta_node.dir/depend.make
@@ -70,46 +70,46 @@ include CMakeFiles/linkerta_node.dir/progress.make
 include CMakeFiles/linkerta_node.dir/flags.make
 
 CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o: CMakeFiles/linkerta_node.dir/flags.make
-CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.cpp
+CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.cpp
 CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o: CMakeFiles/linkerta_node.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o -MF CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o.d -o CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o -c /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o -MF CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o.d -o CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o -c /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.cpp
 
 CMakeFiles/linkerta_node.dir/src/CanBus.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/linkerta_node.dir/src/CanBus.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.cpp > CMakeFiles/linkerta_node.dir/src/CanBus.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.cpp > CMakeFiles/linkerta_node.dir/src/CanBus.cpp.i
 
 CMakeFiles/linkerta_node.dir/src/CanBus.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/linkerta_node.dir/src/CanBus.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.cpp -o CMakeFiles/linkerta_node.dir/src/CanBus.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.cpp -o CMakeFiles/linkerta_node.dir/src/CanBus.cpp.s
 
 CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o: CMakeFiles/linkerta_node.dir/flags.make
-CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp
+CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp
 CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o: CMakeFiles/linkerta_node.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o -MF CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o.d -o CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o -c /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o -MF CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o.d -o CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o -c /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp
 
 CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp > CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp > CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.i
 
 CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp -o CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp -o CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.s
 
 CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o: CMakeFiles/linkerta_node.dir/flags.make
-CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/main_ros2.cpp
+CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/main_ros2.cpp
 CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o: CMakeFiles/linkerta_node.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o -MF CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o.d -o CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o -c /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/main_ros2.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o -MF CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o.d -o CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o -c /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/main_ros2.cpp
 
 CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/main_ros2.cpp > CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/main_ros2.cpp > CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.i
 
 CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/main_ros2.cpp -o CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/main_ros2.cpp -o CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.s
 
 # Object files for target linkerta_node
 linkerta_node_OBJECTS = \
@@ -203,7 +203,7 @@ linkerta_node: /opt/ros/humble/lib/librcpputils.so
 linkerta_node: /opt/ros/humble/lib/librosidl_runtime_c.so
 linkerta_node: /opt/ros/humble/lib/librcutils.so
 linkerta_node: CMakeFiles/linkerta_node.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable linkerta_node"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable linkerta_node"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/linkerta_node.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -215,6 +215,6 @@ CMakeFiles/linkerta_node.dir/clean:
 .PHONY : CMakeFiles/linkerta_node.dir/clean
 
 CMakeFiles/linkerta_node.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles/linkerta_node.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles/linkerta_node.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/linkerta_node.dir/depend
 

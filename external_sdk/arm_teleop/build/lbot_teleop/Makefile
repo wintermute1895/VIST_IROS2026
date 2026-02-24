@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,9 +142,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop/CMakeFiles /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop/CMakeFiles /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -210,6 +210,43 @@ teleop_bridge_node/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/teleop_bridge_node.dir/build.make CMakeFiles/teleop_bridge_node.dir/build
 .PHONY : teleop_bridge_node/fast
 
+#=============================================================================
+# Target rules for targets named high_freq_resampler_node
+
+# Build rule for target.
+high_freq_resampler_node: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 high_freq_resampler_node
+.PHONY : high_freq_resampler_node
+
+# fast build rule for target.
+high_freq_resampler_node/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/high_freq_resampler_node.dir/build.make CMakeFiles/high_freq_resampler_node.dir/build
+.PHONY : high_freq_resampler_node/fast
+
+src/high_freq_resampler_node.o: src/high_freq_resampler_node.cpp.o
+.PHONY : src/high_freq_resampler_node.o
+
+# target to build an object file
+src/high_freq_resampler_node.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/high_freq_resampler_node.dir/build.make CMakeFiles/high_freq_resampler_node.dir/src/high_freq_resampler_node.cpp.o
+.PHONY : src/high_freq_resampler_node.cpp.o
+
+src/high_freq_resampler_node.i: src/high_freq_resampler_node.cpp.i
+.PHONY : src/high_freq_resampler_node.i
+
+# target to preprocess a source file
+src/high_freq_resampler_node.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/high_freq_resampler_node.dir/build.make CMakeFiles/high_freq_resampler_node.dir/src/high_freq_resampler_node.cpp.i
+.PHONY : src/high_freq_resampler_node.cpp.i
+
+src/high_freq_resampler_node.s: src/high_freq_resampler_node.cpp.s
+.PHONY : src/high_freq_resampler_node.s
+
+# target to generate assembly for a file
+src/high_freq_resampler_node.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/high_freq_resampler_node.dir/build.make CMakeFiles/high_freq_resampler_node.dir/src/high_freq_resampler_node.cpp.s
+.PHONY : src/high_freq_resampler_node.cpp.s
+
 src/teleop_bridge_node.o: src/teleop_bridge_node.cpp.o
 .PHONY : src/teleop_bridge_node.o
 
@@ -249,7 +286,11 @@ help:
 	@echo "... test"
 	@echo "... lbot_teleop_uninstall"
 	@echo "... uninstall"
+	@echo "... high_freq_resampler_node"
 	@echo "... teleop_bridge_node"
+	@echo "... src/high_freq_resampler_node.o"
+	@echo "... src/high_freq_resampler_node.i"
+	@echo "... src/high_freq_resampler_node.s"
 	@echo "... src/teleop_bridge_node.o"
 	@echo "... src/teleop_bridge_node.i"
 	@echo "... src/teleop_bridge_node.s"

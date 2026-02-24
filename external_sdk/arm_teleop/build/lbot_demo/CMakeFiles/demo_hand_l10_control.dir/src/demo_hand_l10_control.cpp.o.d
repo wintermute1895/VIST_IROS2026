@@ -1,5 +1,5 @@
 CMakeFiles/demo_hand_l10_control.dir/src/demo_hand_l10_control.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo/src/demo_hand_l10_control.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo/src/demo_hand_l10_control.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/11/chrono \
  /usr/include/c++/11/ratio /usr/include/c++/11/type_traits \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \

@@ -1,5 +1,5 @@
 CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/main_ros2.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/main_ros2.cpp \
  /usr/include/stdc-predef.h \
  /opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp \
  /usr/include/c++/11/csignal \
@@ -633,11 +633,11 @@ CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o: \
  /opt/ros/humble/include/std_msgs/std_msgs/msg/detail/header__traits.hpp \
  /opt/ros/humble/include/sensor_msgs/sensor_msgs/msg/detail/joint_state__type_support.hpp \
  /opt/ros/humble/include/sensor_msgs/sensor_msgs/msg/rosidl_generator_cpp__visibility_control.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/LinkerArm.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/LinkerArm.h \
  /usr/include/c++/11/queue /usr/include/c++/11/deque \
  /usr/include/c++/11/bits/stl_deque.h /usr/include/c++/11/bits/deque.tcc \
  /usr/include/c++/11/bits/stl_queue.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.h \
  /usr/include/fcntl.h /usr/include/x86_64-linux-gnu/bits/fcntl.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h \

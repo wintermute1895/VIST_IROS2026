@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces
 
 # Utility rule file for lbot_arm_interfaces__py.
 
@@ -237,8 +237,8 @@ rosidl_generator_py/lbot_arm_interfaces/_lbot_arm_interfaces_s.ep.rosidl_typesup
 rosidl_generator_py/lbot_arm_interfaces/_lbot_arm_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/share/sensor_msgs/msg/Temperature.idl
 rosidl_generator_py/lbot_arm_interfaces/_lbot_arm_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/share/sensor_msgs/msg/TimeReference.idl
 rosidl_generator_py/lbot_arm_interfaces/_lbot_arm_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/share/sensor_msgs/srv/SetCameraInfo.idl
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python code for ROS interfaces"
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py && /home/ilex/miniforge3/envs/robot_env/bin/python3 /opt/ros/humble/share/rosidl_generator_py/cmake/../../../lib/rosidl_generator_py/rosidl_generator_py --generator-arguments-file /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_py__arguments.json --typesupport-impls "rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c;rosidl_typesupport_c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python code for ROS interfaces"
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py && /home/ilex/miniforge3/envs/robot_env/bin/python3 /opt/ros/humble/share/rosidl_generator_py/cmake/../../../lib/rosidl_generator_py/rosidl_generator_py --generator-arguments-file /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_py__arguments.json --typesupport-impls "rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c;rosidl_typesupport_c"
 
 rosidl_generator_py/lbot_arm_interfaces/_lbot_arm_interfaces_s.ep.rosidl_typesupport_introspection_c.c: rosidl_generator_py/lbot_arm_interfaces/_lbot_arm_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_py/lbot_arm_interfaces/_lbot_arm_interfaces_s.ep.rosidl_typesupport_introspection_c.c
@@ -426,10 +426,10 @@ lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/build: lbot_arm_i
 .PHONY : lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/build
 
 lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/clean:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py && $(CMAKE_COMMAND) -P CMakeFiles/lbot_arm_interfaces__py.dir/cmake_clean.cmake
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py && $(CMAKE_COMMAND) -P CMakeFiles/lbot_arm_interfaces__py.dir/cmake_clean.cmake
 .PHONY : lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/clean
 
 lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/depend
 

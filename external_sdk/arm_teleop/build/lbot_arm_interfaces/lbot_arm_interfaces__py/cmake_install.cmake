@@ -1,8 +1,8 @@
-# Install script for directory: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py
+# Install script for directory: /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces")
+  set(CMAKE_INSTALL_PREFIX "/home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

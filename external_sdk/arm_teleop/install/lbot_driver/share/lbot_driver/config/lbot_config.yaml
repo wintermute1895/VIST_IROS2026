@@ -1,1 +1,4 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/config/lbot_config.yaml
+lbot_driver:
+  ros__parameters:
+    #robot param
+    arm_ip: "192.168.10.21"        #设置TCP连接时的IP

@@ -35,9 +35,9 @@ ik_solver.py              # 逆运动学求解器（Pinocchio CLIK）
 vist_kalman_filter.py     # VIST 卡尔曼滤波器（状态估计）
 geometric_arm_solver.py   # 几何解析求解器（肘部约束）
 intent_detector.py        # 意图检测器（5阶段状态机 + 冲突检测）
-safety_monitor_simplified.py  # 简化安全监控器
 one_euro_filter.py        # One Euro 滤波器（噪声抑制）
 hand_retargeting.py       # 手部重定向
+tcp_compensation.py       # TCP 偏移补偿
 ```
 
 **数据流**:

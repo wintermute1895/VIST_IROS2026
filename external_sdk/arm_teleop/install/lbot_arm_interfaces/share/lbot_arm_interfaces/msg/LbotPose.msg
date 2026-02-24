@@ -1,1 +1,2 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/msg/LbotPose.msg
+geometry_msgs/Vector3 euler
+geometry_msgs/Vector3 position

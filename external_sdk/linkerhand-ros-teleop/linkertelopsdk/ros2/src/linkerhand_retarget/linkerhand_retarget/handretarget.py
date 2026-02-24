@@ -79,7 +79,7 @@ class HandRetargetNode(Node):
         super().__init__('handretarget_node')
         print("Ready Create HandRetargetNode!")
 
-        package_share_dir = Path("/home/ilex/Dev/VIST/src/robot/sdk/linkerhand-ros-teleop-main/linkertelopsdk/ros2/src/linkerhand_retarget/linkerhand_retarget")
+        package_share_dir = Path(get_package_share_directory('linkerhand_retarget'))
 
         self.robot_dir = package_share_dir  / "assets" / "robots" / "hands"
         self.base_config = package_share_dir 

@@ -1,1 +1,3 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_cmake/srv/GetAllFrames_Response.msg
+
+string[] names
+bool success

@@ -1,13 +1,76 @@
 # Python 编译垃圾
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
 
 # IDE 配置 (不要传你自己的 VSCode 配置给队友)
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # 敏感配置 (防止你把 IP 地址写死传上去)
 config/settings.yaml
 
 # 操作系统垃圾
 .DS_Store
+Thumbs.db
+
+# ROS2 编译产物
+install/
+log/
+build/
+*.bag
+*.db3
+*.db3-shm
+*.db3-wal
+
+# 外部SDK（这些是第三方仓库，不应该提交）
+external_sdk/*/install/
+external_sdk/*/build/
+external_sdk/*/log/
+external_sdk/linkerhand-ros2-sdk/
+external_sdk/linkerhand-ros-teleop/
+
+# 数据文件
+data/rosbags/
+data/analysis/
+data/experiments/
+*.rosbag
+*.rosbag2
+
+# 临时文件
+*.tmp
+*.bak
+*.log
+
+# Conda/虚拟环境
+.conda/
+venv/
+env/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js (for web frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 用户特定的环境配置
+.vist_env.sh

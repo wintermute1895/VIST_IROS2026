@@ -1,0 +1,28 @@
+WARNING: topic [/right_arm_joint_control] does not appear to be published yet
+average rate: 174.191
+	min: 0.000s max: 0.013s std dev: 0.00589s window: 177
+average rate: 207.857
+	min: 0.000s max: 0.013s std dev: 0.00574s window: 420
+average rate: 219.142
+	min: 0.000s max: 0.013s std dev: 0.00568s window: 663
+average rate: 224.843
+	min: 0.000s max: 0.013s std dev: 0.00564s window: 906
+average rate: 228.185
+	min: 0.000s max: 0.013s std dev: 0.00562s window: 1149
+average rate: 230.415
+	min: 0.000s max: 0.013s std dev: 0.00561s window: 1392
+average rate: 231.983
+	min: 0.000s max: 0.013s std dev: 0.00560s window: 1635
+average rate: 233.198
+	min: 0.000s max: 0.013s std dev: 0.00559s window: 1878
+average rate: 234.152
+	min: 0.000s max: 0.013s std dev: 0.00558s window: 2121
+average rate: 234.905
+	min: 0.000s max: 0.013s std dev: 0.00558s window: 2364
+average rate: 235.551
+	min: 0.000s max: 0.013s std dev: 0.00558s window: 2607
+average rate: 236.029
+	min: 0.000s max: 0.013s std dev: 0.00557s window: 2850
+average rate: 236.473
+	min: 0.000s max: 0.013s std dev: 0.00557s window: 3093
+failed to initialize wait set: the given context is not valid, either rcl_init() was not called or rcl_shutdown() was called., at ./src/rcl/wait.c:130

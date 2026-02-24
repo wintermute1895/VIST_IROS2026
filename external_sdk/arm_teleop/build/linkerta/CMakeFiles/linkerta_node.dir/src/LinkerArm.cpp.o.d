@@ -1,7 +1,7 @@
 CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp \
  /usr/include/stdc-predef.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/LinkerArm.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/LinkerArm.h \
  /usr/include/c++/11/thread /usr/include/c++/11/bits/std_thread.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
@@ -193,7 +193,7 @@ CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o: \
  /usr/include/c++/11/tr1/poly_hermite.tcc \
  /usr/include/c++/11/tr1/poly_laguerre.tcc \
  /usr/include/c++/11/tr1/riemann_zeta.tcc \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.h \
  /usr/include/c++/11/iomanip /usr/include/c++/11/locale \
  /usr/include/c++/11/bits/locale_facets_nonio.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h \

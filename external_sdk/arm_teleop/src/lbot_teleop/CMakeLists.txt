@@ -19,16 +19,25 @@ find_package(lbot_arm_interfaces REQUIRED)
 
 # Teleop bridge node
 add_executable(teleop_bridge_node src/teleop_bridge_node.cpp)
-ament_target_dependencies(teleop_bridge_node 
-  rclcpp 
-  std_msgs 
-  sensor_msgs 
+ament_target_dependencies(teleop_bridge_node
+  rclcpp
+  std_msgs
+  sensor_msgs
+  lbot_arm_interfaces
+)
+
+# High-frequency resampler node
+add_executable(high_freq_resampler_node src/high_freq_resampler_node.cpp)
+ament_target_dependencies(high_freq_resampler_node
+  rclcpp
+  sensor_msgs
   lbot_arm_interfaces
 )
 
 # Install targets
 install(TARGETS
   teleop_bridge_node
+  high_freq_resampler_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

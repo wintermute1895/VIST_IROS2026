@@ -1,1 +1,5 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetEnable.srv
+bool enable
+
+---
+
+bool success

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces
 
 # Utility rule file for lbot_arm_interfaces_uninstall.
 
@@ -67,7 +67,7 @@ include CMakeFiles/lbot_arm_interfaces_uninstall.dir/compiler_depend.make
 include CMakeFiles/lbot_arm_interfaces_uninstall.dir/progress.make
 
 CMakeFiles/lbot_arm_interfaces_uninstall:
-	/usr/bin/cmake -P /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
+	/usr/bin/cmake -P /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
 
 lbot_arm_interfaces_uninstall: CMakeFiles/lbot_arm_interfaces_uninstall
 lbot_arm_interfaces_uninstall: CMakeFiles/lbot_arm_interfaces_uninstall.dir/build.make
@@ -82,6 +82,6 @@ CMakeFiles/lbot_arm_interfaces_uninstall.dir/clean:
 .PHONY : CMakeFiles/lbot_arm_interfaces_uninstall.dir/clean
 
 CMakeFiles/lbot_arm_interfaces_uninstall.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces_uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces_uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/lbot_arm_interfaces_uninstall.dir/depend
 

@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,9 +142,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo/CMakeFiles /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo/CMakeFiles /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

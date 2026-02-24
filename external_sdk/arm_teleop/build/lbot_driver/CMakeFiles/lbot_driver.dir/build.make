@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_driver
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_driver
 
 # Include any dependencies generated for this target.
 include CMakeFiles/lbot_driver.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/lbot_driver.dir/progress.make
 include CMakeFiles/lbot_driver.dir/flags.make
 
 CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: CMakeFiles/lbot_driver.dir/flags.make
-CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp
+CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp
 CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: CMakeFiles/lbot_driver.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o -MF CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o.d -o CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o -c /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_driver/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o -MF CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o.d -o CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o -c /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp
 
 CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp > CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp > CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.i
 
 CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp -o CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp -o CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.s
 
 # Object files for target lbot_driver
 lbot_driver_OBJECTS = \
@@ -98,12 +98,12 @@ lbot_driver: /opt/ros/humble/lib/libstd_srvs__rosidl_typesupport_fastrtps_cpp.so
 lbot_driver: /opt/ros/humble/lib/libstd_srvs__rosidl_typesupport_introspection_cpp.so
 lbot_driver: /opt/ros/humble/lib/libstd_srvs__rosidl_typesupport_cpp.so
 lbot_driver: /opt/ros/humble/lib/libstd_srvs__rosidl_generator_py.so
-lbot_driver: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_c.so
-lbot_driver: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp.so
-lbot_driver: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_c.so
-lbot_driver: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_cpp.so
-lbot_driver: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_cpp.so
-lbot_driver: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_py.so
+lbot_driver: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_c.so
+lbot_driver: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp.so
+lbot_driver: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_c.so
+lbot_driver: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_cpp.so
+lbot_driver: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_cpp.so
+lbot_driver: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_py.so
 lbot_driver: /opt/ros/humble/lib/libstd_srvs__rosidl_typesupport_c.so
 lbot_driver: /opt/ros/humble/lib/libstd_srvs__rosidl_generator_c.so
 lbot_driver: /usr/lib/x86_64-linux-gnu/liborocos-kdl.so
@@ -200,11 +200,11 @@ lbot_driver: /opt/ros/humble/lib/librosidl_typesupport_cpp.so
 lbot_driver: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_py.so
 lbot_driver: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_py.so
 lbot_driver: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_py.so
-lbot_driver: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_c.so
+lbot_driver: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_c.so
 lbot_driver: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_c.so
 lbot_driver: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_c.so
 lbot_driver: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_c.so
-lbot_driver: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_c.so
+lbot_driver: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_c.so
 lbot_driver: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_c.so
 lbot_driver: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_c.so
 lbot_driver: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_c.so
@@ -218,7 +218,7 @@ lbot_driver: /opt/ros/humble/lib/librcutils.so
 lbot_driver: /usr/lib/x86_64-linux-gnu/libpython3.10.so
 lbot_driver: /home/ilex/miniforge3/envs/robot_env/lib/libpython3.10.so
 lbot_driver: CMakeFiles/lbot_driver.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable lbot_driver"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_driver/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable lbot_driver"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/lbot_driver.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -230,6 +230,6 @@ CMakeFiles/lbot_driver.dir/clean:
 .PHONY : CMakeFiles/lbot_driver.dir/clean
 
 CMakeFiles/lbot_driver.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_driver/CMakeFiles/lbot_driver.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_driver && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_driver /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_driver /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_driver /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_driver /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_driver/CMakeFiles/lbot_driver.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/lbot_driver.dir/depend
 

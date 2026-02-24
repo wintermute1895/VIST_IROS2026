@@ -128,8 +128,24 @@ private:
         follow_mode_ = this->get_parameter("follow_mode").as_bool();
     robot_type_ = this->get_parameter("robot_type").as_string();
 
+        first_move_speed_ = this->get_parameter("first_move_speed").as_double();
+        first_move_acce_ = this->get_parameter("first_move_acce").as_double();
+
+        enable_left_arm_ = this->get_parameter("enable_left_arm").as_bool();
+        enable_right_arm_ = this->get_parameter("enable_right_arm").as_bool();
+
+        auto left_mapping = this->get_parameter("left_joint_mapping").as_integer_array();
+        auto right_mapping = this->get_parameter("right_joint_mapping").as_integer_array();
+        left_joint_mapping_.assign(left_mapping.begin(), left_mapping.end());
+        right_joint_mapping_.assign(right_mapping.begin(), right_mapping.end());
+
+        enable_joint_limits_ = this->get_parameter("enable_joint_limits").as_bool();
+
+        // 先读取配置文件的negation参数
         auto negation_param = this->get_parameter("negation").as_integer_array();
         negation_.assign(negation_param.begin(), negation_param.end());
+
+        // 解析negation到left和right
         left_negation_.assign(7, 1);
         right_negation_.assign(7, 1);
         if (negation_.size() >= 14) {
@@ -138,41 +154,28 @@ private:
         } else if (negation_.size() >= 7) {
             left_negation_.assign(negation_.begin(), negation_.begin() + 7);
             right_negation_.assign(negation_.begin(), negation_.begin() + 7);
-        } else if (!negation_.empty()) {
-            RCLCPP_WARN(this->get_logger(), "Negation param size=%zu, expected >=7, using default +1", negation_.size());
         }
-        
-        first_move_speed_ = this->get_parameter("first_move_speed").as_double();
-        first_move_acce_ = this->get_parameter("first_move_acce").as_double();
-        
-        enable_left_arm_ = this->get_parameter("enable_left_arm").as_bool();
-        enable_right_arm_ = this->get_parameter("enable_right_arm").as_bool();
-        
-        auto left_mapping = this->get_parameter("left_joint_mapping").as_integer_array();
-        auto right_mapping = this->get_parameter("right_joint_mapping").as_integer_array();
-        left_joint_mapping_.assign(left_mapping.begin(), left_mapping.end());
-        right_joint_mapping_.assign(right_mapping.begin(), right_mapping.end());
-        
-        enable_joint_limits_ = this->get_parameter("enable_joint_limits").as_bool();
 
-        // 先根据 robot_type 设置默认值
+        // 根据 robot_type 设置默认的limits（但不设置negation，negation完全由配置文件控制）
         if (robot_type_ == "LS") {
             left_joint_limits_min_ = {-2.9, -0.15, -2.35, 0.0, -2.35, -1.57, -1.57};
             left_joint_limits_max_ = {1.0, 3.14, 2.35, 2.2, 2.35, 1.57, 1.57};
             right_joint_limits_min_ = {-1.0, -3.14, -2.35, 0.0, -2.35, -1.57, -1.57};
             right_joint_limits_max_ = {2.9, 0.15, 2.35, 2.2, 2.35, 1.57, 1.57};
-            left_negation_ = {1, 1, 1, -1, 1, -1, 1};
-            right_negation_ = {1, 1, 1, 1, 1, -1, 1};
         } else if (robot_type_ == "RS") {
             left_joint_limits_min_ = {-2.1, -2.967, -2.2, -0.785, -2.9, -1.57, -1.57};
             left_joint_limits_max_ = {3.7, 0.148, 2.2, 1.7, 2.9, 1.57, 1.57};
             right_joint_limits_min_ = {-3.7, -0.148, -2.2, -1.7, -2.9, -1.57, -1.57};
             right_joint_limits_max_ = {2.1, 2.967, 2.2, 0.785, 2.9, 1.57, 1.57};
-            left_negation_ = {-1, -1, -1, -1, -1, -1, -1};
-            right_negation_ = {-1, -1, -1, -1, -1, -1, -1};
         } else {
-            RCLCPP_WARN(this->get_logger(), "Unknown robot_type '%s', using configured limits/negation", robot_type_.c_str());
+            RCLCPP_WARN(this->get_logger(), "Unknown robot_type '%s', using default limits", robot_type_.c_str());
         }
+
+        RCLCPP_INFO(this->get_logger(), "Negation config: left=[%d,%d,%d,%d,%d,%d,%d] right=[%d,%d,%d,%d,%d,%d,%d]",
+            left_negation_[0], left_negation_[1], left_negation_[2], left_negation_[3],
+            left_negation_[4], left_negation_[5], left_negation_[6],
+            right_negation_[0], right_negation_[1], right_negation_[2], right_negation_[3],
+            right_negation_[4], right_negation_[5], right_negation_[6]);
 
         // 再用配置文件中的值覆盖（如果用户在配置文件中显式设置了这些参数）
         // 这样配置文件的优先级高于 robot_type 的硬编码默认值

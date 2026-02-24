@@ -1,1 +1,1 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/lbot_arm_interfaces
+std_msgs;geometry_msgs;sensor_msgs;rosidl_default_runtime;ament_lint_auto;ament_lint_common

@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,9 +142,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -315,17 +315,17 @@ lbot_arm_interfaces__rosidl_typesupport_cpp/fast:
 .PHONY : lbot_arm_interfaces__rosidl_typesupport_cpp/fast
 
 #=============================================================================
-# Target rules for targets named ament_cmake_python_symlink_lbot_arm_interfaces
+# Target rules for targets named ament_cmake_python_copy_lbot_arm_interfaces
 
 # Build rule for target.
-ament_cmake_python_symlink_lbot_arm_interfaces: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ament_cmake_python_symlink_lbot_arm_interfaces
-.PHONY : ament_cmake_python_symlink_lbot_arm_interfaces
+ament_cmake_python_copy_lbot_arm_interfaces: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ament_cmake_python_copy_lbot_arm_interfaces
+.PHONY : ament_cmake_python_copy_lbot_arm_interfaces
 
 # fast build rule for target.
-ament_cmake_python_symlink_lbot_arm_interfaces/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ament_cmake_python_symlink_lbot_arm_interfaces.dir/build.make CMakeFiles/ament_cmake_python_symlink_lbot_arm_interfaces.dir/build
-.PHONY : ament_cmake_python_symlink_lbot_arm_interfaces/fast
+ament_cmake_python_copy_lbot_arm_interfaces/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ament_cmake_python_copy_lbot_arm_interfaces.dir/build.make CMakeFiles/ament_cmake_python_copy_lbot_arm_interfaces.dir/build
+.PHONY : ament_cmake_python_copy_lbot_arm_interfaces/fast
 
 #=============================================================================
 # Target rules for targets named ament_cmake_python_build_lbot_arm_interfaces_egg
@@ -4331,7 +4331,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... ament_cmake_python_build_lbot_arm_interfaces_egg"
-	@echo "... ament_cmake_python_symlink_lbot_arm_interfaces"
+	@echo "... ament_cmake_python_copy_lbot_arm_interfaces"
 	@echo "... lbot_arm_interfaces"
 	@echo "... lbot_arm_interfaces__cpp"
 	@echo "... lbot_arm_interfaces__py"

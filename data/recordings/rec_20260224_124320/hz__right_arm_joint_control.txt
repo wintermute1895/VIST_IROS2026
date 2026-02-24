@@ -1,0 +1,25 @@
+average rate: 241.534
+	min: 0.000s max: 0.013s std dev: 0.00557s window: 243
+average rate: 241.571
+	min: 0.000s max: 0.013s std dev: 0.00556s window: 486
+average rate: 241.217
+	min: 0.000s max: 0.014s std dev: 0.00551s window: 729
+average rate: 241.174
+	min: 0.000s max: 0.014s std dev: 0.00552s window: 972
+average rate: 241.187
+	min: 0.000s max: 0.014s std dev: 0.00553s window: 1215
+average rate: 241.233
+	min: 0.000s max: 0.014s std dev: 0.00554s window: 1458
+average rate: 241.187
+	min: 0.000s max: 0.014s std dev: 0.00554s window: 1701
+average rate: 241.218
+	min: 0.000s max: 0.014s std dev: 0.00554s window: 1944
+average rate: 241.181
+	min: 0.000s max: 0.014s std dev: 0.00554s window: 2187
+average rate: 241.212
+	min: 0.000s max: 0.014s std dev: 0.00554s window: 2430
+average rate: 241.132
+	min: 0.000s max: 0.015s std dev: 0.00554s window: 2673
+average rate: 236.335
+	min: 0.000s max: 0.015s std dev: 0.00557s window: 2858
+timeout: 被监视的命令已核心转储

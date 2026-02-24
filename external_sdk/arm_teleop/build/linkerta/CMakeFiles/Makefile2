@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -83,14 +83,14 @@ clean: CMakeFiles/linkerta_node.dir/clean
 CMakeFiles/uninstall.dir/all: CMakeFiles/linkerta_uninstall.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/uninstall.dir/build.make CMakeFiles/uninstall.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/uninstall.dir/build.make CMakeFiles/uninstall.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num= "Built target uninstall"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num= "Built target uninstall"
 .PHONY : CMakeFiles/uninstall.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/uninstall.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/uninstall.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles 0
 .PHONY : CMakeFiles/uninstall.dir/rule
 
 # Convenience name for target.
@@ -109,14 +109,14 @@ CMakeFiles/uninstall.dir/clean:
 CMakeFiles/linkerta_uninstall.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkerta_uninstall.dir/build.make CMakeFiles/linkerta_uninstall.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkerta_uninstall.dir/build.make CMakeFiles/linkerta_uninstall.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num= "Built target linkerta_uninstall"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num= "Built target linkerta_uninstall"
 .PHONY : CMakeFiles/linkerta_uninstall.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/linkerta_uninstall.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/linkerta_uninstall.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles 0
 .PHONY : CMakeFiles/linkerta_uninstall.dir/rule
 
 # Convenience name for target.
@@ -135,14 +135,14 @@ CMakeFiles/linkerta_uninstall.dir/clean:
 CMakeFiles/linkerta_node.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkerta_node.dir/build.make CMakeFiles/linkerta_node.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkerta_node.dir/build.make CMakeFiles/linkerta_node.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=1,2,3,4 "Built target linkerta_node"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles --progress-num=1,2,3,4 "Built target linkerta_node"
 .PHONY : CMakeFiles/linkerta_node.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/linkerta_node.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/linkerta_node.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/linkerta/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/linkerta/CMakeFiles 0
 .PHONY : CMakeFiles/linkerta_node.dir/rule
 
 # Convenience name for target.

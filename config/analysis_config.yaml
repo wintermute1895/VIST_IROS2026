@@ -1,0 +1,109 @@
+# 数据分析配置文件
+# 用于控制指标计算和可视化选项
+
+# 物理极限参数（用于离群点检测）
+physical_limits:
+  # 是否启用物理极限滤波（暂时禁用，先看纯净数据）
+  enabled: false
+
+  # LinkerArm机械臂的物理极限
+  max_velocity: 3.14  # rad/s (约180°/s)
+  max_acceleration: 15.0  # rad/s²
+  max_jerk: 100.0  # rad/s³
+
+  # 离群点检测阈值（倍数）
+  velocity_threshold_multiplier: 1.5  # 超过1.5倍物理极限视为离群点
+  acceleration_threshold_multiplier: 2.0
+
+  # 插值方法
+  interpolation_method: 'cubic'  # 'linear', 'cubic', 'pchip'
+
+# 数据源配置
+data_sources:
+  # 控制指令（VIST输出）
+  command:
+    enabled: true
+    topics:
+      - /robot1/right_arm/joint_follow
+    label: "VIST控制指令"
+    color: "#2E86AB"  # 蓝色
+
+  # 真机反馈（原始）
+  feedback_raw:
+    enabled: true
+    topics:
+      - /robot1/right_arm/joint_states
+    label: "真机反馈（原始）"
+    color: "#A23B72"  # 紫红色
+
+  # 真机反馈（清洗后）
+  feedback_cleaned:
+    enabled: true
+    # 自动从feedback_raw生成
+    label: "真机反馈（清洗）"
+    color: "#F18F01"  # 橙色
+
+  # 遥操臂输出
+  exo_output:
+    enabled: true
+    topics:
+      - /right_arm_joint_control
+    label: "遥操臂输出"
+    color: "#06A77D"  # 绿色
+
+# 可视化配置
+visualization:
+  # 轨迹对比图
+  trajectory_comparison:
+    enabled: true
+    show_command: true
+    show_feedback_raw: true
+    show_feedback_cleaned: true
+    show_exo_output: false
+
+  # 速度对比图
+  velocity_comparison:
+    enabled: true
+    show_command: true
+    show_feedback_raw: false  # 原始反馈速度太乱，不显示
+    show_feedback_cleaned: true
+    show_exo_output: false
+
+  # 加速度对比图
+  acceleration_comparison:
+    enabled: true
+    show_command: true
+    show_feedback_raw: false
+    show_feedback_cleaned: true
+    show_exo_output: false
+
+  # Jerk对比图
+  jerk_comparison:
+    enabled: true
+    show_command: true
+    show_feedback_raw: false
+    show_feedback_cleaned: true
+    show_exo_output: false
+
+  # 离群点检测可视化
+  outlier_detection:
+    enabled: true
+    show_removed_points: true
+
+  # 指标对比柱状图
+  metrics_bar_chart:
+    enabled: true
+    metrics:
+      - 'avg_velocity'
+      - 'max_velocity'
+      - 'avg_acceleration'
+      - 'max_acceleration'
+      - 'avg_jerk'
+      - 'max_jerk'
+
+# 输出配置
+output:
+  save_json: true
+  save_plots: true
+  dpi: 150
+  format: 'png'  # 'png', 'pdf', 'svg'

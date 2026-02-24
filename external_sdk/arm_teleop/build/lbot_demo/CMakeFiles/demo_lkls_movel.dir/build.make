@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo
 
 # Include any dependencies generated for this target.
 include CMakeFiles/demo_lkls_movel.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/demo_lkls_movel.dir/progress.make
 include CMakeFiles/demo_lkls_movel.dir/flags.make
 
 CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o: CMakeFiles/demo_lkls_movel.dir/flags.make
-CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo/src/demo_lkls_movel.cpp
+CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo/src/demo_lkls_movel.cpp
 CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o: CMakeFiles/demo_lkls_movel.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o -MF CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o.d -o CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o -c /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo/src/demo_lkls_movel.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o -MF CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o.d -o CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o -c /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo/src/demo_lkls_movel.cpp
 
 CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo/src/demo_lkls_movel.cpp > CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo/src/demo_lkls_movel.cpp > CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.i
 
 CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo/src/demo_lkls_movel.cpp -o CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo/src/demo_lkls_movel.cpp -o CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.s
 
 # Object files for target demo_lkls_movel
 demo_lkls_movel_OBJECTS = \
@@ -93,12 +93,12 @@ demo_lkls_movel_EXTERNAL_OBJECTS =
 demo_lkls_movel: CMakeFiles/demo_lkls_movel.dir/src/demo_lkls_movel.cpp.o
 demo_lkls_movel: CMakeFiles/demo_lkls_movel.dir/build.make
 demo_lkls_movel: /opt/ros/humble/lib/librclcpp.so
-demo_lkls_movel: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_c.so
-demo_lkls_movel: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp.so
-demo_lkls_movel: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_c.so
-demo_lkls_movel: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_cpp.so
-demo_lkls_movel: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_cpp.so
-demo_lkls_movel: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_py.so
+demo_lkls_movel: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_c.so
+demo_lkls_movel: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp.so
+demo_lkls_movel: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_c.so
+demo_lkls_movel: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_cpp.so
+demo_lkls_movel: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_cpp.so
+demo_lkls_movel: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_py.so
 demo_lkls_movel: /opt/ros/humble/lib/liblibstatistics_collector.so
 demo_lkls_movel: /opt/ros/humble/lib/librcl.so
 demo_lkls_movel: /opt/ros/humble/lib/librmw_implementation.so
@@ -160,9 +160,9 @@ demo_lkls_movel: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_cpp.so
 demo_lkls_movel: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_cpp.so
 demo_lkls_movel: /opt/ros/humble/lib/librosidl_typesupport_cpp.so
 demo_lkls_movel: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_py.so
-demo_lkls_movel: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_c.so
+demo_lkls_movel: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_c.so
 demo_lkls_movel: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_c.so
-demo_lkls_movel: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_c.so
+demo_lkls_movel: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_c.so
 demo_lkls_movel: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_c.so
 demo_lkls_movel: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_py.so
 demo_lkls_movel: /opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_c.so
@@ -180,7 +180,7 @@ demo_lkls_movel: /opt/ros/humble/lib/librcutils.so
 demo_lkls_movel: /usr/lib/x86_64-linux-gnu/libpython3.10.so
 demo_lkls_movel: /home/ilex/miniforge3/envs/robot_env/lib/libpython3.10.so
 demo_lkls_movel: CMakeFiles/demo_lkls_movel.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable demo_lkls_movel"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable demo_lkls_movel"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/demo_lkls_movel.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -192,6 +192,6 @@ CMakeFiles/demo_lkls_movel.dir/clean:
 .PHONY : CMakeFiles/demo_lkls_movel.dir/clean
 
 CMakeFiles/demo_lkls_movel.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_demo/CMakeFiles/demo_lkls_movel.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_demo/CMakeFiles/demo_lkls_movel.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/demo_lkls_movel.dir/depend
 

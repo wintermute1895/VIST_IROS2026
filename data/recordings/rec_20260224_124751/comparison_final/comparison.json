@@ -1,0 +1,36 @@
+{
+  "/right_arm_joint_control": {
+    "frequency": 241.74935324466705,
+    "resampled_frequency": 241.74935324466705,
+    "avg_velocity": 3.937827841582475e-11,
+    "max_velocity": 35.14651870980224,
+    "rms_velocity": 7.442878439433594,
+    "avg_acceleration": 2.279193722642958e-09,
+    "max_acceleration": 483.0995747582383,
+    "rms_acceleration": 123.02718933122593,
+    "avg_jerk": 0.0009301025806695731,
+    "max_jerk": 35334.93205366701,
+    "rms_jerk": 9747.791221162928,
+    "num_samples": 4470,
+    "resampled_samples": 4469,
+    "duration": 18.486088752746582,
+    "sg_window_ms": 53.7877082824707
+  },
+  "/robot1/right_arm/joint_states": {
+    "frequency": 50.0007656604797,
+    "resampled_frequency": 50.0007656604797,
+    "avg_velocity": 0.004144082819684147,
+    "max_velocity": 8.580048189364492,
+    "rms_velocity": 1.8494694714952495,
+    "avg_acceleration": 0.10889861313097993,
+    "max_acceleration": 266.82652839766763,
+    "rms_acceleration": 58.029734019026236,
+    "avg_jerk": 6.037872036899554,
+    "max_jerk": 15061.064919583734,
+    "rms_jerk": 3147.544677259705,
+    "num_samples": 925,
+    "resampled_samples": 924,
+    "duration": 18.479717016220093,
+    "sg_window_ms": 100.10719299316406
+  }
+}

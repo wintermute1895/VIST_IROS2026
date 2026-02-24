@@ -1,0 +1,96 @@
+{
+  "experiment_config": {},
+  "evaluation_config": {
+    "metrics_enabled": {
+      "smoothness": true,
+      "accuracy": true,
+      "efficiency": true,
+      "normalized_jerk": true,
+      "sparc": true,
+      "psd_high_freq": true,
+      "dtw_distance": true,
+      "pca_task_axis": true,
+      "success_rate": true
+    },
+    "metric_params": {
+      "sparc": {
+        "padlevel": 4,
+        "fc": 10.0,
+        "amp_th": 0.05
+      },
+      "psd": {
+        "sampling_rate": 30,
+        "nperseg": 256,
+        "freq_threshold": 5.0
+      },
+      "dtw": {
+        "radius": 10,
+        "min_trajectories": 2
+      },
+      "pca": {
+        "n_components": 7,
+        "task_axes": [
+          0,
+          1,
+          2
+        ]
+      },
+      "success_rate": {
+        "position_threshold": 0.001,
+        "duration_threshold": 0.5,
+        "goal_position": null
+      }
+    },
+    "visualization": {
+      "enabled": true,
+      "dpi": 300,
+      "figsize": [
+        15,
+        10
+      ],
+      "save_format": "png",
+      "plots": {
+        "joint_angles": true,
+        "velocity_profile": true,
+        "acceleration_profile": true,
+        "jerk_profile": true,
+        "psd_spectrum": true,
+        "trajectory_3d": true
+      }
+    },
+    "report": {
+      "format": "json",
+      "include_raw_data": false,
+      "decimal_places": 4
+    }
+  },
+  "metrics": {
+    "smoothness": {
+      "mean_velocity": 0.12820268367184443,
+      "max_velocity": 0.22893366392473447,
+      "std_velocity": 0.062129442141343416,
+      "mean_acceleration": 0.07690398330799623,
+      "max_acceleration": 0.22062181040183543,
+      "std_acceleration": 0.046112047969949,
+      "mean_jerk": 1.1447109191227673,
+      "max_jerk": 5.621466865787884,
+      "std_jerk": 0.8842270950648858,
+      "sparc": null
+    },
+    "accuracy": {},
+    "efficiency": {
+      "task_duration": 11.734678983688354,
+      "path_length": 1.504417337736439,
+      "avg_velocity": 0.12820268367184443,
+      "efficiency": 0.6149581760932695
+    },
+    "advanced_metrics": {
+      "normalized_jerk": 1103.257400660183,
+      "sparc": -1.738345270859661,
+      "psd_high_freq_power": 2.6875988037720637e-09,
+      "dtw_distance": null,
+      "pca_task_axis_ratio": 0.9999421534929208,
+      "success_rate": null
+    }
+  }
+}

@@ -1,5 +1,5 @@
 CMakeFiles/demo_tool_frame.dir/src/demo_tool_frame.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo/src/demo_tool_frame.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo/src/demo_tool_frame.cpp \
  /usr/include/stdc-predef.h \
  /opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp \
  /usr/include/c++/11/csignal \
@@ -619,41 +619,41 @@ CMakeFiles/demo_tool_frame.dir/src/demo_tool_frame.cpp.o: \
  /opt/ros/humble/include/rclcpp/rclcpp/wait_set_policies/thread_safe_synchronization.hpp \
  /opt/ros/humble/include/rclcpp/rclcpp/wait_set_policies/detail/write_preferring_read_write_lock.hpp \
  /opt/ros/humble/include/rclcpp/rclcpp/wait_set_template.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/set_frame.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/set_frame__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/lbot_frame__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/set_frame.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/set_frame__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/detail/lbot_frame__struct.hpp \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/set_frame__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/set_frame__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/lbot_frame__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/set_frame__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/set_frame__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/detail/lbot_frame__traits.hpp \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/set_frame__type_support.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/get_frame.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_frame__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_frame__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_frame__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_frame__type_support.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/get_current_frame.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_current_frame__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_current_frame__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_current_frame__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_current_frame__type_support.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/get_all_frames.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_all_frames__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_all_frames__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_all_frames__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/get_all_frames__type_support.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/change_frame.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/change_frame__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/change_frame__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/change_frame__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/change_frame__type_support.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/delete_frame.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/delete_frame__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/delete_frame__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/delete_frame__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/delete_frame__type_support.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/lbot_frame.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/lbot_frame__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/lbot_frame__type_support.hpp
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/set_frame__type_support.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/get_frame.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_frame__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_frame__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_frame__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_frame__type_support.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/get_current_frame.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_current_frame__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_current_frame__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_current_frame__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_current_frame__type_support.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/get_all_frames.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_all_frames__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_all_frames__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_all_frames__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/get_all_frames__type_support.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/change_frame.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/change_frame__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/change_frame__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/change_frame__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/change_frame__type_support.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/delete_frame.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/delete_frame__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/delete_frame__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/delete_frame__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/delete_frame__type_support.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/lbot_frame.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/detail/lbot_frame__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/detail/lbot_frame__type_support.hpp

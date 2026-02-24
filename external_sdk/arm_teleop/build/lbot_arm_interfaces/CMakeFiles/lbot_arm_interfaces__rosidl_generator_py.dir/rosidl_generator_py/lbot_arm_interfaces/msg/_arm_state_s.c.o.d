@@ -1,5 +1,5 @@
 CMakeFiles/lbot_arm_interfaces__rosidl_generator_py.dir/rosidl_generator_py/lbot_arm_interfaces/msg/_arm_state_s.c.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_py/lbot_arm_interfaces/msg/_arm_state_s.c \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_py/lbot_arm_interfaces/msg/_arm_state_s.c \
  /usr/include/stdc-predef.h \
  /home/ilex/miniforge3/envs/robot_env/include/python3.10/Python.h \
  /home/ilex/miniforge3/envs/robot_env/include/python3.10/patchlevel.h \
@@ -225,12 +225,12 @@ CMakeFiles/lbot_arm_interfaces__rosidl_generator_py.dir/rosidl_generator_py/lbot
  /home/ilex/miniforge3/envs/robot_env/lib/python3.10/site-packages/numpy/core/include/numpy/_neighborhood_iterator_imp.h \
  /home/ilex/miniforge3/envs/robot_env/lib/python3.10/site-packages/numpy/core/include/numpy/__multiarray_api.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/visibility_control.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/arm_state__struct.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/arm_state__struct.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/primitives_sequence.h \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__struct.h \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/pose__struct.h \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/point__struct.h \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/quaternion__struct.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/arm_state__functions.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/rosidl_generator_c__visibility_control.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/arm_state__functions.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/rosidl_generator_c__visibility_control.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/primitives_sequence_functions.h

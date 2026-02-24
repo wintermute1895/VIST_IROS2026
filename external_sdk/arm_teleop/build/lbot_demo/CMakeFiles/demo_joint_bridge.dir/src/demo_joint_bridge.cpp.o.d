@@ -1,5 +1,5 @@
 CMakeFiles/demo_joint_bridge.dir/src/demo_joint_bridge.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo/src/demo_joint_bridge.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo/src/demo_joint_bridge.cpp \
  /usr/include/stdc-predef.h \
  /opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp \
  /usr/include/c++/11/csignal \
@@ -627,9 +627,9 @@ CMakeFiles/demo_joint_bridge.dir/src/demo_joint_bridge.cpp.o: \
  /opt/ros/humble/include/std_msgs/std_msgs/msg/detail/header__traits.hpp \
  /opt/ros/humble/include/sensor_msgs/sensor_msgs/msg/detail/joint_state__type_support.hpp \
  /opt/ros/humble/include/sensor_msgs/sensor_msgs/msg/rosidl_generator_cpp__visibility_control.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/follow_joint.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/follow_joint__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/follow_joint__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/follow_joint__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/follow_joint__type_support.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/follow_joint.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/detail/follow_joint__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/detail/follow_joint__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/detail/follow_joint__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/detail/follow_joint__type_support.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp

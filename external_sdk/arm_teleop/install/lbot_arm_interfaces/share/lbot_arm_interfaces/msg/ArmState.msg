@@ -1,1 +1,3 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/msg/ArmState.msg
+float32[] joints
+geometry_msgs/Vector3 euler
+geometry_msgs/Pose pose

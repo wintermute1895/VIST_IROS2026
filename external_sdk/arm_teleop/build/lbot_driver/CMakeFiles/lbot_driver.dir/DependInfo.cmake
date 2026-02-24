@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp" "CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o" "gcc" "CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o.d"
+  "/home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_driver/src/lbot_driver.cpp" "CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o" "gcc" "CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o.d"
   )
 
 # Targets to which this target links.

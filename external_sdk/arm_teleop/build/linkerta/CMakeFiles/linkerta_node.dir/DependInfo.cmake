@@ -8,9 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.cpp" "CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o" "gcc" "CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o.d"
-  "/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp" "CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o" "gcc" "CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o.d"
-  "/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/main_ros2.cpp" "CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o" "gcc" "CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o.d"
+  "/home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.cpp" "CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o" "gcc" "CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o.d"
+  "/home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/LinkerArm.cpp" "CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o" "gcc" "CMakeFiles/linkerta_node.dir/src/LinkerArm.cpp.o.d"
+  "/home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/main_ros2.cpp" "CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o" "gcc" "CMakeFiles/linkerta_node.dir/src/main_ros2.cpp.o.d"
   )
 
 # Targets to which this target links.

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop
 
 # Utility rule file for lbot_teleop_uninstall.
 
@@ -67,7 +67,7 @@ include CMakeFiles/lbot_teleop_uninstall.dir/compiler_depend.make
 include CMakeFiles/lbot_teleop_uninstall.dir/progress.make
 
 CMakeFiles/lbot_teleop_uninstall:
-	/usr/bin/cmake -P /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
+	/usr/bin/cmake -P /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop/ament_cmake_uninstall_target/ament_cmake_uninstall_target.cmake
 
 lbot_teleop_uninstall: CMakeFiles/lbot_teleop_uninstall
 lbot_teleop_uninstall: CMakeFiles/lbot_teleop_uninstall.dir/build.make
@@ -82,6 +82,6 @@ CMakeFiles/lbot_teleop_uninstall.dir/clean:
 .PHONY : CMakeFiles/lbot_teleop_uninstall.dir/clean
 
 CMakeFiles/lbot_teleop_uninstall.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop/CMakeFiles/lbot_teleop_uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop/CMakeFiles/lbot_teleop_uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/lbot_teleop_uninstall.dir/depend
 

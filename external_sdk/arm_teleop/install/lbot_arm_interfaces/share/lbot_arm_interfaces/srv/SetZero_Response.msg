@@ -1,1 +1,2 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_cmake/srv/SetZero_Response.msg
+
+bool success

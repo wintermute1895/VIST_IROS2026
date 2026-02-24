@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop
 
 # Include any dependencies generated for this target.
 include CMakeFiles/teleop_bridge_node.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/teleop_bridge_node.dir/progress.make
 include CMakeFiles/teleop_bridge_node.dir/flags.make
 
 CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o: CMakeFiles/teleop_bridge_node.dir/flags.make
-CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop/src/teleop_bridge_node.cpp
+CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop/src/teleop_bridge_node.cpp
 CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o: CMakeFiles/teleop_bridge_node.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o -MF CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o.d -o CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o -c /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop/src/teleop_bridge_node.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o -MF CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o.d -o CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o -c /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop/src/teleop_bridge_node.cpp
 
 CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop/src/teleop_bridge_node.cpp > CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop/src/teleop_bridge_node.cpp > CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.i
 
 CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop/src/teleop_bridge_node.cpp -o CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop/src/teleop_bridge_node.cpp -o CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.s
 
 # Object files for target teleop_bridge_node
 teleop_bridge_node_OBJECTS = \
@@ -93,12 +93,12 @@ teleop_bridge_node_EXTERNAL_OBJECTS =
 teleop_bridge_node: CMakeFiles/teleop_bridge_node.dir/src/teleop_bridge_node.cpp.o
 teleop_bridge_node: CMakeFiles/teleop_bridge_node.dir/build.make
 teleop_bridge_node: /opt/ros/humble/lib/librclcpp.so
-teleop_bridge_node: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_c.so
-teleop_bridge_node: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp.so
-teleop_bridge_node: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_c.so
-teleop_bridge_node: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_cpp.so
-teleop_bridge_node: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_cpp.so
-teleop_bridge_node: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_py.so
+teleop_bridge_node: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_c.so
+teleop_bridge_node: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp.so
+teleop_bridge_node: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_c.so
+teleop_bridge_node: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_introspection_cpp.so
+teleop_bridge_node: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_cpp.so
+teleop_bridge_node: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_py.so
 teleop_bridge_node: /opt/ros/humble/lib/liblibstatistics_collector.so
 teleop_bridge_node: /opt/ros/humble/lib/librcl.so
 teleop_bridge_node: /opt/ros/humble/lib/librmw_implementation.so
@@ -160,9 +160,9 @@ teleop_bridge_node: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_cpp.so
 teleop_bridge_node: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_cpp.so
 teleop_bridge_node: /opt/ros/humble/lib/librosidl_typesupport_cpp.so
 teleop_bridge_node: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_py.so
-teleop_bridge_node: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_c.so
+teleop_bridge_node: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_typesupport_c.so
 teleop_bridge_node: /opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_c.so
-teleop_bridge_node: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_c.so
+teleop_bridge_node: /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/lib/liblbot_arm_interfaces__rosidl_generator_c.so
 teleop_bridge_node: /opt/ros/humble/lib/libsensor_msgs__rosidl_generator_c.so
 teleop_bridge_node: /opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_py.so
 teleop_bridge_node: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_py.so
@@ -180,7 +180,7 @@ teleop_bridge_node: /opt/ros/humble/lib/librosidl_runtime_c.so
 teleop_bridge_node: /opt/ros/humble/lib/librcutils.so
 teleop_bridge_node: /home/ilex/miniforge3/envs/robot_env/lib/libpython3.10.so
 teleop_bridge_node: CMakeFiles/teleop_bridge_node.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable teleop_bridge_node"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable teleop_bridge_node"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/teleop_bridge_node.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -192,6 +192,6 @@ CMakeFiles/teleop_bridge_node.dir/clean:
 .PHONY : CMakeFiles/teleop_bridge_node.dir/clean
 
 CMakeFiles/teleop_bridge_node.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop/CMakeFiles/teleop_bridge_node.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop/CMakeFiles/teleop_bridge_node.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/teleop_bridge_node.dir/depend
 

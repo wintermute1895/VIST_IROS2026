@@ -1,1 +1,3 @@
-/home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/config/lta.yaml
+linkerta_node:
+  ros__parameters:
+    calibration: 0                                                        # 0关闭标定 1开启标定           注意：每次更改后需编译和重启程序！

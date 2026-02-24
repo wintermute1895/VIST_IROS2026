@@ -1,7 +1,7 @@
 CMakeFiles/linkerta_node.dir/src/CanBus.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.cpp \
  /usr/include/stdc-predef.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/linkerta/src/CanBus.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/src/CanBus.h \
  /usr/include/c++/11/iostream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \

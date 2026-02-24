@@ -1,5 +1,5 @@
 CMakeFiles/demo_fk.dir/src/demo_fk.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_demo/src/demo_fk.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_demo/src/demo_fk.cpp \
  /usr/include/stdc-predef.h \
  /opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp \
  /usr/include/c++/11/csignal \
@@ -619,14 +619,14 @@ CMakeFiles/demo_fk.dir/src/demo_fk.cpp.o: \
  /opt/ros/humble/include/rclcpp/rclcpp/wait_set_policies/thread_safe_synchronization.hpp \
  /opt/ros/humble/include/rclcpp/rclcpp/wait_set_policies/detail/write_preferring_read_write_lock.hpp \
  /opt/ros/humble/include/rclcpp/rclcpp/wait_set_template.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/forward_kinematics.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/forward_kinematics__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/forward_kinematics.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/forward_kinematics__struct.hpp \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__struct.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/forward_kinematics__builder.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/forward_kinematics__traits.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/forward_kinematics__builder.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/forward_kinematics__traits.hpp \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__traits.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/forward_kinematics__type_support.hpp \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/srv/detail/forward_kinematics__type_support.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_arm_interfaces/include/lbot_arm_interfaces/lbot_arm_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/vector3.hpp \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__builder.hpp \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__type_support.hpp \

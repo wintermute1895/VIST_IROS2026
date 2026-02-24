@@ -1,0 +1,11 @@
+
+Files:             rosbag_0.db3
+Bag size:          1.4 MiB
+Storage id:        sqlite3
+Duration:          18.842718180s
+Start:             Feb 24 2026 12:34:01.764618923 (1771907641.764618923)
+End:               Feb 24 2026 12:34:20.607337103 (1771907660.607337103)
+Messages:          5421
+Topic information: Topic: /right_arm_joint_control | Type: sensor_msgs/msg/JointState | Count: 4527 | Serialization Format: cdr
+                   Topic: /robot1/right_arm/joint_states | Type: sensor_msgs/msg/JointState | Count: 894 | Serialization Format: cdr
+

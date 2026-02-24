@@ -1,5 +1,5 @@
 CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/lbot_arm_interfaces/srv/set_frame__type_support.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_cpp/lbot_arm_interfaces/srv/set_frame__type_support.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_cpp/lbot_arm_interfaces/srv/set_frame__type_support.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/11/cstddef \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
@@ -15,7 +15,7 @@ CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cp
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/message_type_support_struct.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/visibility_control.h \
  /opt/ros/humble/include/rosidl_typesupport_interface/rosidl_typesupport_interface/macros.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/set_frame__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/srv/detail/set_frame__struct.hpp \
  /usr/include/c++/11/algorithm /usr/include/c++/11/utility \
  /usr/include/c++/11/bits/stl_relops.h \
  /usr/include/c++/11/bits/stl_pair.h /usr/include/c++/11/bits/move.h \
@@ -160,7 +160,7 @@ CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cp
  /usr/include/c++/11/stdexcept \
  /opt/ros/humble/include/rosidl_runtime_cpp/rosidl_runtime_cpp/message_initialization.hpp \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/message_initialization.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/lbot_frame__struct.hpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_cpp/lbot_arm_interfaces/msg/detail/lbot_frame__struct.hpp \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__struct.hpp \
  /opt/ros/humble/include/rosidl_typesupport_cpp/rosidl_typesupport_cpp/identifier.hpp \
  /opt/ros/humble/include/rosidl_typesupport_cpp/rosidl_typesupport_cpp/visibility_control.h \

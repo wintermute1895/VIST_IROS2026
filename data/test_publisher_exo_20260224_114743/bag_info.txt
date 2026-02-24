@@ -1,0 +1,12 @@
+
+Files:             rosbag_0.db3
+Bag size:          677.9 KiB
+Storage id:        sqlite3
+Duration:          13.836117015s
+Start:             Feb 24 2026 11:47:51.404763000 (1771904871.404763000)
+End:               Feb 24 2026 11:48:05.240880015 (1771904885.240880015)
+Messages:          3390
+Topic information: Topic: /joint_error_code | Type: std_msgs/msg/String | Count: 1130 | Serialization Format: cdr
+                   Topic: /left_arm_joint_control | Type: sensor_msgs/msg/JointState | Count: 1130 | Serialization Format: cdr
+                   Topic: /right_arm_joint_control | Type: sensor_msgs/msg/JointState | Count: 1130 | Serialization Format: cdr
+

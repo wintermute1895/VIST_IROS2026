@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop
 
 # Utility rule file for uninstall.
 
@@ -78,6 +78,6 @@ CMakeFiles/uninstall.dir/clean:
 .PHONY : CMakeFiles/uninstall.dir/clean
 
 CMakeFiles/uninstall.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_teleop/CMakeFiles/uninstall.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_teleop/CMakeFiles/uninstall.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/uninstall.dir/depend
 

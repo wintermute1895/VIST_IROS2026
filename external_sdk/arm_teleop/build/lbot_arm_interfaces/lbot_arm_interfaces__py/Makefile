@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,14 +142,14 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py//CMakeFiles/progress.marks
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles 0
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/lbot_arm_interfaces__py//CMakeFiles/progress.marks
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/clean
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/clean
 .PHONY : clean
 
 # The main clean target
@@ -158,22 +158,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/preinstall
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/preinstall
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/rule:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/rule
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/rule
 .PHONY : lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/rule
 
 # Convenience name for target.
@@ -182,7 +182,7 @@ lbot_arm_interfaces__py: lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces_
 
 # fast build rule for target.
 lbot_arm_interfaces__py/fast:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/build.make lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/build
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(MAKE) $(MAKESILENT) -f lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/build.make lbot_arm_interfaces__py/CMakeFiles/lbot_arm_interfaces__py.dir/build
 .PHONY : lbot_arm_interfaces__py/fast
 
 # Help Target
@@ -210,6 +210,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

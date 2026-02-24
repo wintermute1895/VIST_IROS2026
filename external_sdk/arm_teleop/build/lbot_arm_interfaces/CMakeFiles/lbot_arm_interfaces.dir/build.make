@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces
+CMAKE_SOURCE_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces
+CMAKE_BINARY_DIR = /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces
 
 # Utility rule file for lbot_arm_interfaces.
 
@@ -66,58 +66,58 @@ include CMakeFiles/lbot_arm_interfaces.dir/compiler_depend.make
 # Include the progress variables for this target.
 include CMakeFiles/lbot_arm_interfaces.dir/progress.make
 
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/MoveJ.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/MoveJ.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/MoveJ_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/MoveJ_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/MoveL.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/MoveL.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/MoveL_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/MoveL_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/MoveC.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/MoveC.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/MoveC_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/MoveC_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/MoveJP.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/MoveJP.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/MoveJP_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/MoveJP_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/InverseKinematics.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/InverseKinematics.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/InverseKinematics_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/InverseKinematics_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/ForwardKinematics.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/ForwardKinematics.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/ForwardKinematics_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/ForwardKinematics_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetFrame.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetFrame.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetFrame_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetFrame_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetString.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetString.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetString_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetString_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/GetFrame.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/GetFrame.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/GetFrame_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/GetFrame_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/GetCurrentFrame.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/GetCurrentFrame.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/GetCurrentFrame_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/GetCurrentFrame_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/ChangeFrame.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/ChangeFrame.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/ChangeFrame_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/ChangeFrame_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/DeleteFrame.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/DeleteFrame.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/DeleteFrame_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/DeleteFrame_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/GetAllFrames.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/GetAllFrames.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/GetAllFrames_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/GetAllFrames_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetZero.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetZero.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetZero_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetZero_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetEmergency.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetEmergency.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetEmergency_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetEmergency_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetEnable.srv
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/srv/SetEnable.srv
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetEnable_Request.msg
 CMakeFiles/lbot_arm_interfaces: rosidl_cmake/srv/SetEnable_Response.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/msg/ArmState.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/msg/LbotPose.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/msg/LbotFrame.msg
-CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces/msg/FollowJoint.msg
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/msg/ArmState.msg
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/msg/LbotPose.msg
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/msg/LbotFrame.msg
+CMakeFiles/lbot_arm_interfaces: /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces/msg/FollowJoint.msg
 CMakeFiles/lbot_arm_interfaces: /opt/ros/humble/share/std_msgs/msg/Bool.idl
 CMakeFiles/lbot_arm_interfaces: /opt/ros/humble/share/std_msgs/msg/Byte.idl
 CMakeFiles/lbot_arm_interfaces: /opt/ros/humble/share/std_msgs/msg/ByteMultiArray.idl
@@ -222,6 +222,6 @@ CMakeFiles/lbot_arm_interfaces.dir/clean:
 .PHONY : CMakeFiles/lbot_arm_interfaces.dir/clean
 
 CMakeFiles/lbot_arm_interfaces.dir/depend:
-	cd /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/lbot_arm_interfaces.dir/depend
 

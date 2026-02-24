@@ -1,0 +1,46 @@
+# 视觉控制专用高频重采样配置
+# 用于将低频视觉输入(30Hz)插值到高频(200Hz)
+
+high_freq_resampler_node:
+  ros__parameters:
+    # ========== Topic配置 ==========
+    # 输入: 低频视觉指令 (20-30Hz)
+    vision_left_topic: "/vision_left_joint_control"
+    vision_right_topic: "/vision_right_joint_control"
+
+    # 输出: 高频平滑指令 (200Hz)
+    driver_left_topic: "/robot1/left_arm/joint_follow"
+    driver_right_topic: "/robot1/right_arm/joint_follow"
+
+    # ========== 频率与滤波参数 ==========
+    # 输出频率 (Hz) - 建议 100-200Hz
+    output_freq_hz: 200.0
+
+    # EMA平滑系数 (0.0-1.0)
+    # 视觉输入是低频(30Hz)，需要较强的平滑
+    # - 0.3: 平衡平滑度和响应速度（推荐）
+    # - 0.2: 更平滑，但延迟更大
+    # - 0.4: 响应更快，但平滑效果稍差
+    ema_alpha: 0.3
+
+    # ========== 安全限制 ==========
+    # 最大关节速度 (rad/s) - 防止速度过大
+    max_joint_velocity: 2.0
+
+    # 速度突变检测阈值 (rad/s) - 超过此值会打印警告
+    velocity_spike_threshold: 5.0
+
+    # 视觉信号超时时间 (秒) - 超时后保持当前位置
+    timeout_sec: 0.5
+
+    # 是否启用速度限制
+    enable_velocity_limit: true
+
+    # ========== 底层驱动参数 ==========
+    # 发送给底层的follow参数
+    # - false: 低跟随模式 (底层有平滑,双重保险)
+    # - true:  高跟随模式 (底层无平滑,完全依赖我们的平滑)
+    follow_mode: false
+
+    # 是否将角度转换为弧度 (视觉输出是角度,底层需要弧度)
+    convert_to_radians: true

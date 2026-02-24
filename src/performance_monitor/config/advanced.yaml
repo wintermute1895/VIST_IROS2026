@@ -1,0 +1,45 @@
+# 性能监控配置文件（扩展版）
+
+# 监控的话题
+input_topic: "/cb_left_hand_control_cmd"
+feedback_topic: ""  # 如果有反馈话题，填写在这里（用于跟踪误差计算）
+
+# 输出文件
+output_file: "performance_log_advanced.csv"
+
+# 统计窗口大小
+window_size: 100
+
+# 打印统计信息的间隔（秒）
+print_interval: 5.0
+
+# ========================================
+# 指标开关配置
+# ========================================
+
+# 频率监控
+enable_frequency: true
+
+# 延迟测量（需要消息有时间戳）
+enable_latency: true
+
+# 速度计算（一阶导数）
+enable_velocity: true
+
+# 加速度计算（二阶导数）
+enable_acceleration: true
+
+# Jerk计算（三阶导数）
+enable_jerk: true
+
+# 跟踪误差（需要feedback_topic）
+enable_tracking_error: false  # 如果没有反馈话题，设为false
+
+# 丢包检测
+enable_packet_loss: true
+
+# 多关节同步性评估
+enable_synchronization: true
+
+# 稳定性分析（振荡检测）
+enable_stability: true

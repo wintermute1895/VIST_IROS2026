@@ -1,7 +1,7 @@
 CMakeFiles/lbot_arm_interfaces__rosidl_generator_c.dir/rosidl_generator_c/lbot_arm_interfaces/srv/detail/get_current_frame__functions.c.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/get_current_frame__functions.c \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/get_current_frame__functions.c \
  /usr/include/stdc-predef.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/get_current_frame__functions.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/get_current_frame__functions.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h /usr/include/stdlib.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -43,14 +43,14 @@ CMakeFiles/lbot_arm_interfaces__rosidl_generator_c.dir/rosidl_generator_c/lbot_a
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/visibility_control.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/rosidl_generator_c__visibility_control.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/get_current_frame__struct.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/rosidl_generator_c__visibility_control.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/srv/detail/get_current_frame__struct.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/string.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/primitives_sequence.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/lbot_frame__struct.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/lbot_frame__struct.h \
  /opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/vector3__struct.h \
  /usr/include/assert.h /usr/include/string.h \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
@@ -71,4 +71,4 @@ CMakeFiles/lbot_arm_interfaces__rosidl_generator_c.dir/rosidl_generator_c/lbot_a
  /opt/ros/humble/include/rcutils/rcutils/visibility_control_macros.h \
  /opt/ros/humble/include/rcutils/rcutils/types/rcutils_ret.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/string_functions.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/lbot_frame__functions.h
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/lbot_frame__functions.h

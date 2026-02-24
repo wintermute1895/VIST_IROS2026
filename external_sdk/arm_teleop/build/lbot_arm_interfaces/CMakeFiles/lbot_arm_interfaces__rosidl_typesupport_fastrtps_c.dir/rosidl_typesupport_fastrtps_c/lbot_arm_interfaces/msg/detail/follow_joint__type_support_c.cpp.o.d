@@ -1,12 +1,12 @@
 CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/lbot_arm_interfaces/msg/detail/follow_joint__type_support_c.cpp.o: \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_fastrtps_c/lbot_arm_interfaces/msg/detail/follow_joint__type_support_c.cpp \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_fastrtps_c/lbot_arm_interfaces/msg/detail/follow_joint__type_support_c.cpp \
  /usr/include/stdc-predef.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_fastrtps_c/lbot_arm_interfaces/msg/detail/follow_joint__rosidl_typesupport_fastrtps_c.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_fastrtps_c/lbot_arm_interfaces/msg/detail/follow_joint__rosidl_typesupport_fastrtps_c.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/message_type_support_struct.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/visibility_control.h \
  /opt/ros/humble/include/rosidl_typesupport_interface/rosidl_typesupport_interface/macros.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_fastrtps_c/lbot_arm_interfaces/msg/rosidl_typesupport_fastrtps_c__visibility_control.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_typesupport_fastrtps_c/lbot_arm_interfaces/msg/rosidl_typesupport_fastrtps_c__visibility_control.h \
  /usr/include/c++/11/cassert \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
@@ -182,8 +182,8 @@ CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesup
  /usr/include/c++/11/bits/basic_ios.tcc \
  /usr/include/c++/11/bits/ostream.tcc /usr/include/c++/11/istream \
  /usr/include/c++/11/bits/istream.tcc /usr/include/malloc.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/follow_joint__struct.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/follow_joint__functions.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/follow_joint__struct.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/detail/follow_joint__functions.h \
  /usr/include/c++/11/stdlib.h \
- /home/ilex/Dev/VIST/src/robot/sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/rosidl_generator_c__visibility_control.h \
+ /home/ilex/Dev/VIST/external_sdk/arm_teleop/build/lbot_arm_interfaces/rosidl_generator_c/lbot_arm_interfaces/msg/rosidl_generator_c__visibility_control.h \
  /opt/ros/humble/include/rosidl_runtime_c/rosidl_runtime_c/primitives_sequence_functions.h
