@@ -525,3 +525,57 @@ simple_filter_alpha: 0.3  # 推荐值: 0.2-0.4
 # 高频发布配置
 high_freq_publish_enabled: true
 high_freq_interpolation: "linear"  # "linear" 或 "cubic"
+
+# ============================================
+# 启动配置 (Startup Configuration)
+# ============================================
+startup:
+  # 外骨骼配置
+  exoskeleton:
+    package: "linkerta"
+    node: "linkerta_node"
+    publish_left: false
+    publish_right: true
+
+  # 滤波器配置
+  filter:
+    type: "one_euro"  # none, ema, one_euro, vist_kalman
+    input_topic: "/right_arm_joint_control"
+    output_topic: "/filtered_right_joint_control"
+    performance_topic: "/filter_performance"
+
+    # 滤波器参数
+    ema_alpha: 0.3
+    one_euro_min_cutoff: 1.0
+    one_euro_beta: 0.007
+    one_euro_d_cutoff: 1.0
+
+  # 机械臂驱动配置
+  robot_driver:
+    package: "lbot_driver"
+    node: "lbot_driver"
+    config_file: "src/lbot_driver/config/lbot_config.yaml"
+    workspace: "/home/ilex/Dev/VIST/external_sdk/arm_teleop"
+
+  # 遥操作桥接配置
+  teleop_bridge:
+    package: "lbot_teleop"
+    node: "teleop_bridge_node"
+    config_file: "src/lbot_teleop/config/teleop_bridge_params.yaml"
+    workspace: "/home/ilex/Dev/VIST/external_sdk/arm_teleop"
+
+    # 话题和服务重映射
+    remapping:
+      topics:
+        - from: "/robot1/right_arm/joint_follow"
+          to: "/right_arm/joint_follow"
+      services:
+        - from: "/robot1/right_arm/move_joint"
+          to: "/right_arm/move_joint"
+
+  # 启动前检查
+  pre_checks:
+    check_robot_connection: true
+    check_exoskeleton_device: false  # 设为false避免阻塞
+    check_topic_collision: true
+    check_ros_environment: true

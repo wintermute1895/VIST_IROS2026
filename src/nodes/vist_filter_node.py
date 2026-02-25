@@ -35,7 +35,7 @@ from src.core.intent_detector import ContinuousIntentDetector, IntentFactors
 from src.core.ik_solver import PinocchioIKSolver
 from src.core.geometric_arm_solver import GeometricArmSolver
 from src.core.one_euro_filter import OneEuroFilter
-from src.config.config_loader import load_config
+from src.config.config_loader import get_config
 import pinocchio as pin
 
 
@@ -46,7 +46,7 @@ class VISTFilterNode(Node):
         super().__init__('vist_filter_node')
 
         # 声明参数
-        self.declare_parameters()
+        self.declare_node_parameters()
 
         # 加载配置
         self.load_config()
@@ -83,7 +83,7 @@ class VISTFilterNode(Node):
         self.get_logger().info('VIST Filter Node initialized')
         self.print_config()
 
-    def declare_parameters(self):
+    def declare_node_parameters(self):
         """声明ROS2参数"""
         # 话题配置
         self.declare_parameter('exo_left_topic', '/exo_left_joint_control')
@@ -152,7 +152,7 @@ class VISTFilterNode(Node):
 
         # VIST配置
         vist_config_path = self.get_parameter('vist_config_path').value
-        self.vist_config = load_config(project_root / vist_config_path)
+        self.vist_config = get_config(project_root / vist_config_path)
 
         # 性能监控
         self.enable_performance_monitoring = self.get_parameter('enable_performance_monitoring').value
@@ -164,9 +164,8 @@ class VISTFilterNode(Node):
 
         # 初始化IK求解器
         urdf_path = project_root / "config" / self.vist_config.robot_model_urdf_file
-        end_effector_frame = (self.vist_config.robot_model_end_effector_frames['left']
-                             if self.arm_side == 'left'
-                             else self.vist_config.robot_model_end_effector_frames['right'])
+        # robot_model_end_effector_frame 会根据 hardware_arm_side 自动选择
+        end_effector_frame = self.vist_config.robot_model_end_effector_frame
 
         self.ik_solver = PinocchioIKSolver(
             urdf_path=str(urdf_path),

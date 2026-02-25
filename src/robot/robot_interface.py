@@ -113,17 +113,7 @@ class RobotInterface:
 
     def disconnect(self):
         """断开连接"""
-        # 停止运动（发送当前位置）
-        print("\n🛑 停止运动...")
-        try:
-            _, q_current, _ = self.driver.get_state()
-            self.driver.send_command(q_current)
-            import time
-            time.sleep(0.1)
-        except Exception as e:
-            print(f"⚠️ 发送停止指令失败: {e}")
-
-        # 断开连接
+        # 断开连接（driver.disconnect()内部会发送停止指令）
         self.udp_receiver.close()
         self.driver.disconnect()
         print("\n✅ 已断开连接")

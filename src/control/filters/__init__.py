@@ -3,15 +3,15 @@
 """
 
 from .base_filter import BaseFilter, NoFilter, MovingAverageFilter
-from .one_euro_filter import OneEuroFilter
-from .low_pass_filter import LowPassFilter
+from .ema_filter import EMAFilter
+from .one_euro_filter_adapter import OneEuroFilterAdapter
 from .filter_factory import FilterFactory
 
 __all__ = [
     'BaseFilter',
     'NoFilter',
     'MovingAverageFilter',
-    'OneEuroFilter',
-    'LowPassFilter',
+    'EMAFilter',
+    'OneEuroFilterAdapter',
     'FilterFactory',
 ]
