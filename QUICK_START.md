@@ -1,5 +1,4 @@
 # VIST 快速启动参考
-# Quick Start Reference
 
 ## 启动前检查 ✓
 
@@ -8,7 +7,7 @@ cd /home/ilex/Dev/VIST
 ./scripts/validate_startup_config.sh
 ```
 
-## 4 个终端启动命令
+## 启动命令
 
 ### Terminal 1 - 外骨骼
 ```bash
@@ -30,44 +29,53 @@ cd /home/ilex/Dev/VIST && ./scripts/start_3_robot_driver.sh
 cd /home/ilex/Dev/VIST && ./scripts/start_4_teleop_bridge.sh
 ```
 
+### Terminal 5 (可选) - 数据采集相机
+```bash
+cd /home/ilex/Dev/VIST && ./scripts/start_camera.sh
+```
+
 ## 数据采集
 
+**不含相机**:
 ```bash
-cd /home/ilex/Dev/VIST
 ./scripts/collect_right_arm_data.sh exp1_one_euro 30
 ```
 
-## 滤波器类型
-
-- `./scripts/start_2_filter.sh none` - 无滤波
-- `./scripts/start_2_filter.sh ema 0.3` - EMA 滤波
-- `./scripts/start_2_filter.sh one_euro 1.0 0.007` - One-Euro 滤波
-- `./scripts/start_2_filter.sh vist_kalman` - VIST Kalman 滤波
-
-## 重要提醒
-
-1. ✓ 启动前运行验证脚本
-2. ✓ 按顺序启动 4 个终端
-3. ✓ 在 web 控制器手动使能机械臂
-4. ✓ 确认工作空间安全
-5. ✓ 急停按钮在手边
-
-## 故障排除
-
-**机械臂不动？**
+**包含相机** (需先启动 Terminal 5):
 ```bash
-# 检查数据流
-ros2 topic hz /filtered_right_joint_control
-
-# 检查连接
-ros2 topic info /right_arm/joint_follow
+./scripts/collect_right_arm_data.sh exp1_one_euro_camera 30 --with-camera
 ```
 
-**话题碰撞？**
-```bash
-# 停止所有节点，然后重新启动
-ros2 node list
+## 配置控制
+
+编辑 `config/system_config.yaml`:
+
+```yaml
+startup:
+  camera:
+    enabled: true  # 启用/禁用相机
+    serial_number: "123456789"  # 指定相机序列号（多相机时必需）
+
+data_logging:
+  enable_camera_recording: true  # 录制相机数据
 ```
+
+### 配置层级
+
+**配置文件 → 命令行参数 → 最终配置**
+
+- 配置文件提供默认值
+- 命令行参数覆盖配置文件
+- 示例: `./scripts/start_camera.sh 123456789 1280 720 30`
+
+### 多相机使用
+
+如果有两个 D435i 相机：
+
+1. 查找序列号: `rs-enumerate-devices | grep "Serial Number"`
+2. 启动指定相机: `./scripts/start_camera.sh <serial_number>`
+
+详见: [docs/CAMERA_SETUP.md](docs/CAMERA_SETUP.md)
 
 ---
 

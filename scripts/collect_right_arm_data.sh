@@ -27,6 +27,14 @@ print_error() {
 if [ $# -lt 2 ]; then
     echo "用法: $0 <exp_name> <duration_seconds>"
     echo ""
+    echo "参数:"
+    echo "  exp_name          实验名称"
+    echo "  duration_seconds  采集时长（秒）"
+    echo ""
+    echo "说明:"
+    echo "  默认采集所有数据（相机、手臂、手部控制）"
+    echo "  采集后可以根据需要筛选和训练模型"
+    echo ""
     echo "示例:"
     echo "  $0 exp0_no_filter 30"
     echo "  $0 exp1_ema_alpha03 30"
@@ -36,6 +44,10 @@ fi
 EXP_NAME=$1
 DURATION=$2
 
+# 默认采集所有数据
+WITH_CAMERA=true
+WITH_HAND=true
+
 # 创建实验目录
 EXP_DIR="/home/ilex/Dev/VIST/data/exp_right_arm_only_$(date +%Y%m%d)"
 mkdir -p "$EXP_DIR"
@@ -43,6 +55,16 @@ mkdir -p "$EXP_DIR"
 print_info "实验名称: ${EXP_NAME}"
 print_info "采集时长: ${DURATION}秒"
 print_info "保存目录: ${EXP_DIR}"
+if [ "$WITH_CAMERA" = true ]; then
+    print_info "相机录制: 启用"
+else
+    print_info "相机录制: 禁用"
+fi
+if [ "$WITH_HAND" = true ]; then
+    print_info "手部控制录制: 启用"
+else
+    print_info "手部控制录制: 禁用"
+fi
 
 # 检查话题是否存在
 print_info "检查话题连接..."
@@ -52,7 +74,6 @@ TOPICS=(
     "/filtered_right_joint_control"
     "/right_arm/joint_follow"
     "/right_arm/joint_states"
-    "/filter_performance"
 )
 
 for topic in "${TOPICS[@]}"; do
@@ -104,13 +125,54 @@ print_info "开始采集！"
 # 开始录制
 cd "$EXP_DIR"
 
-ros2 bag record \
-  /right_arm_joint_control \
-  /filtered_right_joint_control \
-  /right_arm/joint_follow \
-  /right_arm/joint_states \
-  /filter_performance \
-  -o "${EXP_NAME}" &
+# 基础话题
+RECORD_TOPICS=(
+  /right_arm_joint_control
+  /filtered_right_joint_control
+  /right_arm/joint_follow
+  /right_arm/joint_states
+  /filter_performance
+)
+
+# 如果启用相机，添加相机话题
+if [ "$WITH_CAMERA" = true ]; then
+    CAMERA_TOPICS=(
+      /camera/color/image_raw
+      /camera/depth/image_raw
+      /camera/color/camera_info
+    )
+
+    print_info "检查相机话题..."
+    for topic in "${CAMERA_TOPICS[@]}"; do
+        if ros2 topic list 2>/dev/null | grep -q "^${topic}$"; then
+            print_info "✓ 相机话题: ${topic}"
+            RECORD_TOPICS+=("$topic")
+        else
+            print_warn "✗ 相机话题未找到: ${topic}"
+        fi
+    done
+fi
+
+# 如果启用手部控制，添加手部话题
+if [ "$WITH_HAND" = true ]; then
+    HAND_TOPICS=(
+      /cb_right_hand_control_cmd
+      /cb_right_hand_state
+    )
+
+    print_info "检查手部控制话题..."
+    for topic in "${HAND_TOPICS[@]}"; do
+        if ros2 topic list 2>/dev/null | grep -q "^${topic}$"; then
+            print_info "✓ 手部话题: ${topic}"
+            RECORD_TOPICS+=("$topic")
+        else
+            print_warn "✗ 手部话题未找到: ${topic}"
+        fi
+    done
+fi
+
+# 启动录制
+ros2 bag record "${RECORD_TOPICS[@]}" -o "${EXP_NAME}" &
 
 RECORD_PID=$!
 

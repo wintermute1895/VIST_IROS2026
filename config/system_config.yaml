@@ -510,6 +510,16 @@ data_logging:
   # 是否启用性能监控
   enable_performance_monitoring: true
 
+  # 是否录制相机数据
+  enable_camera_recording: false
+
+  # 相机话题列表（当 enable_camera_recording=true 时录制）
+  camera_topics:
+    - "/camera/color/image_raw"
+    - "/camera/depth/image_raw"
+    - "/camera/color/camera_info"
+    - "/hand_pose"
+
 
 # ============================================
 # 视觉控制测试配置（2026-02-24添加）
@@ -579,3 +589,103 @@ startup:
     check_exoskeleton_device: false  # 设为false避免阻塞
     check_topic_collision: true
     check_ros_environment: true
+
+  # 相机配置
+  camera:
+    enabled: false  # 是否启用相机数据采集
+    package: "camera_manager"
+    node: "data_camera_node"
+
+    # 相机参数
+    width: 848
+    height: 480
+    fps: 30
+
+    # 相机序列号（用于区分多个相机）
+    # 机器人头顶相机（用于数据采集和意图因子计算）
+    serial_number: "348122071157"  # 序列号以7结尾的相机
+
+    # 发布的话题
+    topics:
+      color_image: "/camera/color/image_raw"
+      depth_image: "/camera/depth/image_raw"
+      camera_info: "/camera/color/camera_info"
+      hand_pose: "/hand_pose"  # 如果有手部姿态估计
+
+    # 多相机配置说明
+    # 当前系统有两个 D435i 相机:
+    # - 348122071157 (末位7): 机器人头顶相机，用于数据采集和意图计算
+    # - 327122074150 (末位0): 备用相机
+
+  # 意图计算配置
+  intent_calculation:
+    enabled: false  # 是否启用意图计算
+
+    # 各项因子计算开关
+    compute_alpha_geo: true   # 计算几何距离因子
+    compute_alpha_vel: true   # 计算速度因子
+    compute_alpha_dir: true   # 计算方向因子
+
+    # ArUco标定码参数
+    aruco:
+      enabled: true  # 是否启用ArUco检测（如果禁用则跳过手部位置检测）
+      dict_type: "DICT_4X4_50"  # ArUco字典类型
+      marker_size: 0.05  # 标定码尺寸（米）
+
+    # 手部偏移（相对于标定码的偏移，米）
+    hand_offset:
+      x: 0.0
+      y: 0.0
+      z: 0.1  # 手部在标定码上方10cm
+
+    # 目标位置（任务目标，米）
+    target_position:
+      x: 0.5
+      y: 0.0
+      z: 0.3
+
+    # 发布的话题
+    topics:
+      intent_factors: "/intent_factors"  # 意图因子 [α, α_geo, α_vel, α_dir]
+      debug_image: "/intent_debug_image"  # 调试图像
+
+  # 数据手套配置
+  data_glove:
+    enabled: false  # 是否启用数据手套
+    package: "linkerhand_retarget"
+    node: "handretarget"
+    workspace: "/home/ilex/Downloads/ros-teleop"
+
+    # USB 设备配置
+    usb_device: "/dev/ttyUSB0"  # 默认 USB 设备
+    auto_detect: true  # 自动检测第一个可用的 ttyUSB 设备
+
+    # 标定模式
+    calibration_mode: false  # true=强制标定, false=正常运行
+
+    # 发布的话题
+    topics:
+      control_cmd: "/cb_right_hand_control_cmd"  # 手部控制命令
+      state: "/cb_right_hand_state"  # 手部状态反馈
+
+  # 灵巧手配置
+  dexterous_hand:
+    enabled: false  # 是否启用灵巧手
+    package: "linker_hand_ros2_sdk"
+    node: "linker_hand_advanced_l10"
+    workspace: "/home/ilex/Downloads/linkerhand-ros2-sdk-main"
+
+    # CAN 总线配置
+    can_port: "can0"
+    can_bitrate: 1000000  # 1 Mbps
+
+    # 手部类型
+    hand_type: "right"  # "left" 或 "right"
+
+    # 触觉传感器
+    enable_touch: false  # 是否启用触觉传感器
+
+    # 订阅的话题
+    topics:
+      control_cmd: "/cb_right_hand_control_cmd"  # 接收手部控制命令
+      state: "/cb_right_hand_state"  # 发布手部状态

@@ -11,20 +11,28 @@ RealSense相机ROS2节点
 
 import rclpy
 from rclpy.node import Node
+from rcl_interfaces.msg import ParameterDescriptor
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2, Imu
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Float32MultiArray
 from cv_bridge import CvBridge
 import pyrealsense2 as rs
 import numpy as np
 import time
+import yaml
+import os
+import cv2
 
 
 class RealSenseCameraNode(Node):
     def __init__(self):
         super().__init__('realsense_camera_node')
 
-        # 声明参数
-        self.declare_parameter('serial_number', '')
+        # 声明参数（serial_number 支持动态类型，允许整数或字符串）
+        self.declare_parameter(
+            'serial_number',
+            '',
+            ParameterDescriptor(dynamic_typing=True)
+        )
         self.declare_parameter('camera_name', 'camera')
         self.declare_parameter('camera_id', 0)
 
@@ -44,7 +52,9 @@ class RealSenseCameraNode(Node):
         self.declare_parameter('align_depth_to_color', True)
 
         # 获取参数
-        self.serial_number = self.get_parameter('serial_number').value
+        serial_number_param = self.get_parameter('serial_number').value
+        # 将序列号转换为字符串（支持整数或字符串类型）
+        self.serial_number = str(serial_number_param) if serial_number_param else ''
         self.camera_name = self.get_parameter('camera_name').value
         self.camera_id = self.get_parameter('camera_id').value
 
@@ -63,6 +73,25 @@ class RealSenseCameraNode(Node):
 
         # CV Bridge
         self.bridge = CvBridge()
+
+        # 加载系统配置
+        self.system_config = self.load_system_config()
+
+        # 意图计算相关
+        self.intent_enabled = self.system_config.get('startup', {}).get('intent_calculation', {}).get('enabled', False)
+        self.intent_detector = None
+        self.aruco_dict = None
+        self.aruco_params = None
+        self.hand_offset = np.array([0.0, 0.0, 0.1])
+        self.target_position = np.array([0.5, 0.0, 0.3])
+        self.prev_hand_pos = None
+        self.prev_time = None
+
+        if self.intent_enabled:
+            self.get_logger().info('意图计算功能已启用')
+            self.initialize_intent_calculation()
+        else:
+            self.get_logger().info('意图计算功能未启用')
 
         # 创建发布器
         self.color_pub = None
@@ -91,6 +120,15 @@ class RealSenseCameraNode(Node):
         if self.enable_imu:
             self.imu_pub = self.create_publisher(
                 Imu, f'/{self.camera_name}/imu', 10)
+
+        # 意图计算发布器
+        self.intent_factors_pub = None
+        self.intent_debug_image_pub = None
+        if self.intent_enabled:
+            self.intent_factors_pub = self.create_publisher(
+                Float32MultiArray, '/intent_factors', 10)
+            self.intent_debug_image_pub = self.create_publisher(
+                Image, '/intent_debug_image', 10)
 
         # 初始化RealSense
         self.pipeline = None
@@ -214,6 +252,10 @@ class RealSenseCameraNode(Node):
         # 转换为numpy数组
         color_image = np.asanyarray(frame.get_data())
 
+        # 意图计算（如果启用）
+        if self.intent_enabled:
+            self.process_intent_calculation(color_image, timestamp)
+
         # 转换为ROS2 Image消息
         msg = self.bridge.cv2_to_imgmsg(color_image, encoding='bgr8')
         msg.header.stamp = timestamp
@@ -288,6 +330,184 @@ class RealSenseCameraNode(Node):
             msg.distortion_model = 'plumb_bob'
 
         return msg
+
+    def load_system_config(self):
+        """加载系统配置文件"""
+        try:
+            # 获取配置文件路径
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            config_path = os.path.join(current_dir, '../../../config/system_config.yaml')
+            config_path = os.path.normpath(config_path)
+
+            with open(config_path, 'r', encoding='utf-8') as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            self.get_logger().warn(f'加载配置文件失败: {e}')
+            return {}
+
+    def initialize_intent_calculation(self):
+        """初始化意图计算"""
+        try:
+            # 导入意图检测器
+            import sys
+            sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+            from src.core.intent_detector import ContinuousIntentDetector
+
+            # 加载配置
+            intent_config = self.system_config.get('startup', {}).get('intent_calculation', {})
+
+            # 初始化ArUco检测器
+            aruco_config = intent_config.get('aruco', {})
+            dict_type = aruco_config.get('dict_type', 'DICT_4X4_50')
+            self.aruco_dict = cv2.aruco.getPredefinedDictionary(getattr(cv2.aruco, dict_type))
+            self.aruco_params = cv2.aruco.DetectorParameters()
+
+            # 加载偏移和目标位置
+            hand_offset_cfg = intent_config.get('hand_offset', {})
+            self.hand_offset = np.array([
+                hand_offset_cfg.get('x', 0.0),
+                hand_offset_cfg.get('y', 0.0),
+                hand_offset_cfg.get('z', 0.1)
+            ])
+
+            target_pos_cfg = intent_config.get('target_position', {})
+            self.target_position = np.array([
+                target_pos_cfg.get('x', 0.5),
+                target_pos_cfg.get('y', 0.0),
+                target_pos_cfg.get('z', 0.3)
+            ])
+
+            # 初始化意图检测器
+            self.intent_detector = ContinuousIntentDetector()
+
+            self.get_logger().info('意图计算初始化成功')
+            self.get_logger().info(f'  手部偏移: {self.hand_offset}')
+            self.get_logger().info(f'  目标位置: {self.target_position}')
+
+        except Exception as e:
+            self.get_logger().error(f'意图计算初始化失败: {e}')
+            self.intent_enabled = False
+
+    def process_intent_calculation(self, color_image, timestamp):
+        """处理意图计算"""
+        if not self.intent_enabled or self.intent_detector is None:
+            return
+
+        try:
+            intent_config = self.system_config.get('startup', {}).get('intent_calculation', {})
+            aruco_enabled = intent_config.get('aruco', {}).get('enabled', True)
+
+            hand_pos = None
+            velocity = np.zeros(3)
+            corners = None
+            ids = None
+
+            # 1. 检测ArUco标记（如果启用）
+            if aruco_enabled:
+                # OpenCV 4.7+ 使用新的API
+                try:
+                    detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.aruco_params)
+                    corners, ids, _ = detector.detectMarkers(color_image)
+                except AttributeError:
+                    # 旧版本OpenCV使用旧API
+                    corners, ids, _ = cv2.aruco.detectMarkers(
+                        color_image, self.aruco_dict, parameters=self.aruco_params
+                    )
+
+                if ids is not None and len(ids) > 0:
+                    # 使用第一个检测到的标记
+                    marker_corners = corners[0][0]
+                    marker_center = marker_corners.mean(axis=0)
+
+                    # 简化：假设标记在图像平面上，使用像素坐标估计3D位置
+                    img_h, img_w = color_image.shape[:2]
+                    norm_x = (marker_center[0] - img_w/2) / img_w
+                    norm_y = (marker_center[1] - img_h/2) / img_h
+
+                    # 估计手部位置（相机坐标系）
+                    hand_pos = np.array([norm_x, norm_y, 1.0]) + self.hand_offset
+
+                    # 计算速度
+                    current_time = time.time()
+                    if self.prev_hand_pos is not None and self.prev_time is not None:
+                        dt = current_time - self.prev_time
+                        if dt > 0:
+                            velocity = (hand_pos - self.prev_hand_pos) / dt
+
+                    self.prev_hand_pos = hand_pos
+                    self.prev_time = current_time
+
+            # 2. 计算意图因子（即使没有检测到ArUco也计算）
+            if hand_pos is not None:
+                # 有手部位置，正常计算
+                try:
+                    intent_result = self.intent_detector.detect_intent(
+                        current_pos=hand_pos,
+                        target_pos=self.target_position,
+                        velocity=velocity,
+                        smooth=True
+                    )
+
+                    alpha = intent_result.alpha
+                    alpha_geo = intent_result.alpha_geo
+                    alpha_vel = intent_result.alpha_vel
+                    alpha_dir = intent_result.alpha_dir
+
+                except Exception as e:
+                    self.get_logger().warn(f'意图因子计算失败: {e}，使用默认值')
+                    alpha = 0.0
+                    alpha_geo = 0.0
+                    alpha_vel = 1.0
+                    alpha_dir = 0.5
+            else:
+                # 没有手部位置，使用默认值
+                alpha = 0.0
+                alpha_geo = 0.0
+                alpha_vel = 1.0
+                alpha_dir = 0.5
+
+            # 3. 发布意图因子（总是发布）
+            if self.intent_factors_pub is not None:
+                msg = Float32MultiArray()
+                msg.data = [alpha, alpha_geo, alpha_vel, alpha_dir]
+                self.intent_factors_pub.publish(msg)
+
+            # 4. 绘制调试图像（总是绘制）
+            debug_image = color_image.copy()
+
+            # 绘制ArUco标记（如果检测到）
+            if aruco_enabled and ids is not None and len(ids) > 0:
+                cv2.aruco.drawDetectedMarkers(debug_image, corners, ids)
+
+            # 绘制意图因子
+            y_offset = 30
+            cv2.putText(debug_image, f"alpha: {alpha:.3f}",
+                       (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            y_offset += 25
+            cv2.putText(debug_image, f"alpha_geo: {alpha_geo:.3f}",
+                       (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            y_offset += 25
+            cv2.putText(debug_image, f"alpha_vel: {alpha_vel:.3f}",
+                       (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+            y_offset += 25
+            cv2.putText(debug_image, f"alpha_dir: {alpha_dir:.3f}",
+                       (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+
+            # 如果没有检测到ArUco，显示提示
+            if aruco_enabled and (ids is None or len(ids) == 0):
+                cv2.putText(debug_image, "No ArUco marker detected",
+                           (10, debug_image.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX,
+                           0.5, (0, 0, 255), 1)
+
+            # 发布调试图像
+            if self.intent_debug_image_pub is not None:
+                debug_msg = self.bridge.cv2_to_imgmsg(debug_image, encoding='bgr8')
+                debug_msg.header.stamp = timestamp
+                debug_msg.header.frame_id = f'{self.camera_name}_color_optical_frame'
+                self.intent_debug_image_pub.publish(debug_msg)
+
+        except Exception as e:
+            self.get_logger().warn(f'意图计算处理失败: {e}')
 
     def destroy_node(self):
         """清理资源"""

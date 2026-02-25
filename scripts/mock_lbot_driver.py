@@ -74,8 +74,23 @@ class MockLbotDriver(Node):
         self.left_position = np.zeros(7)
         self.right_position = np.zeros(7)
 
-        # 创建定时器，以50Hz发布状态（模拟真机的50Hz反馈）
-        self.state_timer = self.create_timer(0.02, self.publish_states)
+        # 上一次采样的位置和时间（用于速度计算）
+        self.left_last_position = np.zeros(7)
+        self.right_last_position = np.zeros(7)
+        self.left_last_sample_time = None
+        self.right_last_sample_time = None
+
+        # 速度阈值（rad/s）- 超过此值将触发警报
+        self.declare_parameter('velocity_threshold', 3.0)
+        self.velocity_threshold = self.get_parameter('velocity_threshold').value
+
+        # 加速度阈值（rad/s^2）
+        self.declare_parameter('acceleration_threshold', 100.0)
+        self.acceleration_threshold = self.get_parameter('acceleration_threshold').value
+
+        # 创建定时器，以50Hz采样和发布状态（模拟真机的50Hz反馈）
+        # 这个频率模拟了真实机械臂底层固件的控制循环频率
+        self.state_timer = self.create_timer(0.02, self.sample_and_publish_states)
 
         # 创建定时器，每秒打印频率统计
         if self.monitor_freq:
@@ -91,6 +106,11 @@ class MockLbotDriver(Node):
         self.get_logger().info(f'发布: /{namespace}/right_arm/joint_states (50Hz)')
         self.get_logger().info(f'服务: /{namespace}/left_arm/move_joint (MoveJ)')
         self.get_logger().info(f'服务: /{namespace}/right_arm/move_joint (MoveJ)')
+        self.get_logger().info('='*80)
+        self.get_logger().info('安全监控已启用:')
+        self.get_logger().info(f'  速度阈值: {self.velocity_threshold} rad/s')
+        self.get_logger().info(f'  加速度阈值: {self.acceleration_threshold} rad/s²')
+        self.get_logger().info(f'  采样频率: 50 Hz (模拟真机底层固件)')
         self.get_logger().info('='*80)
 
     def movej_callback(self, request, response, arm):
@@ -125,25 +145,102 @@ class MockLbotDriver(Node):
             if msg.joints and len(msg.joints) >= 7:
                 self.right_position = np.array(msg.joints[:7])
 
-    def publish_states(self):
-        """以50Hz发布机器人状态（模拟真机反馈）"""
-        # 发布左臂状态
-        left_msg = JointState()
-        left_msg.header.stamp = self.get_clock().now().to_msg()
-        left_msg.name = [f'joint_{i}' for i in range(7)]
-        left_msg.position = self.left_position.tolist()
-        left_msg.velocity = [0.0] * 7
-        left_msg.effort = [0.0] * 7
-        self.left_state_pub.publish(left_msg)
+    def sample_and_publish_states(self):
+        """
+        以50Hz采样最新的指令并发布机器人状态
+        这模拟了真实机械臂底层固件的行为：
+        - 每20ms醒来一次
+        - 从接收缓冲区抓取最新指令
+        - 计算瞬时速度和加速度
+        - 检测危险的运动指令
+        """
+        current_time = time.time()
 
-        # 发布右臂状态
-        right_msg = JointState()
-        right_msg.header.stamp = self.get_clock().now().to_msg()
-        right_msg.name = [f'joint_{i}' for i in range(7)]
-        right_msg.position = self.right_position.tolist()
-        right_msg.velocity = [0.0] * 7
-        right_msg.effort = [0.0] * 7
-        self.right_state_pub.publish(right_msg)
+        # 采样左臂
+        self._sample_arm(
+            'left',
+            self.left_position,
+            self.left_last_position,
+            self.left_last_sample_time,
+            current_time
+        )
+        self.left_last_position = self.left_position.copy()
+        self.left_last_sample_time = current_time
+
+        # 采样右臂
+        self._sample_arm(
+            'right',
+            self.right_position,
+            self.right_last_position,
+            self.right_last_sample_time,
+            current_time
+        )
+        self.right_last_position = self.right_position.copy()
+        self.right_last_sample_time = current_time
+
+        # 发布状态
+        self._publish_arm_state('left', self.left_position, self.left_state_pub)
+        self._publish_arm_state('right', self.right_position, self.right_state_pub)
+
+    def _sample_arm(self, arm_name, current_pos, last_pos, last_time, current_time):
+        """采样单个机械臂并检测危险运动"""
+        if last_time is None:
+            return  # 第一次采样，没有历史数据
+
+        dt = current_time - last_time
+        if dt <= 0:
+            return
+
+        # 计算位置差（模拟从缓冲区抓取到的新指令与上次指令的差异）
+        position_delta = current_pos - last_pos
+
+        # 计算瞬时速度（rad/s）
+        instantaneous_velocity = position_delta / dt
+
+        # 计算瞬时加速度（rad/s^2）
+        # 注意：这里简化处理，实际应该用速度差/时间差
+        instantaneous_acceleration = instantaneous_velocity / dt
+
+        # 检测每个关节
+        for joint_idx in range(len(current_pos)):
+            vel = abs(instantaneous_velocity[joint_idx])
+            acc = abs(instantaneous_acceleration[joint_idx])
+            pos_delta = abs(position_delta[joint_idx])
+
+            # 速度阈值检测
+            if vel > self.velocity_threshold:
+                self.get_logger().error(
+                    f'🚨 [{arm_name}] 关节{joint_idx} 速度异常！'
+                    f'瞬时速度 = {vel:.2f} rad/s (阈值: {self.velocity_threshold} rad/s)'
+                )
+                self.get_logger().error(
+                    f'    位置跳变: {pos_delta:.4f} rad, 时间间隔: {dt*1000:.1f} ms'
+                )
+
+            # 加速度阈值检测
+            if acc > self.acceleration_threshold:
+                self.get_logger().error(
+                    f'🚨 [{arm_name}] 关节{joint_idx} 加速度异常！'
+                    f'瞬时加速度 = {acc:.2f} rad/s² (阈值: {self.acceleration_threshold} rad/s²)'
+                )
+
+            # 极端情况：单次跳变超过0.3弧度（约17度）
+            if pos_delta > 0.3:
+                self.get_logger().fatal(
+                    f'💀 [{arm_name}] 关节{joint_idx} 检测到极端位置跳变！'
+                    f'跳变量: {pos_delta:.4f} rad ({np.degrees(pos_delta):.1f}°)'
+                    f' - 这将导致电机烧毁！'
+                )
+
+    def _publish_arm_state(self, arm_name, position, publisher):
+        """发布机械臂状态"""
+        msg = JointState()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.name = [f'joint_{i}' for i in range(7)]
+        msg.position = position.tolist()
+        msg.velocity = [0.0] * 7
+        msg.effort = [0.0] * 7
+        publisher.publish(msg)
 
     def calculate_frequency(self, timestamps):
         """计算频率"""
