@@ -137,14 +137,17 @@ class RealSenseCameraNode(Node):
 
         self.initialize_camera()
 
-        # 创建定时器（30Hz）
-        self.timer = self.create_timer(1.0 / self.color_fps, self.timer_callback)
-
         self.get_logger().info(f'RealSense相机节点已启动: {self.camera_name}')
         if self.serial_number:
             self.get_logger().info(f'  序列号: {self.serial_number}')
         self.get_logger().info(f'  彩色: {self.color_width}x{self.color_height}@{self.color_fps}fps')
         self.get_logger().info(f'  深度: {self.depth_width}x{self.depth_height}@{self.depth_fps}fps')
+
+        # 启动采集循环（在单独的线程中）
+        import threading
+        self.running = True
+        self.capture_thread = threading.Thread(target=self.capture_loop, daemon=True)
+        self.capture_thread.start()
 
     def initialize_camera(self):
         """初始化RealSense相机"""
@@ -211,6 +214,51 @@ class RealSenseCameraNode(Node):
         except Exception as e:
             self.get_logger().error(f'相机初始化失败: {e}')
             raise
+
+    def capture_loop(self):
+        """采集循环 - 持续读取和发布帧"""
+        self.get_logger().info('开始采集循环')
+
+        while self.running and rclpy.ok():
+            try:
+                # 等待帧（使用200ms超时）
+                frames = self.pipeline.wait_for_frames(timeout_ms=200)
+
+                # 对齐深度到彩色（如果启用）
+                if self.align:
+                    frames = self.align.process(frames)
+
+                # 获取时间戳
+                timestamp = self.get_clock().now().to_msg()
+
+                # 发布彩色图像
+                if self.enable_color and self.color_pub:
+                    color_frame = frames.get_color_frame()
+                    if color_frame:
+                        self.publish_color_image(color_frame, timestamp)
+
+                # 发布深度图像
+                if self.enable_depth and self.depth_pub:
+                    depth_frame = frames.get_depth_frame()
+                    if depth_frame:
+                        self.publish_depth_image(depth_frame, timestamp)
+
+                # 发布点云
+                if self.enable_pointcloud and self.pointcloud_pub:
+                    depth_frame = frames.get_depth_frame()
+                    color_frame = frames.get_color_frame()
+                    if depth_frame and color_frame:
+                        self.publish_pointcloud(depth_frame, color_frame, timestamp)
+
+            except RuntimeError as e:
+                # 超时是正常的，继续循环
+                if 'Timeout' not in str(e):
+                    self.get_logger().warn(f'采集帧失败: {e}')
+            except Exception as e:
+                self.get_logger().error(f'采集循环错误: {e}')
+                break
+
+        self.get_logger().info('采集循环结束')
 
     def timer_callback(self):
         """定时器回调 - 采集和发布数据"""
@@ -334,13 +382,25 @@ class RealSenseCameraNode(Node):
     def load_system_config(self):
         """加载系统配置文件"""
         try:
-            # 获取配置文件路径
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            config_path = os.path.join(current_dir, '../../../config/system_config.yaml')
-            config_path = os.path.normpath(config_path)
+            # 尝试多个可能的配置文件路径
+            possible_paths = [
+                # 开发环境路径
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../config/system_config.yaml'),
+                # 工作空间根目录
+                os.path.expanduser('~/Dev/VIST/config/system_config.yaml'),
+                # 相对于当前工作目录
+                'config/system_config.yaml',
+            ]
 
-            with open(config_path, 'r', encoding='utf-8') as f:
-                return yaml.safe_load(f)
+            for config_path in possible_paths:
+                config_path = os.path.normpath(config_path)
+                if os.path.exists(config_path):
+                    with open(config_path, 'r', encoding='utf-8') as f:
+                        return yaml.safe_load(f)
+
+            # 如果都找不到，返回空配置
+            self.get_logger().warn('未找到配置文件，使用默认配置')
+            return {}
         except Exception as e:
             self.get_logger().warn(f'加载配置文件失败: {e}')
             return {}
@@ -511,8 +571,15 @@ class RealSenseCameraNode(Node):
 
     def destroy_node(self):
         """清理资源"""
+        # 停止采集循环
+        self.running = False
+        if hasattr(self, 'capture_thread') and self.capture_thread.is_alive():
+            self.capture_thread.join(timeout=2.0)
+
+        # 停止pipeline
         if self.pipeline:
             self.pipeline.stop()
+
         super().destroy_node()
 
 

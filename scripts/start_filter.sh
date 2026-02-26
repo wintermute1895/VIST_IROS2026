@@ -22,4 +22,15 @@ cd /home/ilex/Dev/VIST
 source install/setup.bash
 
 echo -e "${GREEN}启动One-Euro滤波器...${NC}"
-ros2 run one_euro_filter filter_node
+echo ""
+echo "配置:"
+echo "  输入话题: /left_arm_joint_control"
+echo "  输出话题: /filtered_joint_states"
+echo "  滤波器类型: one_euro"
+echo ""
+
+# 使用unified_filter_node
+python3 src/nodes/unified_filter_node.py --ros-args \
+  -p input_topic:=/left_arm_joint_control \
+  -p output_topic:=/filtered_joint_states \
+  -p filter_type:=one_euro

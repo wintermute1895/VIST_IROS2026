@@ -21,14 +21,14 @@ if [ -z "$ROS_DISTRO" ]; then
     source /opt/ros/humble/setup.bash
 fi
 
-# 进入灵巧手工作空间
-HAND_WS="/home/ilex/Dev/VIST/external_sdk/linkerhand-ros2-sdk"
-if [ ! -d "$HAND_WS" ]; then
-    echo -e "${RED}错误: 灵巧手工作空间不存在: $HAND_WS${NC}"
+# 进入VIST工作空间
+VIST_WS="/home/ilex/Dev/VIST"
+if [ ! -d "$VIST_WS" ]; then
+    echo -e "${RED}错误: VIST工作空间不存在: $VIST_WS${NC}"
     exit 1
 fi
 
-cd "$HAND_WS"
+cd "$VIST_WS"
 
 # 检查并激活 CAN 端口
 echo -e "${GREEN}检查 CAN 端口...${NC}"
@@ -50,7 +50,7 @@ ip -details link show can0
 source install/setup.bash
 
 # 启动参数
-HAND_TYPE="${1:-right}"
+HAND_TYPE="${1:-left}"
 CAN_PORT="${2:-can0}"
 ENABLE_TOUCH="${3:-false}"
 

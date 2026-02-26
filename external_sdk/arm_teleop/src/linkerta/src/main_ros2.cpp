@@ -18,15 +18,16 @@ int main(int argc, char ** argv)
 
     auto node = std::make_shared<rclcpp::Node>("linkerta_node");
 
-    // uint32_t id = node->declare_parameter("arm_id", 0x123);
-    // int baudrate = node->declare_parameter("arm_baudrate", 1000000);    
-    // std::string channel = node->declare_parameter<std::string>("arm_channel", "can0");
-    int calibration = node->declare_parameter("calibration", 0); 
+    int baudrate = node->declare_parameter("arm_baudrate", 1000000);
+    std::string channel = node->declare_parameter<std::string>("arm_channel", "can0");
+    int calibration = node->declare_parameter("calibration", 0);
 
     std::cout << "calibration : " << calibration << std::endl;
+    std::cout << "CAN channel : " << channel << std::endl;
+    std::cout << "baudrate : " << baudrate << std::endl;
     try {
-        LinkerArm::LinkerArm arm("master_arm");
-        // LinkerArm::LinkerArm arm(id, channel, baudrate);
+        LinkerArm::LinkerArm arm(channel, baudrate);
+        // LinkerArm::LinkerArm arm("master_arm");
         std::this_thread::sleep_for(200ms);
         std::cout << arm.getVersion() << std::endl;
         

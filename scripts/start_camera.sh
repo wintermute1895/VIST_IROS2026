@@ -88,7 +88,8 @@ echo -e "${GREEN}启动相机节点...${NC}"
 # 使用当前环境的 Python 直接运行模块
 # 注意：参数需要正确传递，序列号用引号包裹
 python3 -m camera_manager.realsense_camera_node --ros-args \
-  -p width:=$WIDTH \
-  -p height:=$HEIGHT \
-  -p fps:=$FPS \
+  -p color_width:=$WIDTH \
+  -p color_height:=$HEIGHT \
+  -p color_fps:=$FPS \
+  -p enable_depth:=false \
   -p serial_number:="$SERIAL_NUMBER"

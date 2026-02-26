@@ -3,10 +3,12 @@
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/launch/teleop.launch.py
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/launch/teleop_exo.launch.py
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/launch/high_freq_resampler.launch.py
+/home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/launch/teleop_with_filter.launch.py
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/launch/teleop_with_resampler.launch.py
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/launch/vision_resampler.launch.py
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/config/high_freq_resampler.yaml
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/config/vision_resampler.yaml
+/home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/config/teleop_bridge_params.yaml
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/lbot_teleop/config/teleop_config.yaml
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/ament_index/resource_index/package_run_dependencies/lbot_teleop
 /home/ilex/Dev/VIST/external_sdk/arm_teleop/install/lbot_teleop/share/ament_index/resource_index/parent_prefix_path/lbot_teleop

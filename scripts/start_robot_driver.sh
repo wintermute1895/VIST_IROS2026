@@ -1,25 +1,26 @@
 #!/bin/bash
-# 启动左臂外骨骼遥操
-# Start Left Arm Teleoperation
+# 启动机械臂驱动节点
 
 set -e
 
+# 颜色定义
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}左臂外骨骼遥操${NC}"
+echo -e "${BLUE}启动机械臂驱动${NC}"
 echo -e "${BLUE}========================================${NC}"
 
-# 检查ROS2环境
+# 检查 ROS2 环境
 if [ -z "$ROS_DISTRO" ]; then
-    echo "加载ROS2环境..."
+    echo "正在加载 ROS2 环境..."
     source /opt/ros/humble/setup.bash
 fi
 
-# 加载外骨骼工作空间
+# 进入外骨骼工作空间
 EXO_WS="/home/ilex/Dev/VIST/external_sdk/arm_teleop"
 if [ ! -d "$EXO_WS" ]; then
     echo -e "${RED}错误: 外骨骼工作空间不存在: $EXO_WS${NC}"
@@ -29,13 +30,9 @@ fi
 cd "$EXO_WS"
 source install/setup.bash
 
-# 加载主工作空间（滤波器）
-cd /home/ilex/Dev/VIST
-source install/setup.bash
-
-echo -e "${GREEN}启动左臂外骨骼...${NC}"
-echo "CAN接口: can1"
+echo -e "${GREEN}启动机械臂驱动...${NC}"
+echo -e "${YELLOW}注意: 请确保机械臂已上电并连接${NC}"
 echo ""
 
-# 启动外骨骼，使用配置文件
-ros2 run linkerta linkerta_node --ros-args --params-file ~/Dev/VIST/external_sdk/arm_teleop/src/linkerta/config/lta.yaml
+# 启动机械臂驱动
+ros2 launch lbot_driver lbot_start_driver.launch.py
