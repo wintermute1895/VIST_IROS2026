@@ -1,0 +1,9 @@
+description: 直接透传遥操臂数据，不经过任何滤波处理
+enable_alignment_factor: false
+enable_conflict_detection: false
+enable_distance_factor: false
+enable_velocity_factor: false
+expected_jerk: 未知（取决于遥操臂输出）
+filter_type: passthrough
+name: Baseline (无滤波)
+论文标签: Direct Teleoperation

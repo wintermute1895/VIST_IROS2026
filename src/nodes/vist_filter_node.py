@@ -84,27 +84,35 @@ class VISTFilterNode(Node):
         self.print_config()
 
     def declare_node_parameters(self):
-        """声明ROS2参数"""
+        """
+        声明ROS2参数
+
+        注意：这里的默认值仅作为后备值使用。
+        实际运行时应通过 --params-file 参数传递配置文件来覆盖这些默认值。
+        启动命令示例：
+            python3 src/nodes/vist_filter_node.py --ros-args --params-file config/vist_filter_config.yaml
+        """
         # 话题配置
-        self.declare_parameter('exo_left_topic', '/exo_left_joint_control')
-        self.declare_parameter('exo_right_topic', '/exo_right_joint_control')
+        # 默认值与实际话题名称匹配（linkerta_node发布的话题）
+        self.declare_parameter('exo_left_topic', '/left_arm_joint_control')
+        self.declare_parameter('exo_right_topic', '/right_arm_joint_control')
         self.declare_parameter('vision_left_topic', '/vision_left_joint_control')
         self.declare_parameter('vision_right_topic', '/vision_right_joint_control')
         self.declare_parameter('filtered_left_topic', '/filtered_left_joint_control')
         self.declare_parameter('filtered_right_topic', '/filtered_right_joint_control')
 
         # 控制参数
-        self.declare_parameter('output_freq_hz', 100.0)
+        self.declare_parameter('output_freq_hz', 80.0)  # 匹配遥操臂频率（80Hz）
         self.declare_parameter('arm_side', 'left')  # 'left' or 'right'
 
         # 滤波器选择
-        self.declare_parameter('filter_type', 'vist_kalman')  # ema, one_euro, vist_kalman
+        self.declare_parameter('filter_type', 'passthrough')  # passthrough, ema, one_euro, vist_kalman
 
-        # 意图因子配置
-        self.declare_parameter('enable_distance_factor', True)
-        self.declare_parameter('enable_velocity_factor', True)
-        self.declare_parameter('enable_alignment_factor', True)
-        self.declare_parameter('enable_conflict_detection', True)
+        # 意图因子配置（默认关闭，用于baseline实验）
+        self.declare_parameter('enable_distance_factor', False)
+        self.declare_parameter('enable_velocity_factor', False)
+        self.declare_parameter('enable_alignment_factor', False)
+        self.declare_parameter('enable_conflict_detection', False)
 
         # EMA参数
         self.declare_parameter('ema_alpha', 0.3)

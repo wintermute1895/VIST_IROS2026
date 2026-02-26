@@ -1,0 +1,10 @@
+description: 指数移动平均滤波，简单的低通滤波器
+ema_alpha: 0.3
+enable_alignment_factor: false
+enable_conflict_detection: false
+enable_distance_factor: false
+enable_velocity_factor: false
+expected_jerk: 中等（取决于alpha值）
+filter_type: ema
+name: EMA滤波
+论文标签: EMA Smoothing

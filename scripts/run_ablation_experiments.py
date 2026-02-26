@@ -13,7 +13,7 @@ import argparse
 from datetime import datetime
 
 class AblationExperimentRunner:
-    def __init__(self, config_path, duration=15):
+    def __init__(self, config_path, duration=200):
         """
         初始化消融实验运行器
 
@@ -75,7 +75,7 @@ class AblationExperimentRunner:
         # 更新配置
         self.update_vist_filter_config(experiment_config)
 
-        # 创建实验目录
+        # 创建实验目录（但不创建rosbag子目录，让ros2 bag record创建）
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         exp_dir = self.results_dir / f"{experiment_name}_{timestamp}"
         exp_dir.mkdir(parents=True, exist_ok=True)
@@ -96,20 +96,34 @@ class AblationExperimentRunner:
         print(f"\n开始录制 {self.duration} 秒...")
         rosbag_dir = exp_dir / "rosbag"
 
-        # 录制命令
+        # 录制命令（使用timeout限制时长）
         record_cmd = [
+            "timeout", f"{self.duration}s",
             "ros2", "bag", "record",
             "-o", str(rosbag_dir),
-            "/right_arm_joint_control",  # 遥操臂输出
-            "/robot1/right_arm/joint_follow",  # VIST滤波后的控制指令
-            "/robot1/right_arm/joint_states",  # 真机反馈
-            "/vist_performance",  # VIST性能指标
-            "--duration", str(self.duration)
+            "/camera/color/image_raw",
+            "/camera/color/camera_info",
+            "/cb_left_hand_control_cmd",
+            "/cb_left_hand_control_angle_cmd",
+            "/filter_performance",
+            "/filtered_left_joint_control",
+            "/left_arm_joint_control",
+            "/parameter_events",
+            "/robot1/left_arm/joint_states",
+            "/robot1/left_arm/joint_follow",
+            "/robot1/left_arm/pose_states",
+            "/vist_performance"
         ]
 
         try:
-            subprocess.run(record_cmd, check=True)
-            print(f"✓ 录制完成")
+            # timeout命令会在指定时间后自动终止
+            result = subprocess.run(record_cmd, check=False)
+            # timeout命令返回124表示超时（正常），0表示正常结束
+            if result.returncode in [0, 124]:
+                print(f"✓ 录制完成")
+            else:
+                print(f"❌ 录制失败: 返回码 {result.returncode}")
+                return False
         except subprocess.CalledProcessError as e:
             print(f"❌ 录制失败: {e}")
             return False
@@ -123,8 +137,12 @@ class AblationExperimentRunner:
         ]
 
         try:
-            subprocess.run(analysis_cmd, check=True)
+            # 分析步骤也设置超时（60秒应该足够）
+            subprocess.run(analysis_cmd, check=True, timeout=60)
             print(f"✓ 分析完成")
+        except subprocess.TimeoutExpired:
+            print(f"❌ 分析超时: 执行时间超过 60 秒，任务失败")
+            return False
         except subprocess.CalledProcessError as e:
             print(f"❌ 分析失败: {e}")
             return False

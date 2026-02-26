@@ -20,19 +20,20 @@ physical_limits:
 
 # 数据源配置
 data_sources:
-  # 控制指令（VIST输出）
+  # 控制指令（滤波后发给机械臂的指令）
   command:
     enabled: true
     topics:
-      - /robot1/right_arm/joint_follow
-    label: "VIST控制指令"
+      - /robot1/left_arm/joint_follow
+      - /filtered_left_joint_control
+    label: "滤波后控制指令"
     color: "#2E86AB"  # 蓝色
 
   # 真机反馈（原始）
   feedback_raw:
     enabled: true
     topics:
-      - /robot1/right_arm/joint_states
+      - /robot1/left_arm/joint_states
     label: "真机反馈（原始）"
     color: "#A23B72"  # 紫红色
 
@@ -47,8 +48,8 @@ data_sources:
   exo_output:
     enabled: true
     topics:
-      - /right_arm_joint_control
-    label: "遥操臂输出"
+      - /left_arm_joint_control
+    label: "遥操臂原始输出"
     color: "#06A77D"  # 绿色
 
 # 可视化配置

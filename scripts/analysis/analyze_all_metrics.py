@@ -31,6 +31,72 @@ except ImportError:
     print("警告：无法导入FollowJoint消息类型")
 
 
+def compute_sparc(velocity, dt):
+    """
+    计算SPARC (Spectral Arc Length)指标
+
+    SPARC是基于速度频谱的平滑度指标，越大越平滑
+    参考: Balasubramanian et al. (2015) "On the analysis of movement smoothness"
+
+    Args:
+        velocity: 速度数组 (N, num_joints)
+        dt: 采样时间间隔
+
+    Returns:
+        sparc: SPARC值（越大越平滑）
+    """
+    # 计算所有关节的速度幅值
+    velocity_magnitude = np.linalg.norm(velocity, axis=1)
+
+    # 计算功率谱密度
+    from scipy.fft import rfft, rfftfreq
+    N = len(velocity_magnitude)
+
+    # FFT
+    fft_vals = rfft(velocity_magnitude)
+    freqs = rfftfreq(N, dt)
+
+    # 功率谱
+    power = np.abs(fft_vals) ** 2
+
+    # 归一化功率谱
+    power_norm = power / np.sum(power)
+
+    # 累积功率谱
+    cumsum_power = np.cumsum(power_norm)
+
+    # 找到包含99.9%能量的频率
+    idx_99 = np.where(cumsum_power >= 0.999)[0]
+    if len(idx_99) == 0:
+        idx_99 = len(freqs) - 1
+    else:
+        idx_99 = idx_99[0]
+
+    # 计算频谱弧长
+    freqs_truncated = freqs[:idx_99+1]
+    power_truncated = power_norm[:idx_99+1]
+
+    # 归一化到[0, 1]
+    if len(freqs_truncated) > 1:
+        freq_norm = freqs_truncated / freqs_truncated[-1]
+        power_cumsum = np.cumsum(power_truncated)
+        power_cumsum_norm = power_cumsum / power_cumsum[-1]
+
+        # 计算弧长
+        arc_length = 0
+        for i in range(1, len(freq_norm)):
+            dx = freq_norm[i] - freq_norm[i-1]
+            dy = power_cumsum_norm[i] - power_cumsum_norm[i-1]
+            arc_length += np.sqrt(dx**2 + dy**2)
+
+        # SPARC = -arc_length (负号使得越大越平滑)
+        sparc = -arc_length
+    else:
+        sparc = 0.0
+
+    return sparc
+
+
 def load_config(config_path):
     """加载配置文件"""
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -239,6 +305,17 @@ def compute_metrics_robust(trajectory, timestamps, config):
     acceleration_abs = np.abs(acceleration)
     jerk_abs = np.abs(jerk)
 
+    # 计算Normalized Jerk (Table II指标)
+    # 公式: NJ = sqrt(T^5 / (2 * duration^3) * sum(jerk^2))
+    T = len(uniform_trajectory)
+    normalized_jerk = np.sqrt(
+        (T ** 5) / (2 * total_duration ** 3) * np.sum(jerk ** 2)
+    )
+
+    # 计算SPARC (Spectral Arc Length) - Table II指标
+    # 基于速度的频谱分析
+    sparc_value = compute_sparc(velocity, uniform_dt)
+
     return {
         'frequency': original_freq,
         'resampled_frequency': target_freq,
@@ -251,6 +328,10 @@ def compute_metrics_robust(trajectory, timestamps, config):
         'avg_jerk': np.median(jerk_abs),
         'max_jerk': np.percentile(jerk_abs, 99),
         'rms_jerk': np.sqrt(np.mean(jerk_abs ** 2)),
+        # Table II指标
+        'normalized_jerk': normalized_jerk,
+        'sparc': sparc_value,
+        # 基础信息
         'num_samples': len(trajectory),
         'resampled_samples': num_samples,
         'duration': total_duration,
@@ -383,6 +464,9 @@ def analyze_all_data(rosbag_path, config, output_dir):
         print(f"  99%加速度: {metrics['max_acceleration']:.4f} rad/s²")
         print(f"  中位Jerk: {metrics['avg_jerk']:.4f} rad/s³")
         print(f"  99%Jerk: {metrics['max_jerk']:.4f} rad/s³")
+        print(f"  --- Table II 指标 ---")
+        print(f"  Normalized Jerk: {metrics['normalized_jerk']:.2f}")
+        print(f"  SPARC: {metrics['sparc']:.4f}")
 
         comparison[source_name] = {
             'label': data['label'],
@@ -398,6 +482,8 @@ def analyze_all_data(rosbag_path, config, output_dir):
                 'avg_jerk': metrics['avg_jerk'],
                 'max_jerk': metrics['max_jerk'],
                 'rms_jerk': metrics['rms_jerk'],
+                'normalized_jerk': metrics['normalized_jerk'],
+                'sparc': metrics['sparc'],
                 'num_samples': metrics['num_samples'],
                 'duration': metrics['duration']
             }

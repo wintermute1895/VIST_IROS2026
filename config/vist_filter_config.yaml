@@ -1,139 +1,21 @@
-# VIST Filter Node Configuration
-# VIST滤波节点配置文件 - 将VIST算法集成到ROS2控制流
-
 vist_filter_node:
   ros__parameters:
-    #========================================
-    # 话题配置
-    #========================================
-    # 输入话题 - 外骨骼数据 (高频本体感觉, ~100Hz)
-    exo_left_topic: "/exo_left_joint_control"
-    exo_right_topic: "/exo_right_joint_control"
-
-    # 输入话题 - 视觉数据 (低频意图, ~30Hz)
-    vision_left_topic: "/vision_left_joint_control"
-    vision_right_topic: "/vision_right_joint_control"
-
-    # 输出话题 - 滤波后的控制指令
-    filtered_left_topic: "/filtered_left_joint_control"
-    filtered_right_topic: "/filtered_right_joint_control"
-
-    #========================================
-    # 控制参数
-    #========================================
-    # 输出频率 (Hz) - 建议 50-250Hz
-    # 注意：需要与遥操臂频率匹配以保持高频控制
-    output_freq_hz: 250.0
-
-    # 控制哪个臂 ('left' or 'right')
-    arm_side: "left"
-
-    #========================================
-    # 滤波器选择
-    #========================================
-    # 滤波器类型:
-    # - "vist_kalman": VIST卡尔曼滤波器 (推荐，支持双源融合)
-    # - "one_euro": One Euro滤波器 (低延迟平滑)
-    # - "ema": 指数移动平均滤波器 (简单快速)
-    # - "passthrough": 直通模式 (无滤波，baseline对比)
-    filter_type: "passthrough"
-
-    #========================================
-    # 意图因子配置 (仅VIST卡尔曼滤波器)
-    #========================================
-    # 启用哪些意图因子
-    enable_distance_factor: true      # 距离因子 (目标距离)
-    enable_velocity_factor: true      # 速度因子 (运动速度)
-    enable_alignment_factor: true     # 对齐因子 (方向对齐)
-    enable_conflict_detection: true   # 冲突检测 (人机冲突)
-
-    #========================================
-    # EMA滤波器参数
-    #========================================
-    # EMA平滑系数 (0.0-1.0)
-    # - 越小越平滑，但延迟越大
-    # - 越大响应越快，但平滑效果越差
-    # - 推荐范围: 0.2-0.4
+    arm_side: left
     ema_alpha: 0.3
-
-    #========================================
-    # One Euro滤波器参数
-    #========================================
-    # 最小截止频率 (Hz)
-    one_euro_min_cutoff: 1.0
-
-    # Beta参数 (速度敏感度)
-    one_euro_beta: 0.007
-
-    #========================================
-    # VIST配置文件路径
-    #========================================
-    # VIST核心算法的配置文件
-    vist_config_path: "config/system_config.yaml"
-
-    #========================================
-    # 性能监控
-    #========================================
-    # 是否启用性能监控
+    enable_alignment_factor: false
+    enable_conflict_detection: false
+    enable_distance_factor: false
     enable_performance_monitoring: true
-
-    # 性能指标发布话题
-    performance_topic: "/vist_performance"
-
-#========================================
-# 使用说明
-#========================================
-# 1. 基础使用 (仅外骨骼):
-#    - 启动外骨骼驱动
-#    - 启动此节点
-#    - 外骨骼数据会被滤波后发布
-#
-# 2. 完整VIST (外骨骼+视觉):
-#    - 启动外骨骼驱动
-#    - 启动视觉节点
-#    - 启动此节点
-#    - 双源数据会被融合滤波
-#
-# 3. 切换滤波器:
-#    - 修改 filter_type 参数
-#    - 重启节点
-#
-# 4. 调整意图因子:
-#    - 修改 enable_*_factor 参数
-#    - 重启节点
-#
-# 5. 性能监控:
-#    - 启动性能监控节点
-#    - 订阅 /vist_performance 话题
-
-#========================================
-# 消融实验配置示例
-#========================================
-# 实验1: 纯外骨骼 + EMA滤波
-# filter_type: "ema"
-# ema_alpha: 0.3
-
-# 实验2: 纯外骨骼 + One Euro滤波
-# filter_type: "one_euro"
-# one_euro_min_cutoff: 1.0
-
-# 实验3: 外骨骼+视觉 + VIST完整融合
-# filter_type: "vist_kalman"
-# enable_distance_factor: true
-# enable_velocity_factor: true
-# enable_alignment_factor: true
-# enable_conflict_detection: true
-
-# 实验4: VIST仅距离因子
-# filter_type: "vist_kalman"
-# enable_distance_factor: true
-# enable_velocity_factor: false
-# enable_alignment_factor: false
-# enable_conflict_detection: false
-
-# 实验5: VIST无冲突检测
-# filter_type: "vist_kalman"
-# enable_distance_factor: true
-# enable_velocity_factor: true
-# enable_alignment_factor: true
-# enable_conflict_detection: false
+    enable_velocity_factor: false
+    exo_left_topic: /left_arm_joint_control
+    exo_right_topic: /right_arm_joint_control
+    filter_type: one_euro
+    filtered_left_topic: /filtered_left_joint_control
+    filtered_right_topic: /filtered_right_joint_control
+    one_euro_beta: 0.007
+    one_euro_min_cutoff: 1.0
+    output_freq_hz: 80.0
+    performance_topic: /vist_performance
+    vision_left_topic: /vision_left_joint_control
+    vision_right_topic: /vision_right_joint_control
+    vist_config_path: config/system_config.yaml

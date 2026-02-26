@@ -32,7 +32,7 @@ cd "$EXO_WS"
 source install/setup.bash
 
 echo -e "${GREEN}启动遥操作桥接节点...${NC}"
-echo "输入: /filtered_joint_states"
+echo "输入: /filtered_left_joint_control"
 echo "输出: /robot1/left_arm/joint_follow"
 echo ""
 

@@ -1,0 +1,11 @@
+description: 自适应低通滤波器，平衡延迟和平滑度
+enable_alignment_factor: false
+enable_conflict_detection: false
+enable_distance_factor: false
+enable_velocity_factor: false
+expected_jerk: 较低（自适应调整）
+filter_type: one_euro
+name: One Euro滤波
+one_euro_beta: 0.007
+one_euro_min_cutoff: 1.0
+论文标签: One Euro Filter

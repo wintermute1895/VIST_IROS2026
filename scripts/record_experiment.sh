@@ -36,12 +36,16 @@ echo ""
 TOPICS=(
     "/camera/color/image_raw"
     "/camera/color/camera_info"
-    "/left_arm_joint_control"
-    "/filtered_joint_states"
     "/cb_left_hand_control_cmd"
     "/cb_left_hand_control_angle_cmd"
+    "/filter_performance"
+    "/filtered_joint_states"
+    "/left_arm_joint_control"
+    "/parameter_events"
     "/robot1/left_arm/joint_states"
     "/robot1/left_arm/joint_follow"
+    "/robot1/left_arm/pose_states"
+    
 )
 
 echo -e "${YELLOW}将记录以下topic:${NC}"
