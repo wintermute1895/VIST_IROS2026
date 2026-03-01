@@ -1,0 +1,101 @@
+# VIST 滤波器 Baseline 实验配置文件
+# 用于测试 5 种不同的滤波算法
+
+# ==================== 通用配置 ====================
+/vist_filter_node:
+  ros__parameters:
+    # 话题配置
+    exo_left_topic: '/left_arm_joint_control'
+    exo_right_topic: '/right_arm_joint_control'
+    vision_left_topic: '/vision_left_joint_control'
+    vision_right_topic: '/vision_right_joint_control'
+    filtered_left_topic: '/filtered_left_joint_control'
+    filtered_right_topic: '/filtered_right_joint_control'
+
+    # 控制参数
+    output_freq_hz: 80.0
+    arm_side: 'left'
+
+    # ==================== 滤波器选择 ====================
+    # 可选值: 'gello', 'oneeuro', 'vist', 'fsm', 'apf'
+    filter_type: 'fsm'  # FSM 有限状态机滤波器
+
+    # ==================== 意图因子配置 ====================
+    # 用于 VIST 和 FSM 算法
+    enable_distance_factor: false
+    enable_velocity_factor: false
+    enable_alignment_factor: false
+    enable_conflict_detection: false
+
+    # ==================== One Euro 滤波器参数 ====================
+    oneeuro:
+      min_cutoff: 1.0      # 最小截止频率 (Hz)
+      beta: 0.007          # 速度系数
+
+    # ==================== VIST 卡尔曼滤波器参数 ====================
+    vist:
+      process_noise: 0.01        # 过程噪声协方差
+      measurement_noise: 0.1     # 测量噪声协方差
+
+    # ==================== FSM 虚拟夹具参数 ====================
+    fsm:
+      # 圆柱形结界配置
+      socket_center_xy: [0.42, -0.11]      # 插座中心的XY坐标 [x, y] (单位: m) #1.217-0.47
+      cylinder_radius: 0.15              # 圆柱形结界半径 (单位: m)
+
+      # 关节角缩放比例（关节空间版本）
+      # 注意：在关节空间版本中，xy_scale_factor 被用作关节角缩放因子
+      # 例如：0.2 表示遥操臂转动 10 度，机械臂转动 2 度（1:5 缩放）
+      xy_scale_factor: 0.2               # 粘滞态下的关节角缩放比例 (0.2 = 1:5微缩)
+      z_scale_factor: 1.0                # 已废弃（关节空间版本不使用）
+
+    # ==================== APF 人工势场参数 ====================
+    apf:
+      attractive_gain: 1.0        # 引力增益
+      repulsive_gain: 0.5         # 斥力增益
+      influence_distance: 0.1     # 斥力影响距离 (m)
+      max_force: 10.0             # 最大虚拟力 (N)
+
+    # ==================== 目标位姿配置 ====================
+    # 用于 FSM 和 APF 算法的目标位置
+    target_pose:
+      x: 0.5      # 目标 X 位置 (m)
+      y: 0.0      # 目标 Y 位置 (m)
+      z: 0.3      # 目标 Z 位置 (m)
+      rx: 0.0     # 目标 Roll (rad)
+      ry: 0.0     # 目标 Pitch (rad)
+      rz: 0.0     # 目标 Yaw (rad)
+
+    # ==================== VIST 系统配置 ====================
+    vist_config_path: 'config/system_config.yaml'
+
+    # ==================== 性能监控 ====================
+    enable_performance_monitoring: true
+    performance_topic: '/vist_performance'
+
+
+# ==================== 实验配置说明 ====================
+#
+# Baseline 1: GELLO (直通)
+#   filter_type: 'gello'
+#   说明: 无滤波，直接透传输入
+#
+# Baseline 2: One Euro 滤波
+#   filter_type: 'oneeuro'
+#   参数: min_cutoff, beta
+#   说明: 自适应低通滤波，平滑抖动
+#
+# Baseline 3: VIST 卡尔曼滤波
+#   filter_type: 'vist'
+#   参数: process_noise, measurement_noise
+#   说明: 状态估计与预测
+#
+# Baseline 4: FSM 有限状态机
+#   filter_type: 'fsm'
+#   参数: contact_threshold, approach_threshold
+#   说明: 基于状态的自适应控制
+#
+# Baseline 5: APF 人工势场
+#   filter_type: 'apf'
+#   参数: attractive_gain, repulsive_gain
+#   说明: 基于虚拟力场的避障控制

@@ -5,7 +5,7 @@
 # 机器人模型参数
 # ==========================================
 robot_model:
-  # URDF 文件名
+  # URDF 文件路径（相对于 config 目录）
   urdf_file: "urdf/lkls73_o2_dual_arm_description.urdf"
 
   # 末端执行器名称
@@ -433,7 +433,7 @@ hardware:
   robot_ip: "192.168.10.21"
 
   # 使用哪个手臂
-  arm_side: "right"  # "left" 或 "right"
+  arm_side: "left"  # "left" 或 "right" - 修改为 left 以匹配 baseline_filters_config.yaml
 
   # 关节映射关系（URDF ↔ SDK）
   joint_mapping:

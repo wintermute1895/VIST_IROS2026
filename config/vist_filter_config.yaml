@@ -9,7 +9,7 @@ vist_filter_node:
     enable_velocity_factor: false
     exo_left_topic: /left_arm_joint_control
     exo_right_topic: /right_arm_joint_control
-    filter_type: one_euro
+    filter_type: fsm
     filtered_left_topic: /filtered_left_joint_control
     filtered_right_topic: /filtered_right_joint_control
     one_euro_beta: 0.007

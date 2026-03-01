@@ -1,0 +1,266 @@
+# VIST 相机管理配置（融合版本）
+# 统一管理所有相机参数、外参标定、目标检测等
+# 支持 ROS2 参数服务器和直接配置文件读取
+
+# ==========================================
+# ROS2 参数服务器配置
+# ==========================================
+multi_camera_manager:
+  ros__parameters:
+    # Publishing rate (Hz)
+    publish_rate: 30.0
+
+# ==========================================
+# 相机管理器配置
+# ==========================================
+camera_manager:
+  # 自动发现模式
+  auto_discovery: true
+  discovery_timeout: 5.0  # 秒
+
+  # 故障恢复
+  enable_auto_reconnect: true
+  reconnect_interval: 2.0  # 秒
+  max_reconnect_attempts: 10
+
+  # 时间同步
+  use_hardware_timestamp: true
+  sync_tolerance_ms: 5.0  # 多相机同步容差（毫秒）
+
+  # 数据质量监控
+  enable_quality_check: true
+  quality_check_interval: 1.0  # 秒
+
+# ==========================================
+# 相机列表（融合三个相机配置）
+# ==========================================
+cameras:
+  # 相机 1: MediaPipe 骨骼捕捉相机（D435i）
+  - id: "mediapipe_camera"
+    role: "intent_detection"  # 用于意图计算和手部追踪
+    serial: "your_d435i_serial_1"  # 替换为实际序列号
+    model: "D435i"
+    enabled: true
+    description: "用于MediaPipe人体骨骼捕捉和意图计算"
+
+    # 流配置
+    streams:
+      color:
+        resolution: [640, 480]  # [width, height]
+        fps: 30
+        format: "bgr8"
+      depth:
+        resolution: [640, 480]
+        fps: 30
+        format: "z16"
+
+    # 外参标定（Hand-eye calibration）
+    # 相机相对于机器人基座的位置和姿态
+    extrinsics:
+      translation: [0.5, 0.0, 1.2]  # [x, y, z] 米，相对于 body_base_link
+      rotation: [0, 0, 0, 1]  # [x, y, z, w] 四元数
+      calibration_file: "calibration/mediapipe_camera.yaml"
+      calibrated: false
+
+    # 数据质量监控
+    quality_check:
+      enable: true
+      min_depth_valid_ratio: 0.5  # 最小有效深度比例（0-1）
+      max_depth_jump: 0.1  # 最大深度跳变阈值（米）
+      max_keypoint_jump: 0.05  # 最大关键点跳变阈值（米）
+      min_detection_confidence: 0.5  # MediaPipe 最小检测置信度
+
+  # 相机 2: 机器人头顶相机（D435i）
+  - id: "robot_head_camera"
+    role: "data_collection"  # 用于数据采集和模型训练
+    serial: "your_d435i_serial_2"  # 替换为实际序列号
+    model: "D435i"
+    enabled: true
+    description: "机器人头顶相机，用于数据采集和模型训练"
+
+    # 流配置
+    streams:
+      color:
+        resolution: [1280, 720]  # [width, height]
+        fps: 30
+        format: "bgr8"
+      depth:
+        resolution: [1280, 720]
+        fps: 30
+        format: "z16"
+
+    # 外参标定
+    extrinsics:
+      translation: [0.0, 0.0, 0.3]  # 相对于机器人头部
+      rotation: [0, 0, 0, 1]
+      calibration_file: "calibration/robot_head_camera.yaml"
+      calibrated: false
+
+    # 数据质量监控
+    quality_check:
+      enable: true
+      min_depth_valid_ratio: 0.5
+      max_depth_jump: 0.1
+      max_keypoint_jump: 0.05
+      min_detection_confidence: 0.5
+
+  # 相机 3: 手部精细操作相机（D405）
+  - id: "hand_camera"
+    role: "fine_manipulation"  # 用于精密插入等任务
+    serial: "your_d405_serial"  # 替换为实际序列号
+    model: "D405"  # 短距离深度相机
+    enabled: true
+    description: "D405近距离相机，用于手部精细操作"
+
+    # 流配置
+    streams:
+      color:
+        resolution: [640, 480]
+        fps: 30
+        format: "bgr8"
+      depth:
+        resolution: [640, 480]
+        fps: 30
+        format: "z16"
+
+    # 外参标定
+    extrinsics:
+      translation: [0.0, 0.0, 0.15]  # 相对于末端执行器
+      rotation: [0, 0, 0, 1]
+      calibration_file: "calibration/hand_camera.yaml"
+      calibrated: false
+
+    # 数据质量监控
+    quality_check:
+      enable: true
+      min_depth_valid_ratio: 0.6
+      max_depth_jump: 0.05
+      max_keypoint_jump: 0.03
+      min_detection_confidence: 0.6
+
+# ==========================================
+# 目标检测配置
+# ==========================================
+target_detection:
+  enable: true
+  detector_type: "apriltag"  # "apriltag", "aruco", "yolo", "none"
+
+  # AprilTag 配置
+  apriltag:
+    family: "tag36h11"  # 标签家族
+    nthreads: 4  # 检测线程数
+    quad_decimate: 2.0  # 降采样因子（提速）
+    quad_sigma: 0.0  # 高斯模糊（降噪）
+    refine_edges: true  # 边缘精化
+    decode_sharpening: 0.25  # 解码锐化
+
+    # 目标标签定义
+    target_tags:
+      - id: 0
+        name: "insertion_hole"  # 插孔位置
+        size: 0.05  # 标签尺寸（米）
+        priority: 1  # 优先级（1=最高）
+
+      - id: 1
+        name: "workspace_origin"  # 工作空间原点
+        size: 0.08
+        priority: 2
+
+      - id: 2
+        name: "calibration_target"  # 标定目标
+        size: 0.10
+        priority: 3
+
+  # ArUco 配置（备选）
+  aruco:
+    dictionary: "DICT_6X6_250"  # ArUco 字典
+    marker_size: 0.05  # 标记尺寸（米）
+
+  # YOLO 配置（高级功能，可选）
+  yolo:
+    model: "yolov8n.pt"  # 模型文件
+    confidence_threshold: 0.5
+    iou_threshold: 0.45
+    target_classes: ["usb_port", "socket", "connector"]  # 目标类别
+
+# ==========================================
+# 意图检测配置（与目标检测集成）
+# ==========================================
+intent_detection:
+  # 自动目标选择
+  auto_target_selection: true
+  target_selection_strategy: "nearest"  # "nearest", "highest_priority", "manual"
+
+  # 场景状态阈值
+  scene_thresholds:
+    free_space_distance: 0.3  # 自由空间距离阈值（米）
+    approaching_distance: 0.05  # 接近距离阈值（米）
+    insertion_distance: 0.02  # 插入距离阈值（米）
+
+  # 场景调制（根据场景调整意图因子）
+  scene_modulation:
+    enable: true
+    insertion_min_alpha: 0.8  # 插入阶段最小意图因子
+    approaching_alpha_boost: 0.2  # 接近阶段意图因子提升
+
+# ==========================================
+# 降级策略配置
+# ==========================================
+fallback_strategy:
+  # MediaPipe 检测失败时的策略
+  mediapipe_failure:
+    strategy: "use_last_frame"  # "use_last_frame", "stop", "extrapolate"
+    max_failure_frames: 5  # 最大连续失败帧数
+    extrapolation_method: "linear"  # "linear", "constant_velocity"
+
+  # 深度数据无效时的策略
+  depth_failure:
+    strategy: "use_mediapipe_depth"  # "use_mediapipe_depth", "use_last_depth", "stop"
+    max_invalid_ratio: 0.8  # 最大无效深度比例
+
+  # 目标检测失败时的策略
+  target_detection_failure:
+    strategy: "use_last_target"  # "use_last_target", "use_default", "stop"
+    default_target_offset: [0.0, 0.0, 0.2]  # 默认目标偏移（相对于当前位置）
+
+# ==========================================
+# 性能监控配置
+# ==========================================
+performance_monitoring:
+  enable: true
+  log_interval: 5.0  # 日志输出间隔（秒）
+
+  # 监控指标
+  metrics:
+    - "fps"  # 帧率
+    - "latency"  # 延迟
+    - "depth_valid_ratio"  # 深度有效率
+    - "detection_confidence"  # 检测置信度
+    - "target_detection_rate"  # 目标检测成功率
+
+  # 告警阈值
+  alerts:
+    min_fps: 25.0  # 最小帧率
+    max_latency_ms: 50.0  # 最大延迟（毫秒）
+    min_depth_valid_ratio: 0.4  # 最小深度有效率
+
+# ==========================================
+# 调试和可视化
+# ==========================================
+debug:
+  enable_visualization: true  # 启用可视化窗口
+  show_keypoints: true  # 显示关键点
+  show_depth_overlay: true  # 显示深度叠加
+  show_target_detection: true  # 显示目标检测结果
+  show_intent_factor: true  # 显示意图因子
+  save_debug_frames: false  # 保存调试帧
+  debug_output_dir: "data/debug_frames"  # 调试帧输出目录
+
+# ==========================================
+# 使用说明
+# ==========================================
+# 如何获取相机序列号：
+# 1. 连接所有相机到电脑
+# 2. 运行命令: rs-enumerate-devices
+# 3. 记录每个相机的Serial Number
+# 4. 将序列号填入上面的 cameras[].serial 字段

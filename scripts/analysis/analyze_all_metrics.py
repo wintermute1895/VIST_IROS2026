@@ -153,6 +153,102 @@ def extract_trajectory(rosbag_path, topic):
     return trajectory, np.array(timestamps)
 
 
+def align_time_series(data_dict):
+    """
+    对齐多个时间序列到相同的时间范围
+
+    策略：
+    1. 找到所有时间序列的公共时间范围（最晚的开始时间，最早的结束时间）
+    2. 将所有时间序列裁剪到这个公共范围
+    3. 将时间戳归零到公共起始时间
+
+    Args:
+        data_dict: 字典，包含多个数据源，每个数据源有 'timestamps' 和 'trajectory'
+
+    Returns:
+        aligned_dict: 对齐后的数据字典
+    """
+    if not data_dict:
+        return {}
+
+    # 1. 找到公共时间范围
+    start_times = []
+    end_times = []
+
+    for key, data in data_dict.items():
+        if 'timestamps' in data and len(data['timestamps']) > 0:
+            start_times.append(data['timestamps'][0])
+            end_times.append(data['timestamps'][-1])
+
+    if not start_times:
+        return data_dict
+
+    # 公共时间范围：最晚的开始时间，最早的结束时间
+    common_start = max(start_times)
+    common_end = min(end_times)
+
+    print(f"\n时间对齐信息：")
+    print(f"  原始时间范围: {min(start_times):.3f}s - {max(end_times):.3f}s")
+    print(f"  公共时间范围: {common_start:.3f}s - {common_end:.3f}s")
+    print(f"  对齐后时长: {common_end - common_start:.3f}s")
+
+    # 2. 裁剪每个时间序列到公共范围
+    aligned_dict = {}
+
+    for key, data in data_dict.items():
+        if 'timestamps' not in data or 'trajectory' not in data:
+            aligned_dict[key] = data
+            continue
+
+        timestamps = data['timestamps']
+        trajectory = data['trajectory']
+
+        # 找到公共范围内的索引
+        mask = (timestamps >= common_start) & (timestamps <= common_end)
+
+        if not np.any(mask):
+            print(f"  ⚠️  {key}: 没有数据在公共时间范围内")
+            continue
+
+        # 裁剪数据
+        aligned_timestamps = timestamps[mask]
+        aligned_trajectory = trajectory[mask]
+
+        # 归零时间戳（相对于公共起始时间）
+        aligned_timestamps = aligned_timestamps - common_start
+
+        # 更新数据
+        aligned_data = data.copy()
+        aligned_data['timestamps'] = aligned_timestamps
+        aligned_data['trajectory'] = aligned_trajectory
+
+        # 重新计算指标（基于对齐后的数据）
+        if 'metrics' in data:
+            from copy import deepcopy
+            config_placeholder = {
+                'physical_limits': {
+                    'max_velocity': 10.0,
+                    'velocity_threshold_multiplier': 2.0
+                }
+            }
+            new_metrics = compute_metrics_robust(
+                aligned_trajectory,
+                aligned_timestamps,
+                config_placeholder
+            )
+            if new_metrics:
+                aligned_data['metrics'] = new_metrics
+
+        aligned_dict[key] = aligned_data
+
+        original_duration = timestamps[-1] - timestamps[0]
+        aligned_duration = aligned_timestamps[-1] - aligned_timestamps[0]
+        print(f"  ✓ {key}: {len(aligned_trajectory)} 样本, "
+              f"原始 {original_duration:.2f}s → 对齐后 {aligned_duration:.2f}s")
+
+    return aligned_dict
+
+
 def apply_physical_filter(trajectory, timestamps, config):
     """
     应用物理极限滤波器，剔除不符合物理规律的离群点
@@ -251,7 +347,10 @@ def compute_metrics_robust(trajectory, timestamps, config):
         )
         uniform_trajectory[:, joint_idx] = interpolator(uniform_time)
 
-    # 使用Savitzky-Golay滤波器计算导数
+    # ========================================
+    # 使用滑动窗口多项式拟合法计算导数
+    # 真正的 Sliding Window Polynomial Fitting
+    # ========================================
     window_length = int(target_freq * 0.05)  # 50ms窗口
     if window_length < 5:
         window_length = 5
@@ -261,43 +360,59 @@ def compute_metrics_robust(trajectory, timestamps, config):
         window_length = (len(uniform_trajectory) // 3) | 1
 
     polyorder = min(3, window_length - 1)
+    half_window = window_length // 2
 
     try:
         velocity = np.zeros_like(uniform_trajectory)
         acceleration = np.zeros_like(uniform_trajectory)
         jerk = np.zeros_like(uniform_trajectory)
 
+        # 对每个关节使用滑动窗口多项式拟合
         for joint_idx in range(trajectory.shape[1]):
-            # 计算速度（1阶导数）
-            velocity[:, joint_idx] = savgol_filter(
-                uniform_trajectory[:, joint_idx],
-                window_length=window_length,
-                polyorder=polyorder,
-                deriv=1,
-                delta=uniform_dt
-            )
+            pos = uniform_trajectory[:, joint_idx]
 
-            # 计算加速度（2阶导数）
-            acceleration[:, joint_idx] = savgol_filter(
-                uniform_trajectory[:, joint_idx],
-                window_length=window_length,
-                polyorder=polyorder,
-                deriv=2,
-                delta=uniform_dt
-            )
+            # 对每个时间点进行滑动窗口拟合
+            for i in range(len(pos)):
+                # 确定窗口范围
+                start = max(0, i - half_window)
+                end = min(len(pos), i + half_window + 1)
 
-        # 计算Jerk（加速度的导数）
-        for joint_idx in range(trajectory.shape[1]):
-            jerk[:, joint_idx] = savgol_filter(
-                acceleration[:, joint_idx],
-                window_length=window_length,
-                polyorder=polyorder,
-                deriv=1,
-                delta=uniform_dt
-            )
+                # 窗口内的时间和位置
+                window_time = uniform_time[start:end] - uniform_time[i]  # 相对时间
+                window_pos = pos[start:end]
+
+                # 拟合多项式 (3次多项式)
+                # p(t) = a0 + a1*t + a2*t^2 + a3*t^3
+                try:
+                    coeffs = np.polyfit(window_time, window_pos, polyorder)
+
+                    # 从多项式系数直接计算导数
+                    # p(t) = a3*t^3 + a2*t^2 + a1*t + a0
+                    # p'(t) = 3*a3*t^2 + 2*a2*t + a1
+                    # p''(t) = 6*a3*t + 2*a2
+                    # p'''(t) = 6*a3
+
+                    if polyorder >= 1:
+                        # 速度 (1阶导数) 在 t=0 处
+                        velocity[i, joint_idx] = coeffs[-2]  # a1
+
+                    if polyorder >= 2:
+                        # 加速度 (2阶导数) 在 t=0 处
+                        acceleration[i, joint_idx] = 2 * coeffs[-3]  # 2*a2
+
+                    if polyorder >= 3:
+                        # Jerk (3阶导数) 在 t=0 处
+                        jerk[i, joint_idx] = 6 * coeffs[-4]  # 6*a3
+
+                except np.linalg.LinAlgError:
+                    # 如果拟合失败，使用前一个值或零
+                    if i > 0:
+                        velocity[i, joint_idx] = velocity[i-1, joint_idx]
+                        acceleration[i, joint_idx] = acceleration[i-1, joint_idx]
+                        jerk[i, joint_idx] = jerk[i-1, joint_idx]
 
     except Exception as e:
-        print(f"警告：SG滤波失败: {e}")
+        print(f"警告：滑动窗口多项式拟合失败: {e}")
         return None
 
     # 计算统计指标
@@ -305,16 +420,79 @@ def compute_metrics_robust(trajectory, timestamps, config):
     acceleration_abs = np.abs(acceleration)
     jerk_abs = np.abs(jerk)
 
+    # ========================================
     # 计算Normalized Jerk (Table II指标)
-    # 公式: NJ = sqrt(T^5 / (2 * duration^3) * sum(jerk^2))
-    T = len(uniform_trajectory)
+    # 使用滑动窗口多项式拟合法 (Sliding Window Polynomial Fitting)
+    # ========================================
+    # 参考: Flash & Hogan (1985) "The Coordination of Arm Movements"
+    # 公式: NJ = sqrt( (duration^5 / (2 * path_length^2)) * integral(jerk^2) dt )
+
+    # 1. 计算路径长度 (path length)
+    # 使用欧几里得距离累积
+    path_length = 0.0
+    for i in range(1, len(uniform_trajectory)):
+        # 计算相邻点之间的欧几里得距离
+        delta = uniform_trajectory[i] - uniform_trajectory[i-1]
+        path_length += np.linalg.norm(delta)
+
+    # 防止除零
+    if path_length < 1e-6:
+        path_length = 1e-6
+
+    # 2. 计算 jerk 的平方积分
+    # 使用梯形法则进行数值积分
+    jerk_magnitude = np.linalg.norm(jerk, axis=1)  # 每个时刻的 jerk 幅值
+    jerk_squared = jerk_magnitude ** 2
+    jerk_integral = np.trapz(jerk_squared, dx=uniform_dt)
+
+    # 3. 计算 Normalized Jerk
+    # NJ = sqrt( (T^5 / (2 * L^2)) * integral(jerk^2) dt )
+    # 其中 T = duration, L = path_length
     normalized_jerk = np.sqrt(
-        (T ** 5) / (2 * total_duration ** 3) * np.sum(jerk ** 2)
+        (total_duration ** 5) / (2 * path_length ** 2) * jerk_integral
     )
+
+    # 应用 Log-NJ 转换以解决长时任务的数值爆炸问题
+    # 当任务耗时 T > 100s 时，T^5 项会导致 NJ 指标数值爆炸（> 10^10）
+    # Log-NJ 将数值映射到易读的范围（通常 6-8 左右）
+    # 参考: 对于精密装配等长时任务，Log-NJ 是更合理的平滑度评价指标
+    normalized_jerk = np.log10(normalized_jerk)
 
     # 计算SPARC (Spectral Arc Length) - Table II指标
     # 基于速度的频谱分析
     sparc_value = compute_sparc(velocity, uniform_dt)
+
+    # ========================================
+    # 高级统计指标
+    # ========================================
+
+    # 1. 关节空间方差 (Joint Spatial Variance, deg²)
+    # 计算轨迹在关节空间的分布方差
+    # 注意：这是关节角度的方差，不是末端笛卡尔空间的方差
+    # 因为没有正向运动学，无法直接计算笛卡尔空间方差
+    # 单位：deg²（度的平方，比 rad² 更易读）
+    spatial_variance = np.var(uniform_trajectory, axis=0).sum() * (180/np.pi)**2  # 转换为 deg²
+
+    # 2. 任务正交轴速度方差 (Orthogonal Velocity Variance)
+    # 使用PCA找到主运动方向，计算正交方向的速度方差
+    from sklearn.decomposition import PCA
+
+    # 对速度数据进行PCA分析
+    pca = PCA(n_components=min(3, velocity.shape[1]))
+    pca.fit(velocity)
+
+    # 变换到主成分空间
+    velocity_pca = pca.transform(velocity)
+
+    # 正交轴速度方差：除主轴外其他轴的速度方差之和
+    if velocity_pca.shape[1] > 1:
+        orthogonal_vel_var = np.var(velocity_pca[:, 1:], axis=0).sum()
+    else:
+        orthogonal_vel_var = 0.0
+
+    # 3. 任务主轴能量占比 (PCA Energy Ratio, %)
+    # 主成分解释的方差比例
+    pca_energy_ratio = pca.explained_variance_ratio_[0] * 100  # 转换为百分比
 
     return {
         'frequency': original_freq,
@@ -331,6 +509,10 @@ def compute_metrics_robust(trajectory, timestamps, config):
         # Table II指标
         'normalized_jerk': normalized_jerk,
         'sparc': sparc_value,
+        # 高级统计指标
+        'spatial_variance': spatial_variance,
+        'orthogonal_vel_var': orthogonal_vel_var,
+        'pca_energy_ratio': pca_energy_ratio,
         # 基础信息
         'num_samples': len(trajectory),
         'resampled_samples': num_samples,
@@ -446,6 +628,16 @@ def analyze_all_data(rosbag_path, config, output_dir):
         print("\n❌ 没有可用的数据")
         return
 
+    # 时间对齐：将所有话题对齐到相同的时间范围
+    print(f"\n{'='*60}")
+    print(f"时间对齐")
+    print(f"{'='*60}")
+    all_results = align_time_series(all_results)
+
+    if not all_results:
+        print("\n❌ 时间对齐后没有可用的数据")
+        return
+
     # 打印指标对比
     print(f"\n{'='*60}")
     print(f"指标对比")
@@ -465,8 +657,12 @@ def analyze_all_data(rosbag_path, config, output_dir):
         print(f"  中位Jerk: {metrics['avg_jerk']:.4f} rad/s³")
         print(f"  99%Jerk: {metrics['max_jerk']:.4f} rad/s³")
         print(f"  --- Table II 指标 ---")
-        print(f"  Normalized Jerk: {metrics['normalized_jerk']:.2f}")
+        print(f"  Log-NJ (Log Normalized Jerk): {metrics['normalized_jerk']:.2f}")
         print(f"  SPARC: {metrics['sparc']:.4f}")
+        print(f"  --- 高级统计指标 ---")
+        print(f"  关节空间方差: {metrics['spatial_variance']:.2f} deg²")
+        print(f"  正交轴速度方差: {metrics['orthogonal_vel_var']:.6f}")
+        print(f"  主轴能量占比: {metrics['pca_energy_ratio']:.2f}%")
 
         comparison[source_name] = {
             'label': data['label'],
@@ -484,6 +680,9 @@ def analyze_all_data(rosbag_path, config, output_dir):
                 'rms_jerk': metrics['rms_jerk'],
                 'normalized_jerk': metrics['normalized_jerk'],
                 'sparc': metrics['sparc'],
+                'spatial_variance': metrics['spatial_variance'],
+                'orthogonal_vel_var': metrics['orthogonal_vel_var'],
+                'pca_energy_ratio': metrics['pca_energy_ratio'],
                 'num_samples': metrics['num_samples'],
                 'duration': metrics['duration']
             }
@@ -651,18 +850,97 @@ def generate_metrics_bar_chart(all_results, viz_config, config, output_dir):
 
 def main():
     parser = argparse.ArgumentParser(description='完整性能指标分析')
-    parser.add_argument('--rosbag', required=True, help='rosbag目录路径')
+    parser.add_argument('--rosbag', help='rosbag目录路径')
+    parser.add_argument('--all', action='store_true',
+                        help='分析 data/experiments 目录下的所有实验')
     parser.add_argument('--config', default='config/analysis_config.yaml',
                         help='配置文件路径')
     parser.add_argument('--output', default='data/analysis', help='输出目录')
 
     args = parser.parse_args()
 
+    # 检查参数
+    if not args.rosbag and not args.all:
+        parser.error('必须指定 --rosbag 或 --all 参数')
+
     # 加载配置
     config = load_config(args.config)
 
-    # 分析数据
-    analyze_all_data(args.rosbag, config, args.output)
+    # 批量分析模式
+    if args.all:
+        experiments_dir = Path('data/experiments')
+        if not experiments_dir.exists():
+            print(f"错误: 实验目录不存在: {experiments_dir}")
+            return
+
+        # 查找所有实验目录（包含 .db3 文件的目录）
+        experiment_dirs = []
+        for item in experiments_dir.iterdir():
+            if item.is_dir() and list(item.glob('*.db3')):
+                experiment_dirs.append(item)
+
+        if not experiment_dirs:
+            print(f"错误: 在 {experiments_dir} 中未找到任何实验数据")
+            return
+
+        # 排序（按名称）
+        experiment_dirs.sort()
+
+        print(f"\n{'='*60}")
+        print(f"批量分析模式")
+        print(f"{'='*60}")
+        print(f"找到 {len(experiment_dirs)} 个实验:")
+        for exp_dir in experiment_dirs:
+            print(f"  - {exp_dir.name}")
+        print()
+
+        # 逐个分析
+        success_count = 0
+        failed_count = 0
+        for i, exp_dir in enumerate(experiment_dirs, 1):
+            print(f"\n{'='*60}")
+            print(f"[{i}/{len(experiment_dirs)}] 分析: {exp_dir.name}")
+            print(f"{'='*60}")
+
+            try:
+                # 创建输出目录
+                output_dir = Path(args.output) / exp_dir.name
+                output_dir.mkdir(parents=True, exist_ok=True)
+
+                print(f"分析输出目录: {output_dir}")
+
+                # 分析数据
+                analyze_all_data(str(exp_dir), config, str(output_dir))
+                success_count += 1
+                print(f"✓ {exp_dir.name} 分析完成")
+
+            except Exception as e:
+                failed_count += 1
+                print(f"✗ {exp_dir.name} 分析失败: {e}")
+                import traceback
+                traceback.print_exc()
+
+        # 总结
+        print(f"\n{'='*60}")
+        print(f"批量分析完成")
+        print(f"{'='*60}")
+        print(f"成功: {success_count}/{len(experiment_dirs)}")
+        print(f"失败: {failed_count}/{len(experiment_dirs)}")
+        print(f"结果保存在: {args.output}")
+
+    # 单个分析模式
+    else:
+        rosbag_path = Path(args.rosbag)
+        experiment_name = rosbag_path.name
+
+        # 创建以实验名称命名的子目录
+        output_dir = Path(args.output) / experiment_name
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"\n分析输出目录: {output_dir}")
+
+        # 分析数据
+        analyze_all_data(args.rosbag, config, str(output_dir))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,33 @@
+# Teleop Bridge Node Parameters Only
+# 仅包含节点参数，用于直接启动节点（不通过launch文件）
+
+teleop_bridge_node:
+  ros__parameters:
+    # 话题配置
+    master_left_topic: "/filtered_left_joint_control"  # 订阅滤波后的左臂话题
+    master_right_topic: "/right_arm_disabled"  # 禁用右臂
+
+    # 转换配置
+    scale_factor: 1.0
+    follow_mode: true
+    robot_type: "RS"  # RS 或 LS
+
+    # 首次移动配置
+    first_move_speed: 0.2
+    first_move_acce: 0.2
+
+    # 使能配置
+    enable_left_arm: true  # 启用左臂
+    enable_right_arm: false  # 禁用右臂
+
+    # 关节映射
+    left_joint_mapping: [0, 1, 2, 3, 4, 5, 6]
+    right_joint_mapping: [0, 1, 2, 3, 4, 5, 6]
+
+    # 关节方向映射
+    # 格式: [左臂7个关节, 右臂7个关节]
+    # 1 = 正向, -1 = 反向
+    negation: [1, 1, 1, -1, 1, -1, 1, 1, 1, 1, -1, 1, -1, 1]
+
+    # 安全限位使能
+    enable_joint_limits: true

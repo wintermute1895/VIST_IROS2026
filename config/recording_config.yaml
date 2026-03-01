@@ -4,42 +4,154 @@
 # 录制模式
 recording_mode:
   # 可选: raw, processed, both
-  # raw: 只录制原始输出（如 /right_arm_joint_control）
-  # processed: 只录制处理后的数据（如 /robot1/right_arm/joint_follow）
+  # raw: 只录制原始输出（如 /left_arm_joint_control）
+  # processed: 只录制处理后的数据（如 /robot1/left_arm/joint_follow）
   # both: 同时录制两者
   mode: "both"
 
 # 话题配置
 topics:
-  # 遥操臂原始输出
-  exo_raw:
+  # ========================================
+  # 相机模块 (Camera)
+  # ========================================
+  camera_color_image:
+    enabled: true  # 如果硬盘空间不足可设为 false
+    topic: "/camera/color/image_raw"
+    description: "RealSense 彩色图像原始数据 (640x480, 30Hz)"
+
+  camera_depth_image:
+    enabled: true  # 如果硬盘空间不足可设为 false
+    topic: "/camera/depth/image_rect_raw"
+    description: "RealSense 深度图像矫正后数据 (640x480, 30Hz)"
+
+  camera_info:
     enabled: true
+    topic: "/camera/color/camera_info"
+    description: "相机标定信息和内参"
+
+  # ========================================
+  # 左臂外骨骼 (Exoskeleton Left Arm)
+  # ========================================
+  exo_left_raw:
+    enabled: true
+    topic: "/left_arm_joint_control"
+    description: "左臂外骨骼传感器原始读数 (81.5Hz)"
+
+  exo_left_filtered:
+    enabled: true
+    topic: "/filtered_left_joint_control"
+    description: "左臂经过 VIST 滤波器处理后的数据 (80Hz)"
+
+  # ========================================
+  # 右臂外骨骼 (Exoskeleton Right Arm)
+  # ========================================
+  exo_right_raw:
+    enabled: false
     topic: "/right_arm_joint_control"
-    description: "遥操臂传感器原始读数（81.5Hz）"
+    description: "右臂外骨骼传感器原始读数 (81.5Hz)"
 
-  # 遥操臂处理后输出
-  exo_processed:
-    enabled: true
-    topic: "/robot1/right_arm/joint_follow"
-    description: "经过桥接处理后的数据（单位转换、限位检查）"
+  exo_right_filtered:
+    enabled: false
+    topic: "/filtered_right_joint_control"
+    description: "右臂经过 VIST 滤波器处理后的数据 (80Hz)"
 
-  # 视觉控制原始输出
-  vision_raw:
+  # ========================================
+  # 视觉控制 (Vision Control)
+  # ========================================
+  vision_left_raw:
+    enabled: false
+    topic: "/vision_left_joint_control"
+    description: "左臂视觉算法计算的关节角度 (30Hz)"
+
+  vision_right_raw:
     enabled: false
     topic: "/vision_right_joint_control"
-    description: "视觉算法计算的关节角度（30Hz）"
+    description: "右臂视觉算法计算的关节角度 (30Hz)"
 
-  # 视觉控制插值后输出
-  vision_resampled:
+  # ========================================
+  # 灵巧手 (Dexterous Hand)
+  # ========================================
+  hand_left_control:
+    enabled: true
+    topic: "/cb_left_hand_control_cmd"
+    description: "左手灵巧手控制指令"
+
+  hand_left_state:
+    enabled: true
+    topic: "/cb_left_hand_state"
+    description: "左手灵巧手状态反馈"
+
+  hand_right_control:
+    enabled: false
+    topic: "/cb_right_hand_control_cmd"
+    description: "右手灵巧手控制指令"
+
+  hand_right_state:
+    enabled: false
+    topic: "/cb_right_hand_state"
+    description: "右手灵巧手状态反馈"
+
+  # ========================================
+  # 机械臂驱动 - 左臂 (Robot Arm Driver - Left)
+  # ========================================
+  robot_left_joint_follow:
+    enabled: true
+    topic: "/robot1/left_arm/joint_follow"
+    description: "左臂机械臂关节跟随指令 (经过桥接处理)"
+
+  robot_left_joint_states:
+    enabled: true
+    topic: "/robot1/left_arm/joint_states"
+    description: "左臂机械臂实际执行的关节角度反馈"
+
+  robot_left_pose_states:
+    enabled: true
+    topic: "/robot1/left_arm/pose_states"
+    description: "左臂机械臂末端位姿状态"
+
+  # ========================================
+  # 机械臂驱动 - 右臂 (Robot Arm Driver - Right)
+  # ========================================
+  robot_right_joint_follow:
     enabled: false
     topic: "/robot1/right_arm/joint_follow"
-    description: "经过高频重采样后的数据（200Hz）"
+    description: "右臂机械臂关节跟随指令 (经过桥接处理)"
 
-  # 真机反馈（如果连接真机）
-  robot_feedback:
-    enabled: true
+  robot_right_joint_states:
+    enabled: false
     topic: "/robot1/right_arm/joint_states"
-    description: "真机实际执行的关节角度反馈"
+    description: "右臂机械臂实际执行的关节角度反馈"
+
+  robot_right_pose_states:
+    enabled: false
+    topic: "/robot1/right_arm/pose_states"
+    description: "右臂机械臂末端位姿状态"
+
+  # ========================================
+  # 全局状态 (Global States)
+  # ========================================
+  robot_joint_states_global:
+    enabled: true
+    topic: "/robot_joint_states"
+    description: "机械臂全局关节状态（包含所有关节）"
+
+  # ========================================
+  # 性能监控 (Performance Metrics)
+  # ========================================
+  filter_performance:
+    enabled: true
+    topic: "/filter_performance"
+    description: "VIST 滤波器性能指标（延迟、频率等）"
+
+  vist_performance:
+    enabled: true
+    topic: "/vist_performance"
+    description: "VIST 系统整体性能指标"
+
+  vist_intent_factors:
+    enabled: false
+    topic: "/vist_intent_factors"
+    description: "VIST 意图因子（距离、速度、对齐、冲突）"
 
 # 评估配置
 evaluation:
@@ -50,10 +162,12 @@ evaluation:
   # 是否对比多个话题
   compare_topics: true
 
-  # 对比的话题列表
+  # 对比的话题列表（左臂为主）
   comparison_topics:
-    - "/right_arm_joint_control"
-    - "/robot1/right_arm/joint_follow"
+    - "/left_arm_joint_control"
+    - "/filtered_left_joint_control"
+    - "/robot1/left_arm/joint_follow"
+    - "/robot1/left_arm/joint_states"
 
 # 数据保存配置
 output:
@@ -79,9 +193,12 @@ frequency_analysis:
 
   # 期望的频率范围
   expected_frequencies:
-    exo_raw: [80, 85]  # Hz
-    vision_raw: [28, 32]  # Hz
-    processed: [195, 205]  # Hz
+    exo_raw: [80, 85]  # Hz - 外骨骼原始数据
+    exo_filtered: [75, 85]  # Hz - VIST 滤波后数据
+    vision_raw: [28, 32]  # Hz - 视觉控制数据
+    robot_feedback: [95, 105]  # Hz - 机械臂反馈
+    camera: [28, 32]  # Hz - 相机数据
+    hand_state: [95, 105]  # Hz - 灵巧手状态
 
 # 数据质量检查
 quality_checks:
