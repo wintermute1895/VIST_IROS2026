@@ -51,7 +51,7 @@
 
 **功能**: 对外骨骼数据进行滤波处理（支持passthrough, ema, one_euro, vist_kalman）
 
-**配置文件**: `config/vist_filter_config.yaml`
+**配置文件**: `config/baseline_filters_config.yaml`
 
 ---
 
@@ -284,7 +284,7 @@
 |------|---------|---------|
 | 相机 | scripts/start_camera.sh | 分辨率: 848x480, FPS: 30, 深度流: 禁用 |
 | 外骨骼 | external_sdk/arm_teleop/src/linkerta/config/lta.yaml | CAN: can1, 波特率: 1000000 |
-| 滤波器 | config/vist_filter_config.yaml | 滤波类型: vist_kalman/one_euro |
+| 滤波器 | config/baseline_filters_config.yaml | 滤波类型: vist_kalman/one_euro |
 | 遥操桥接 | external_sdk/arm_teleop/src/lbot_teleop/config/teleop_bridge_params.yaml | 关节映射, 方向反转 |
 | 灵巧手 | external_sdk/linkerhand-ros2-sdk/.../config/setting.yaml | CAN: can0, 手部: left |
 

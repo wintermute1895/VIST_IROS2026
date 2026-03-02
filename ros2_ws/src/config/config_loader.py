@@ -570,7 +570,7 @@ class VISTConfig:
     @property
     def hardware_arm_side(self):
         """使用哪个手臂 ('left' 或 'right')"""
-        return self._config.get('hardware', {}).get('arm_side', 'right')
+        return self._config.get('hardware', {}).get('arm_side', 'left')
 
     @property
     def hardware_urdf_to_sdk_mapping(self):

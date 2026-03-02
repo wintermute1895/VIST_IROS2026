@@ -35,7 +35,7 @@ class AblationExperimentRunner:
 
     def update_vist_filter_config(self, experiment_config):
         """更新VIST滤波节点配置"""
-        filter_config_path = Path("config/vist_filter_config.yaml")
+        filter_config_path = Path("config/baseline_filters_config.yaml")
 
         with open(filter_config_path, 'r', encoding='utf-8') as f:
             filter_config = yaml.safe_load(f)

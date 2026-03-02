@@ -88,6 +88,7 @@ cd /home/ilex/Dev/VIST/ros2_ws/src/external_sdk/arm_teleop
 cd /home/ilex/Dev/VIST
 source /opt/ros/humble/setup.bash
 source install/setup.bash
+conda activate robot_env
 
 ```bash
 # 启动相机
@@ -199,7 +200,7 @@ source install/setup.bash
 
 各个模块使用的配置文件：
 - 外骨骼: `/home/ilex/Dev/VIST/external_sdk/arm_teleop/src/linkerta/config/lta.yaml`
-- VIST滤波器: `/home/ilex/Dev/VIST/config/vist_filter_config.yaml`
+- VIST滤波器: `/home/ilex/Dev/VIST/config/baseline_filters_config.yaml`
 - 遥操作桥接: `/home/ilex/Dev/VIST/external_sdk/arm_teleop/src/lbot_teleop/config/teleop_bridge_params.yaml`
 
 ## 注意事项

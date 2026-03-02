@@ -18,6 +18,7 @@ import numpy as np
 from enum import Enum
 from typing import Tuple, Optional
 from dataclasses import dataclass
+import time
 
 
 class VirtualFixtureState(Enum):
@@ -85,6 +86,10 @@ class VirtualFixtureFSM:
         self.time_in_free = 0.0
         self.time_in_constrained = 0.0
 
+        # 调试输出控制
+        self.last_print_time = 0.0
+        self.print_interval = 0.5  # 打印间隔（秒）
+
     def update(self,
                exo_joints: np.ndarray,
                robot_flange_position: np.ndarray) -> Tuple[np.ndarray, VirtualFixtureState]:
@@ -100,9 +105,6 @@ class VirtualFixtureFSM:
             target_joints: 机械臂目标关节角 [q1, q2, ..., q7] (单位: rad)
             current_state: 当前状态
         """
-        # 调试：确认方法被调用
-        print("🔍 FSM update() 被调用", flush=True)
-
         # 确保输入是 numpy 数组
         if not isinstance(exo_joints, np.ndarray):
             exo_joints = np.array(exo_joints)
@@ -110,8 +112,40 @@ class VirtualFixtureFSM:
             robot_flange_position = np.array(robot_flange_position)
 
         # ========== 步骤 1: 计算法兰到结界中心的距离（仅 XY 平面） ==========
+        # 🔍 调试：控制打印频率（每 0.5 秒打印一次详细信息）
+        current_time = time.time()
+        should_print_debug = (current_time - self.last_print_time) >= self.print_interval
+
+        if should_print_debug:
+            print(f"\n🔍 [FSM Debug] 原始输入:")
+            print(f"  robot_flange_position = {robot_flange_position}")
+            print(f"  socket_center_xy = {self.socket_center_xy}")
+
         flange_xy = robot_flange_position[:2]
+
+        if should_print_debug:
+            print(f"  flange_xy = {flange_xy}")
+
+        # 🔍 单位检测：如果法兰位置的模长 > 10，很可能是毫米
+        flange_norm = np.linalg.norm(flange_xy)
+
+        if should_print_debug:
+            print(f"  flange_xy 模长 = {flange_norm:.3f}")
+
+        if flange_norm > 10:
+            if should_print_debug:
+                print(f"⚠️  [FSM] 检测到法兰位置单位可能是毫米（模长 {flange_norm:.1f} > 10）")
+                print(f"  自动转换: {flange_xy} mm -> {flange_xy/1000.0} m")
+            flange_xy = flange_xy / 1000.0
+        else:
+            if should_print_debug:
+                print(f"✓ [FSM] 法兰位置单位正常（模长 {flange_norm:.3f} ≤ 10，单位为米）")
+
         distance_to_center = np.linalg.norm(flange_xy - self.socket_center_xy)
+
+        if should_print_debug:
+            print(f"  计算距离 = {distance_to_center:.6f} m = {distance_to_center*1000:.1f} mm")
+            self.last_print_time = current_time  # 更新上次打印时间
 
         # ========== 实时打印距离和状态信息 ==========
         print(f"\r距离: {distance_to_center*1000:.1f}mm | 状态: {self.current_state.value} | 阈值: {self.cylinder_radius*1000:.1f}mm", end='', flush=True)

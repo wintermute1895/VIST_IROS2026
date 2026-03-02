@@ -27,7 +27,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # 配置文件路径
-CONFIG_FILE="${PROJECT_ROOT}/config/vist_filter_config.yaml"
+CONFIG_FILE="${PROJECT_ROOT}/config/baseline_filters_config.yaml"
 
 # 检查配置文件
 if [ ! -f "$CONFIG_FILE" ]; then

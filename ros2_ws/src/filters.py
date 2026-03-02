@@ -5,6 +5,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
 import numpy as np
+import time
 
 # 导入核心算法模块
 from src.core.one_euro_filter import OneEuroFilter
@@ -245,19 +246,30 @@ class FSMTeleopFilter(BaseTeleopFilter):
         # 机械臂侧配置
         self.arm_side = arm_side
 
-    def update(self, q_in: List[float], dt: float, robot_flange_pose: Optional[np.ndarray] = None) -> List[float]:
+        # 关节方向映射（用于正运动学计算）
+        # 格式: [左臂7个关节, 右臂7个关节]
+        # 1 = 正向, -1 = 反向
+        self.joint_negation = np.array([1, 1, 1, -1, 1, -1, 1, 1, 1, 1, -1, 1, -1, 1])
+
+        # 调试输出控制
+        self.last_print_time = 0.0
+        self.print_interval = 0.5  # 打印间隔（秒）
+
+        # 上一帧的法兰位置（用于缺失时的回退）
+        self.last_robot_flange_position = None
+
+    def update(self, q_in: List[float], dt: float, robot_flange_pose: Optional[np.ndarray] = None, robot_joints: Optional[np.ndarray] = None) -> List[float]:
         """
         虚拟夹具 FSM 完整逻辑流程（关节空间版本，NO IK）：
-        1. 正运动学：计算机械臂当前法兰位置
+        1. 正运动学：使用机械臂真实关节角计算法兰位置
         2. FSM 更新：基于圆柱形结界判定状态，计算目标关节角（关节空间增量映射）
         3. 输出：目标关节角（无需 IK）
 
         Args:
-            q_in: 输入关节角度列表 [q1, q2, ..., q7] (单臂 7 个关节)
+            q_in: 输入关节角度列表 [q1, q2, ..., q7] (单臂 7 个关节) - 遥操臂关节角
             dt: 时间步长（秒）
-            robot_flange_pose: 机械臂当前法兰位姿 [x, y, z, rx, ry, rz]（可选）
-                              如果提供，则使用外部 SDK 的 FK 结果
-                              如果不提供，则使用输入关节角计算
+            robot_flange_pose: 机械臂当前法兰位姿 [x, y, z, rx, ry, rz]（可选，已弃用）
+            robot_joints: 机械臂真实关节角 [q1, q2, ..., q7]（用于 FK 计算）
 
         Returns:
             输出关节角度列表 (单臂 7 个关节)
@@ -265,27 +277,84 @@ class FSMTeleopFilter(BaseTeleopFilter):
         try:
             import pinocchio as pin
 
-            # ========== Step 1: 正运动学 - 计算机械臂当前法兰位置 ==========
-            # 将 7 维单臂关节角扩展为 14 维双臂关节角（适配双臂 URDF）
-            q_array = np.array(q_in)
-            q_dual = expand_single_arm_to_dual(q_array, self.arm_side)
+            # ========== 前置检查：强制要求真机数据 ==========
+            if robot_joints is None:
+                # 没有真机数据时，直接透传输入（passthrough）
+                current_time = time.time()
+                if (current_time - self.last_print_time) >= self.print_interval:
+                    print(f"\n⚠️  [FSM Warning] 机械臂真实关节角缺失，FSM 进入透传模式")
+                    print(f"  提示：FSM 需要真机反馈数据才能正确工作")
+                    self.last_print_time = current_time
+                return q_in
 
-            # 执行正运动学
-            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_dual)
+            # ========== Step 1: 正运动学 - 使用机械臂真实关节角计算法兰位置 ==========
+            # 🔍 调试：控制打印频率（每 0.5 秒打印一次详细信息）
+            current_time = time.time()
+            should_print_debug = (current_time - self.last_print_time) >= self.print_interval
+
+            # 使用机械臂真实关节角进行 FK 计算
+            q_for_fk = np.array(robot_joints).copy()
+
+            # 🔧 关键修正：第3、4、6个关节（索引2、3、5）需要反向
+            # 因为 URDF 定义的方向与电机控制方向不一致
+            # 这样才能得到正确的末端位置
+            q_for_fk[2] = -q_for_fk[2]  # 第3个关节（Shoulder_Yaw）反向
+            q_for_fk[3] = -q_for_fk[3]  # 第4个关节（Elbow_Pitch）反向
+            q_for_fk[5] = -q_for_fk[5]  # 第6个关节（Wrist_Pitch）反向
+
+            if should_print_debug:
+                print(f"\n🔍 [FSM FK Debug] 使用机械臂真实关节角:")
+                print(f"  原始 robot_joints = {robot_joints}")
+                print(f"  反向修正后 q_for_fk = {q_for_fk}")
+                print(f"  (第3、4、6个关节已反向)")
+
+            # 将 7 维单臂关节角扩展为 14 维双臂关节角（适配双臂 URDF）
+            q_dual = expand_single_arm_to_dual(q_for_fk, self.arm_side)
+
+            # 🔧 应用关节方向映射（修正电机方向）
+            q_dual_corrected = q_dual * self.joint_negation
+
+            if should_print_debug:
+                # 🔍 调试：打印关节角修正前后的对比
+                print(f"  原始关节角: {q_dual}")
+                print(f"  方向映射: {self.joint_negation}")
+                print(f"  修正后关节角: {q_dual_corrected}")
+
+            # 执行正运动学（使用修正后的关节角）
+            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_dual_corrected)
             pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
 
-            # 获取机械臂法兰位置
-            if robot_flange_pose is not None:
-                # 使用外部提供的机械臂法兰位姿（推荐方式）
-                robot_flange_position = robot_flange_pose[:3]
-            else:
-                # 使用输入关节角计算法兰位置
+            # 获取机械臂法兰位置（始终使用 FK 计算，不使用外部提供的位姿）
+            try:
                 robot_flange_position = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id].translation.copy()
+
+                # 更新上一帧的位置
+                self.last_robot_flange_position = robot_flange_position.copy()
+
+                if should_print_debug:
+                    print(f"  使用FK计算的法兰位置: {robot_flange_position}")
+            except Exception as e:
+                # 如果 FK 计算失败，使用上一帧的位置
+                if self.last_robot_flange_position is not None:
+                    robot_flange_position = self.last_robot_flange_position
+                    if should_print_debug:
+                        print(f"  ⚠️  FK计算失败，使用上一帧位置: {robot_flange_position}")
+                else:
+                    # 如果没有上一帧，使用零位置并记录错误
+                    robot_flange_position = np.zeros(3)
+                    if should_print_debug:
+                        print(f"  ❌ FK计算失败且无上一帧，使用零位置: {e}")
+
+            if should_print_debug:
+                self.last_print_time = current_time  # 更新上次打印时间
 
             # ========== Step 2: 虚拟夹具 FSM 更新（关节空间增量映射，NO IK） ==========
             # 调用 FSM 核心算法，获取目标关节角和当前状态
+            # 将遥操臂关节角转换为 numpy 数组
+            exo_joints_array = np.array(q_in)
+
             target_joints, current_state = self.virtual_fixture_fsm.update(
-                exo_joints=q_array,
+                exo_joints=exo_joints_array,
                 robot_flange_position=robot_flange_position
             )
 

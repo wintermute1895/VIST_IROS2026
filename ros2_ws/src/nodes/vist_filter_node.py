@@ -132,6 +132,7 @@ class VISTFilterNode(Node):
         # 初始化状态
         self.exo_data: Optional[JointState] = None
         self.vision_data: Optional[JointState] = None
+        self.robot_data: Optional[JointState] = None  # 机械臂真实反馈数据
         self.current_state: Optional[np.ndarray] = None
         self.last_update_time = self.get_clock().now()
 
@@ -143,6 +144,7 @@ class VISTFilterNode(Node):
         # 线程锁
         self.exo_lock = threading.Lock()
         self.vision_lock = threading.Lock()
+        self.robot_lock = threading.Lock()  # 机械臂数据锁
         self.state_lock = threading.Lock()
 
         # 频率监控器
@@ -425,10 +427,9 @@ class VISTFilterNode(Node):
             10
         )
 
-        # 订阅机械臂反馈话题（用于频率监控）
-        # 假设机械臂反馈话题为 /robot_joint_states 或类似名称
-        # 你需要根据实际情况修改话题名称
-        robot_feedback_topic = '/robot_joint_states'  # 修改为实际的机械臂反馈话题
+        # 订阅机械臂反馈话题（用于 FSM 的 FK 计算）
+        # lbot_driver 发布的话题：robot1/left_arm/joint_states 或 robot1/right_arm/joint_states
+        robot_feedback_topic = f'robot1/{self.arm_side}_arm/joint_states'
         self.robot_feedback_sub = self.create_subscription(
             JointState,
             robot_feedback_topic,
@@ -487,8 +488,10 @@ class VISTFilterNode(Node):
             self.freq_vision_receive.tick()  # 记录接收频率
 
     def robot_feedback_callback(self, msg: JointState):
-        """机械臂反馈数据回调（用于频率监控）"""
-        self.freq_robot_feedback.tick()  # 记录机械臂反馈频率
+        """机械臂反馈数据回调（保存真实关节角）"""
+        with self.robot_lock:
+            self.robot_data = msg
+            self.freq_robot_feedback.tick()  # 记录机械臂反馈频率
 
     def timer_callback(self):
         """高频控制循环 - 使用策略模式统一处理"""
@@ -505,6 +508,8 @@ class VISTFilterNode(Node):
             exo_data = self.exo_data
         with self.vision_lock:
             vision_data = self.vision_data
+        with self.robot_lock:
+            robot_data = self.robot_data  # 获取机械臂真实反馈数据
 
         # 检查数据有效性 - 如果没有数据，使用默认零位姿态
         if exo_data is None and vision_data is None:
@@ -538,7 +543,33 @@ class VISTFilterNode(Node):
 
         # 使用策略模式应用滤波器
         try:
-            q_out = self.current_filter.update(q_in, dt)
+            # 对于 FSM 滤波器，计算机械臂真实法兰位置
+            robot_joints = None
+            if self.filter_type == 'fsm' and robot_data is not None:
+                try:
+                    # 直接传递关节角，不在这里计算 FK
+                    # 提取机械臂真实关节角
+                    robot_q = np.array(robot_data.position)
+
+                    # 🔍 单位检测：如果数值很大（>10），很可能是角度而非弧度
+                    if len(robot_q) == 7:
+                        max_val = np.max(np.abs(robot_q))
+                        if max_val > 10:
+                            # 很可能是角度，转换为弧度
+                            self.get_logger().warn(f'⚠️ 检测到关节角可能是角度（最大值={max_val:.1f}），自动转换为弧度')
+                            robot_q = np.deg2rad(robot_q)
+
+                        # 将单臂关节角赋值给 robot_joints（FSM 内部会处理扩展）
+                        robot_joints = robot_q
+
+                except Exception as e:
+                    self.get_logger().warn(f'⚠️ 无法提取机械臂真实关节角: {e}')
+
+            # 调用滤波器（FSM 会使用 robot_joints，其他滤波器会忽略）
+            if robot_joints is not None:
+                q_out = self.current_filter.update(q_in, dt, robot_joints=robot_joints)
+            else:
+                q_out = self.current_filter.update(q_in, dt)
 
             if q_out is None:
                 self.get_logger().error('❌ Filter returned None!')

@@ -6,7 +6,7 @@
 # ==========================================
 robot_model:
   # URDF 文件路径（相对于 config 目录）
-  urdf_file: "urdf/lkls73_o2_dual_arm_description.urdf"
+  urdf_file: "urdf/lkls73_o2_dual_arm_description_fsm.urdf"  # FSM 专用 URDF（修改了 Elbow_Pitch 和 Wrist_Pitch 的关节方向）
 
   # 末端执行器名称
   end_effector_frames:
