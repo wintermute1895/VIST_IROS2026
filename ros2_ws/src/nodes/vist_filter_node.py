@@ -696,12 +696,15 @@ class VISTFilterNode(Node):
 
                 # 获取笛卡尔速度和其他诊断信息
                 velocity_norm = float(getattr(vist_filter, 'current_velocity_norm', 0.0))
-                alpha_value = float(getattr(vist_filter, 'current_alpha', 0.0))
+                alpha_value = float(getattr(vist_filter, 'current_alpha', 0.5))
 
-                # 计算 R 放大倍数
-                r_scale = 1.0
-                if hasattr(vist_filter, 'R') and hasattr(vist_filter, 'R_base'):
-                    r_scale = float(np.trace(vist_filter.R) / np.trace(vist_filter.R_base))
+                # 计算 R_human 和 R_virtual 放大倍数
+                r_human_scale = 1.0
+                r_virtual_scale = 1.0
+                if hasattr(vist_filter, 'R_human') and hasattr(vist_filter, 'R_base'):
+                    r_human_scale = float(np.trace(vist_filter.R_human) / np.trace(vist_filter.R_base))
+                if hasattr(vist_filter, 'R_virtual') and hasattr(vist_filter, 'R_base'):
+                    r_virtual_scale = float(np.trace(vist_filter.R_virtual) / np.trace(vist_filter.R_base))
 
                 # 计算 Q 速度方差
                 q_variance = 0.0
@@ -724,20 +727,41 @@ class VISTFilterNode(Node):
                     except:
                         pass
 
-                # 诊断数据格式：
+                # 获取末端到目标的距离
+                distance_to_target = float(getattr(vist_filter, 'current_distance_xy', 0.0))
+
+                # 获取关节变化量范数
+                joint_delta_norm = 0.0
+                if hasattr(vist_filter, 'joint_delta'):
+                    joint_delta_norm = float(np.linalg.norm(vist_filter.joint_delta))
+
+                # 获取卡尔曼增益K的范数
+                k_gain_norm = 0.0
+                if hasattr(vist_filter, 'current_K') and vist_filter.current_K is not None:
+                    k_gain_norm = float(np.linalg.norm(vist_filter.current_K))
+
+                # 诊断数据格式（v3.0扩展）：
                 # [0]: 笛卡尔速度范数 (m/s)
                 # [1]: 意图因子 α
-                # [2]: R 放大倍数
+                # [2]: R_human 放大倍数
                 # [3]: Q 速度方差
                 # [4-6]: 笛卡尔速度 xyz
+                # [7]: 末端到目标XY距离 (m)
+                # [8]: 关节变化量范数
+                # [9]: 卡尔曼增益K范数
+                # [10]: R_virtual 缩小倍数
                 diagnostics_msg.data = [
                     velocity_norm,
                     alpha_value,
-                    r_scale,
+                    r_human_scale,
                     q_variance,
                     cart_vel_x,
                     cart_vel_y,
-                    cart_vel_z
+                    cart_vel_z,
+                    distance_to_target,
+                    joint_delta_norm,
+                    k_gain_norm,
+                    r_virtual_scale
                 ]
                 self.vist_diagnostics_pub.publish(diagnostics_msg)
 
