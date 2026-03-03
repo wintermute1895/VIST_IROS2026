@@ -128,7 +128,7 @@ class OneEuroTeleopFilter(BaseTeleopFilter):
 
 
 class VISTTeleopFilter(BaseTeleopFilter):
-    """VIST 卡尔曼滤波策略"""
+    """VIST 卡尔曼滤波策略 - 基础版本 v1.0"""
 
     def __init__(self,
                  ik_solver: IKSolver,
@@ -146,7 +146,7 @@ class VISTTeleopFilter(BaseTeleopFilter):
         """
         super().__init__(ik_solver, tcp_compensation, target_pose, **kwargs)
 
-        # 实例化 VIST 核心算法（需要完整的配置对象）
+        # 实例化 VIST 核心算法
         if vist_config is None:
             raise ValueError("VIST 滤波器需要 vist_config 参数")
 
@@ -161,147 +161,35 @@ class VISTTeleopFilter(BaseTeleopFilter):
         应用 VIST 卡尔曼滤波
 
         Args:
-            q_in: 输入关节角度（来自遥操臂，作为影子关节）
-            dt: 时间步长（未使用，VIST使用配置中的dt）
+            q_in: 输入关节角度（来自遥操臂）
+            dt: 时间步长
 
         Returns:
             滤波后的关节角度
         """
-        # 将输入关节角度转换为numpy数组（作为影子关节）
+        # 将输入转换为 numpy 数组
         shadow_joints = np.array(q_in)
 
-        # 构建目标位姿（使用固定目标或从IK计算）
-        # 这里使用self.target_pose作为目标末端位姿
-        if hasattr(self, 'target_pose') and self.target_pose is not None:
-            # 如果target_pose是列表或数组，转换为4x4矩阵
-            if isinstance(self.target_pose, (list, np.ndarray)):
-                if len(self.target_pose) == 3:
-                    # 只有位置，构建4x4矩阵
-                    target_pose_matrix = np.eye(4)
-                    target_pose_matrix[:3, 3] = self.target_pose[:3]
-                    target_pose = target_pose_matrix
-                elif len(self.target_pose) == 7:
-                    # 位置+四元数，构建4x4矩阵
-                    import pinocchio as pin
-                    target_pose = pin.SE3(
-                        pin.Quaternion(self.target_pose[6], self.target_pose[3],
-                                     self.target_pose[4], self.target_pose[5]).matrix(),
-                        np.array(self.target_pose[:3])
-                    )
-                else:
-                    target_pose = self.target_pose
-            else:
-                target_pose = self.target_pose
-        else:
-            # 如果没有目标位姿，使用当前位姿作为目标
-            import pinocchio as pin
-            q_full = np.zeros(self.ik_solver.model.nq)
-            q_full[:len(q_in)] = q_in
-            pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
-            pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
-            target_pose = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
+        # 构建目标位姿（暂时使用当前位姿）
+        import pinocchio as pin
+        q_full = np.zeros(self.ik_solver.model.nq)
+        q_full[self.ik_solver.controlled_indices] = shadow_joints
+        pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
+        pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
+        target_pose = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
 
-        # ✅ 计算虚拟引导（关键修复！）
-        virtual_joints = self._compute_virtual_guidance(shadow_joints, target_pose)
-
-        # 调用 VIST 更新（新接口）
+        # 调用 VIST 更新
         filtered_joints = self.vist_filter.update(
             shadow_joints=shadow_joints,
             target_pose=target_pose,
-            virtual_joints=virtual_joints  # ✅ 传入真实的虚拟引导
+            virtual_joints=None
         )
 
-        # 返回滤波结果
         return filtered_joints.tolist()
-
-    def _compute_virtual_guidance(self, shadow_joints, target_pose):
-        """
-        计算虚拟引导关节角度（通过微分 IK）
-
-        Args:
-            shadow_joints: 影子关节角度（来自遥操臂）
-            target_pose: 目标末端位姿（任务空间约束）
-
-        Returns:
-            virtual_joints: 虚拟引导关节角度
-        """
-        import pinocchio as pin
-
-        # ==========================================
-        # Step 1: 正向运动学 - 计算当前末端位姿
-        # ==========================================
-        q_full = np.zeros(self.ik_solver.model.nq)
-        q_full[self.ik_solver.controlled_indices] = shadow_joints
-
-        pin.forwardKinematics(self.ik_solver.model, self.ik_solver.data, q_full)
-        pin.updateFramePlacements(self.ik_solver.model, self.ik_solver.data)
-        current_pose = self.ik_solver.data.oMf[self.ik_solver.ee_frame_id]
-
-        # ==========================================
-        # Step 2: 计算位姿误差（李代数）
-        # ==========================================
-        # 将 target_pose 转换为 SE3 对象
-        if isinstance(target_pose, np.ndarray) and target_pose.shape == (4, 4):
-            target_se3 = pin.SE3(target_pose[:3, :3], target_pose[:3, 3])
-        elif hasattr(target_pose, 'rotation'):
-            target_se3 = target_pose
-        else:
-            # 如果只有位置，构建 SE3
-            target_se3 = pin.SE3(np.eye(3), np.array(target_pose[:3]))
-
-        # 计算相对变换: T_error = T_current^-1 * T_target
-        error_se3 = current_pose.inverse() * target_se3
-
-        # 转换为李代数（6D 误差旋量）
-        error_twist = pin.log(error_se3).vector  # [v_x, v_y, v_z, ω_x, ω_y, ω_z]
-
-        # 如果不使用姿态控制，只取位置部分
-        if not self.vist_filter.use_orientation_control:
-            error_twist = error_twist[:3]  # 只保留位置误差
-
-        # ==========================================
-        # Step 3: 计算雅可比矩阵
-        # ==========================================
-        J_full = pin.computeFrameJacobian(
-            self.ik_solver.model,
-            self.ik_solver.data,
-            q_full,
-            self.ik_solver.ee_frame_id,
-            pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
-        )
-
-        # 只使用受控关节
-        J = J_full[:, self.ik_solver.controlled_indices]
-
-        # 如果不使用姿态控制，只取位置部分
-        if not self.vist_filter.use_orientation_control:
-            J = J[:3, :]  # 3×7 雅可比（只有位置）
-
-        # ==========================================
-        # Step 4: 阻尼最小二乘法（DLS）
-        # ==========================================
-        damping = self.vist_filter.differential_ik_damping
-        task_dim = J.shape[0]  # 3 或 6
-
-        # J_dls = J^T (J J^T + λ² I)^(-1)
-        J_dls = J.T @ np.linalg.inv(J @ J.T + damping**2 * np.eye(task_dim))
-
-        # ==========================================
-        # Step 5: 计算关节空间增量
-        # ==========================================
-        delta_q = J_dls @ error_twist
-
-        # ==========================================
-        # Step 6: 虚拟引导 = 当前关节 + 增量
-        # ==========================================
-        virtual_joints = shadow_joints + delta_q
-
-        return virtual_joints
 
     def reset(self):
         """重置卡尔曼滤波器"""
         super().reset()
-        # 重置VIST滤波器内部状态
         if hasattr(self, 'vist_filter'):
             self.vist_filter.reset()
 
