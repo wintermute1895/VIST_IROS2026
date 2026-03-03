@@ -474,13 +474,6 @@ class VISTFilterNode(Node):
             self.latest_exo_data = msg
             self.freq_exo_receive.tick()  # 记录接收频率
 
-            # 添加调试信息
-            if not hasattr(self, '_exo_callback_count'):
-                self._exo_callback_count = 0
-            self._exo_callback_count += 1
-            if self._exo_callback_count % 50 == 0:  # 每50次打印一次
-                self.get_logger().info(f'Exo callback received {self._exo_callback_count} messages')
-
     def vision_callback(self, msg: JointState):
         """视觉数据回调"""
         with self.vision_lock:
@@ -566,10 +559,34 @@ class VISTFilterNode(Node):
                     self.get_logger().warn(f'⚠️ 无法提取机械臂真实关节角: {e}')
 
             # 调用滤波器（FSM 会使用 robot_joints，其他滤波器会忽略）
-            if robot_joints is not None:
-                q_out = self.current_filter.update(q_in, dt, robot_joints=robot_joints)
+            # 🔍 VIST滤波器单位转换：LinkerTA输出的是角度（degree），需要转换为弧度
+            if self.filter_type == 'vist':
+                q_in_array = np.array(q_in)
+                q_in_rad = np.deg2rad(q_in_array)
+
+                # 🔧 关节方向修正：反转第3和第5关节（索引2和4）
+                q_in_rad[2] = -q_in_rad[2]
+                q_in_rad[4] = -q_in_rad[4]
+
+                # 转换回列表
+                q_in_rad = q_in_rad.tolist()
+
+                # 首次转换时打印日志
+                if not hasattr(self, '_vist_unit_conversion_logged'):
+                    self.get_logger().info('✓ VIST滤波器：遥操臂输入单位转换（角度 → 弧度）')
+                    self.get_logger().info('✓ VIST滤波器：关节方向修正（反转索引2和4）')
+                    self._vist_unit_conversion_logged = True
+
+                if robot_joints is not None:
+                    q_out = self.current_filter.update(q_in_rad, dt, robot_joints=robot_joints)
+                else:
+                    q_out = self.current_filter.update(q_in_rad, dt)
             else:
-                q_out = self.current_filter.update(q_in, dt)
+                # 其他滤波器（FSM等）保持原始单位
+                if robot_joints is not None:
+                    q_out = self.current_filter.update(q_in, dt, robot_joints=robot_joints)
+                else:
+                    q_out = self.current_filter.update(q_in, dt)
 
             if q_out is None:
                 self.get_logger().error('❌ Filter returned None!')
@@ -577,8 +594,24 @@ class VISTFilterNode(Node):
 
             filtered_state = np.array(q_out)
 
+            # 🔍 关节序号验证（每100帧打印一次）
+            if not hasattr(self, '_joint_mapping_check_count'):
+                self._joint_mapping_check_count = 0
+            self._joint_mapping_check_count += 1
+
+            if self._joint_mapping_check_count % 100 == 0:
+                self.get_logger().info(f'\n🔍 关节序号验证 (第{self._joint_mapping_check_count}帧):')
+                self.get_logger().info(f'  输入 q_in:  {[f"{x:6.3f}" for x in q_in]}')
+                self.get_logger().info(f'  输出 q_out: {[f"{x:6.3f}" for x in q_out]}')
+                delta = np.array(q_out) - np.array(q_in if self.filter_type != "vist" else q_in_rad)
+                self.get_logger().info(f'  差值 Δq:    {[f"{x:6.3f}" for x in delta]}')
+                self.get_logger().info(f'  最大变化: Joint {np.argmax(np.abs(delta))}, Δ={np.max(np.abs(delta)):.3f}')
+
             # 发布滤波后的状态
             self.publish_filtered_state(filtered_state)
+
+            # 发布性能数据和意图因子
+            self.publish_metrics(filtered_state, q_in, dt)
 
         except Exception as e:
             import traceback
@@ -599,19 +632,8 @@ class VISTFilterNode(Node):
             msg = JointState()
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.header.frame_id = 'base_link'
-            msg.name = [f'joint_{i+1}' for i in range(len(filtered_state))]
+            msg.name = [f'joint_{i}' for i in range(len(filtered_state))]
             msg.position = filtered_state.tolist()
-
-            # 添加调试信息
-            if not hasattr(self, '_publish_count'):
-                self._publish_count = 0
-            self._publish_count += 1
-
-            if self._publish_count % 80 == 0:
-                self.get_logger().info(f'📊 Publishing message #{self._publish_count}')
-                self.get_logger().info(f'   Topic: {self.filtered_pub.topic_name}')
-                self.get_logger().info(f'   Subscriber count: {self.filtered_pub.get_subscription_count()}')
-                self.get_logger().info(f'   Position: {msg.position[:3]}...')
 
             # 发布滤波后的数据
             self.filtered_pub.publish(msg)
@@ -623,6 +645,78 @@ class VISTFilterNode(Node):
             self.get_logger().error(f'❌ Error in publish_filtered_state: {e}')
             import traceback
             self.get_logger().error(f'Traceback: {traceback.format_exc()}')
+
+    def publish_metrics(self, filtered_state: np.ndarray, input_state: list, dt: float):
+        """
+        发布性能指标和意图因子（适用于所有滤波器类型）
+
+        Args:
+            filtered_state: 滤波后的关节状态
+            input_state: 输入关节状态
+            dt: 时间步长
+        """
+        try:
+            # 默认意图因子值
+            alpha = 0.0
+            alpha_geo = 0.0
+            alpha_vel = 0.0
+            alpha_alignment = 0.0
+            Q_norm = 0.0
+            R_norm = 0.0
+            K_norm = 0.0
+
+            # 尝试从滤波器获取意图因子和协方差范数
+            if self.filter_type == 'vist' and hasattr(self.current_filter, 'vist_filter'):
+                vist_filter = self.current_filter.vist_filter
+                if hasattr(vist_filter, 'alpha'):
+                    alpha = float(vist_filter.alpha)
+                    alpha_geo = float(getattr(vist_filter, 'alpha_geo', 0.0))
+                    alpha_vel = float(getattr(vist_filter, 'alpha_vel', 0.0))
+                    alpha_alignment = float(getattr(vist_filter, 'alpha_alignment', 0.0))
+                    Q_norm = float(getattr(vist_filter, 'Q_norm', 0.0))
+                    R_norm = float(getattr(vist_filter, 'R_norm', 0.0))
+                    K_norm = float(getattr(vist_filter, 'K_norm', 0.0))
+
+            # 发布意图因子和协方差范数
+            intent_msg = Float64MultiArray()
+            intent_msg.data = [alpha, alpha_geo, alpha_vel, alpha_alignment, Q_norm, R_norm, K_norm]
+            self.intent_pub.publish(intent_msg)
+
+            # 发布性能数据
+            if self.enable_performance_monitoring:
+                perf_msg = Float64MultiArray()
+
+                # 计算性能指标
+                position_error = np.linalg.norm(filtered_state - np.array(input_state))
+
+                # 计算速度（如果有历史数据）
+                if self.last_position is not None:
+                    velocity = np.linalg.norm(filtered_state - self.last_position) / dt
+                else:
+                    velocity = 0.0
+
+                # 计算加速度（如果有历史速度）
+                if self.last_velocity is not None:
+                    acceleration = abs(velocity - self.last_velocity) / dt
+                else:
+                    acceleration = 0.0
+
+                # 更新历史数据
+                self.last_position = filtered_state.copy()
+                self.last_velocity = velocity
+
+                perf_msg.data = [
+                    float(position_error),  # 位置误差
+                    float(velocity),  # 速度
+                    float(acceleration),  # 加速度
+                    float(dt * 1000),  # 时间步长(ms)
+                    float(alpha)  # 意图因子
+                ]
+                self.performance_pub.publish(perf_msg)
+
+        except Exception as e:
+            # 静默失败，不影响主控制循环
+            pass
 
     def print_frequencies(self):
         """定期打印所有频率信息"""
@@ -711,6 +805,11 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
+        # 保存监控数据（如果使用VIST滤波器）
+        if hasattr(node, 'current_filter') and hasattr(node.current_filter, 'save_monitor_data'):
+            node.get_logger().info('正在保存监控数据...')
+            node.current_filter.save_monitor_data()
+
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()

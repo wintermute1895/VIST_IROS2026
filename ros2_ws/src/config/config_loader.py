@@ -232,6 +232,11 @@ class VISTConfig:
         return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('human_base_variance', 1e-2))
 
     @property
+    def vist_observation_human_base_variance(self):
+        """VIST 人类指令基础方差（带前缀）"""
+        return self.vist_human_base_variance
+
+    @property
     def vist_human_max_variance(self):
         """VIST 人类指令最大方差"""
         return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('human_max_variance', 1e-1))
@@ -247,6 +252,11 @@ class VISTConfig:
         return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('virtual_min_variance', 1e-5))
 
     @property
+    def vist_observation_virtual_min_variance(self):
+        """VIST 虚拟引导最小方差（带前缀）"""
+        return self.vist_virtual_min_variance
+
+    @property
     def vist_conflict_gain(self):
         """VIST 冲突增益（挣脱机制）
 
@@ -260,9 +270,19 @@ class VISTConfig:
         return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('conflict_gain', 0.5))
 
     @property
+    def vist_observation_conflict_gain(self):
+        """VIST 冲突增益（带前缀）"""
+        return self.vist_conflict_gain
+
+    @property
     def vist_differential_ik_damping(self):
         """VIST 微分 IK 阻尼"""
         return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('differential_ik_damping', 5e-3))
+
+    @property
+    def vist_observation_differential_ik_damping(self):
+        """VIST 微分 IK 阻尼（带前缀）"""
+        return self.vist_differential_ik_damping
 
     @property
     def vist_use_orientation_control(self):
@@ -354,6 +374,109 @@ class VISTConfig:
     def vist_initial_velocity_variance(self):
         """VIST 初始速度方差"""
         return float(self._config.get('vist_kalman', {}).get('initialization', {}).get('initial_velocity_variance', 1e-3))
+
+    # ==========================================
+    # VIST 新增参数（任务空间方差、门控、速度感知、系统参数）
+    # ==========================================
+    @property
+    def vist_task_covariance_free_variance_xyz(self):
+        """任务空间自由方差 XYZ"""
+        return self._config.get('vist_kalman', {}).get('task_covariance', {}).get('free_variance_xyz', [1.0, 1.0, 1.0])
+
+    @property
+    def vist_task_covariance_free_variance_rpy(self):
+        """任务空间自由方差 RPY"""
+        return self._config.get('vist_kalman', {}).get('task_covariance', {}).get('free_variance_rpy', [0.1, 0.1, 0.1])
+
+    @property
+    def vist_task_covariance_cons_variance_xyz(self):
+        """任务空间约束方差 XYZ（粘滞感）"""
+        return self._config.get('vist_kalman', {}).get('task_covariance', {}).get('cons_variance_xyz', [1e-3, 1e-3, 1.0])
+
+    @property
+    def vist_task_covariance_cons_variance_rpy(self):
+        """任务空间约束方差 RPY（粘滞感）"""
+        return self._config.get('vist_kalman', {}).get('task_covariance', {}).get('cons_variance_rpy', [1e-4, 1e-4, 1e-4])
+
+    @property
+    def vist_gating_z_activation_threshold(self):
+        """圆柱形门控 Z轴激活阈值"""
+        return float(self._config.get('vist_kalman', {}).get('gating', {}).get('z_activation_threshold', 0.05))
+
+    @property
+    def vist_gating_dir_epsilon(self):
+        """方向因子容差（避免除零）"""
+        return float(self._config.get('vist_kalman', {}).get('gating', {}).get('dir_epsilon', 1e-4))
+
+    @property
+    def vist_velocity_perception_velocity_noise_floor(self):
+        """速度噪声底限"""
+        return float(self._config.get('vist_kalman', {}).get('velocity_perception', {}).get('velocity_noise_floor', 1e-3))
+
+    @property
+    def vist_velocity_perception_max_valid_velocity(self):
+        """最大有效速度"""
+        return float(self._config.get('vist_kalman', {}).get('velocity_perception', {}).get('max_valid_velocity', 0.5))
+
+    @property
+    def vist_filter_system_process_noise_epsilon(self):
+        """过程噪声兜底（防止协方差退化）"""
+        return float(self._config.get('vist_kalman', {}).get('filter_system', {}).get('process_noise_epsilon', 1e-6))
+
+    @property
+    def vist_filter_system_dt(self):
+        """滤波器系统时间步长（优先使用filter_system.dt，回退到process_model.dt）"""
+        # 优先使用新的filter_system.dt
+        dt = self._config.get('vist_kalman', {}).get('filter_system', {}).get('dt')
+        if dt is not None:
+            return float(dt)
+        # 回退到旧的process_model.dt
+        return float(self._config.get('vist_kalman', {}).get('process_model', {}).get('dt', 0.02))
+
+    @property
+    def vist_observation_human_lambda(self):
+        """人类指令噪声指数增长系数"""
+        return float(self._config.get('vist_kalman', {}).get('observation_model', {}).get('human_lambda', 3.0))
+
+    @property
+    def vist_observation_fusion_method(self):
+        """观测融合方法 (standard 或 information)"""
+        return self._config.get('vist_kalman', {}).get('observation_model', {}).get('fusion_method', 'standard')
+
+    @property
+    def vist_observation_use_orientation_control(self):
+        """是否使用姿态控制"""
+        return self._config.get('vist_kalman', {}).get('observation_model', {}).get('use_orientation_control', False)
+
+    @property
+    def vist_intent_w_task(self):
+        """任务流形度量张量 W_task"""
+        return self._config.get('vist_kalman', {}).get('intent_detection', {}).get('w_task', [5.0, 5.0, 5.0, 0.5, 0.5, 0.5])
+
+    @property
+    def vist_intent_alpha_beta(self):
+        """运动能量参数 β"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('alpha_beta', 0.5))
+
+    @property
+    def vist_intent_w_geo(self):
+        """几何势能权重"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('w_geo', 0.3))
+
+    @property
+    def vist_intent_w_vel(self):
+        """速度权重"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('w_vel', 0.7))
+
+    @property
+    def vist_intent_alpha_alignment_power(self):
+        """方向对齐指数"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('alpha_alignment_power', 1.0))
+
+    @property
+    def vist_intent_intent_smoothing(self):
+        """意图平滑系数"""
+        return float(self._config.get('vist_kalman', {}).get('intent_detection', {}).get('intent_smoothing', 0.95))
 
     # ==========================================
     # VIST 几何解析求解器参数

@@ -6,7 +6,7 @@
 # ==========================================
 robot_model:
   # URDF 文件路径（相对于 config 目录）
-  urdf_file: "urdf/lkls73_o2_dual_arm_description_fsm.urdf"  # FSM 专用 URDF（修改了 Elbow_Pitch 和 Wrist_Pitch 的关节方向）
+  urdf_file: "urdf/lkls73_o2_dual_arm_description.urdf"  # FSM 专用 URDF（修改了 Elbow_Pitch 和 Wrist_Pitch 的关节方向）
 
   # 末端执行器名称
   end_effector_frames:
@@ -123,7 +123,7 @@ control:
 
   # 微分 IK 参数
   ik_gain: 0.5  # 增益系数 (0-1)，降低以获得更平滑的运动
-  ik_damping: 5e-3  # 阻尼系数（避免奇异点，增加以减少跳变）
+  ik_damping: 1e-1  # 阻尼系数（避免奇异点，增加以减少跳变）
   ik_max_iter: 100  # 最大迭代次数
   ik_tolerance: 2e-3  # 收敛阈值（米）= 2mm（平衡精度和稳定性）
 
@@ -263,11 +263,11 @@ vist_kalman:
 
   # 过程模型参数（恒速模型）
   process_model:
-    dt: 0.02  # 时间步长（秒）
+    dt: 0.0125  # 时间步长（秒），对应 80Hz
 
     # 过程噪声协方差 Q（各向异性）
-    position_variance: 1e-4  # 关节角度方差
-    velocity_variance: 1e-3  # 关节速度方差
+    position_variance: 1e-5  # 关节角度方差
+    velocity_variance: 1e-4  # 关节速度方差
 
     # 肘部约束（防止 7-DoF 肘部漂移）
     elbow_joint_indices: [3]  # 肘部关节索引
@@ -297,18 +297,18 @@ vist_kalman:
 
     # 人类指令观测噪声 R_human（意图驱动）
     # 论文3.0版本：指数形式 R_human(α) = R_base × exp(λα)
-    human_base_variance: 1e-2  # 基础噪声水平 R_base
+    human_base_variance: 1e-3  # 基础噪声水平 R_base（收缩：5e-2 → 1e-4，建立对观测的信任）
     human_max_variance: 1e-1   # 最大噪声（自由移动时，仅用于兼容旧版本）
     human_lambda: 3.0          # 指数增长系数 λ（论文3.0版本新增）
 
     # 虚拟引导观测噪声 R_virtual（微分 IK）
     # 论文3.0版本：反比例形式 R_virtual(α) = R_min/(α + ε) + γ_c × conflict
     virtual_base_variance: 1e-4  # 基础噪声水平（仅用于兼容旧版本）
-    virtual_min_variance: 1e-3   # 最小噪声 R_min（论文3.0版本）
+    virtual_min_variance: 1e-4   # 最小噪声 R_min（收缩：1e-3 → 1e-4，建立对观测的信任）
     conflict_gain: 1.0           # 冲突增益 γ_c（论文3.0版本新增）
 
     # 微分 IK 参数
-    differential_ik_damping: 5e-3  # 雅可比伪逆阻尼
+    differential_ik_damping: 0.05  # 雅可比伪逆阻尼
 
   # 意图检测参数
   intent_detection:
@@ -326,20 +326,25 @@ vist_kalman:
 
     # 任务流形度量张量 W_task (对角矩阵)
     # 对不同维度赋予不同权重 [x, y, z, rx, ry, rz]
-    w_task: [10.0, 10.0, 10.0, 1.0, 1.0, 1.0]  # 位置权重高，姿态权重低
+    # 🔧 调整：降低权重以增加误差容忍度，使系统更柔顺
+    w_task: [5.0, 5.0, 5.0, 0.5, 0.5, 0.5]  # 从 [10, 10, 10, 1, 1, 1] 降低到 [5, 5, 5, 0.5, 0.5, 0.5]
 
     # 运动能量参数 β (Eq. 3)
     # α_vel = 1/(1 + β||ξ_vel||²)
-    alpha_beta: 1.0  # 速度敏感度系数
+    # 🔧 调整：降低β值，使速度因子对速度变化更不敏感，增加平滑性
+    alpha_beta: 0.25  # 从 1.0 降低到 0.5
 
     # 意图因子融合权重 (Eq. 5)
     # α_k = σ(w_g·α_geo + w_v·α_vel) · (α_dir)^η
+    # 🔧 调整：平衡几何势能和速度权重
     w_geo: 0.5  # 几何势能权重
-    w_vel: 0.5  # 运动能量权重
-    alpha_alignment_power: 2.0  # 方向对齐的指数η
+    w_vel: 0.5  # 速度权重
+    # 🔧 调整：降低方向对齐指数，减少不确定方向的影响
+    alpha_alignment_power: 1.0  # 从 2.0 降低到 1.0（线性而非二次方）
 
     # 意图平滑
-    intent_smoothing: 0.9  # EMA 平滑系数（0-1）
+    # 🔧 调整：降低平滑系数，使α值变化更灵敏
+    intent_smoothing: 0.95  # 70% 历史 + 30% 当前
 
     # ==========================================
     # 旧版参数（保留用于向后兼容）
@@ -355,9 +360,56 @@ vist_kalman:
       velocity: 0.3
       alignment: 0.4
 
+  # ==========================================
+  # 任务空间方差参数 (Task Space Covariance)
+  # ==========================================
+  task_covariance:
+    # α = 0 时的自由探索方差 (对应论文 Sigma_free)
+    # 值越大，系统越信任人的输入，手感越轻盈
+    free_variance_xyz: [0.001, 0.001, 0.001]     # [X, Y, Z] 自由平移方差
+    free_variance_rpy: [0.5, 0.5, 0.1]     # [Rx, Ry, Rz] 自由旋转方差
+
+    # α = 1 时的约束方差 (对应论文 Sigma_cons，决定"粘滞感")
+    # ⚠️ 绝对不能设为 0！设为小正数以保留人的横向微调能力
+    cons_variance_xyz: [0.00001, 0.00001, 0.00001]   # [X, Y, Z] 约束平移方差。XY 放宽到 0.01，Z 轴(插入方向)保持大方差
+    cons_variance_rpy: [0.0001, 0.0001, 0.0001]  # [Rx, Ry, Rz] 约束旋转方差
+
+  # ==========================================
+  # 圆柱形触发约束 (Cylinder Gating)
+  # ==========================================
+  gating:
+    # 只有当末端距离目标孔位的 Z 轴高度小于此值时，才允许意图因子 α > 0
+    # 避免在半空中(XY对准但高度还很高时)提前触发方差坍缩导致锁死
+    z_activation_threshold: 0.05  # 单位：米 (比如距离目标孔面 5cm 处开始启动粘滞感)
+
+    # 主动门控方向因子 (α_dir) 的避死锁容差 (对应论文公式6中的 ε)
+    # 防止分母为 0，同时调节撤退时的灵敏度
+    dir_epsilon: 1e-4
+
+  # ==========================================
+  # 速度与接触感知参数 (Velocity Perception)
+  # ==========================================
+  velocity_perception:
+    # 由于低成本硬件的微分速度极其抖动，必须在此设置一个速度截断或平滑阈值
+    velocity_noise_floor: 1e-3  # 低于此速度视为静止，防止编码器量化噪声引起 α_vel 误触发
+    # 虚拟接触判定的最大允许速度 (超过此速度强行认为没发生接触)
+    max_valid_velocity: 0.5     # 单位：m/s
+
+  # ==========================================
+  # 卡尔曼滤波器系统参数 (Filter System)
+  # ==========================================
+  filter_system:
+    # 过程噪声极小值兜底 (对应论文公式10的 ε)
+    # 防止协方差矩阵 Q_k 在长时间约束模式下彻底退化为不可逆矩阵
+    process_noise_epsilon: 1e-6
+
+    # 算法运行频率 (对应 Δt)
+    # 必须显式传入，以确保公式(10)中的运动学积分 (Δt^3/3, Δt^2/2) 量纲正确
+    dt: 0.0125  # 80Hz 对应 0.0125s
+
   # 初始化参数
   initialization:
-    initial_state_variance: 1e-2  # 初始状态不确定性
+    initial_state_variance: 5e-2  # 初始状态不确定性
     initial_velocity_variance: 1e-3  # 初始速度不确定性
 
 # ==========================================
@@ -640,9 +692,9 @@ startup:
 
     # 目标位置（任务目标，米）
     target_position:
-      x: 0.5
-      y: 0.0
-      z: 0.3
+      x: 0.42
+      y: -0.11
+      z: 0.747
 
     # 发布的话题
     topics:

@@ -26,6 +26,25 @@ fi
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
+# ✅ 关键修复：Source 工作空间以加载消息接口
+echo -e "${YELLOW}加载工作空间环境...${NC}"
+if [ -f "${PROJECT_ROOT}/install/setup.bash" ]; then
+    source "${PROJECT_ROOT}/install/setup.bash"
+    echo -e "${GREEN}✓ 工作空间已加载${NC}"
+else
+    echo -e "${RED}错误: 工作空间未构建${NC}"
+    echo -e "${YELLOW}请先运行: cd ${PROJECT_ROOT} && colcon build${NC}"
+    exit 1
+fi
+
+# 验证消息接口是否可用
+if ! ros2 interface show lbot_arm_interfaces/msg/FollowJoint &>/dev/null; then
+    echo -e "${RED}错误: 消息接口 lbot_arm_interfaces/msg/FollowJoint 不可用${NC}"
+    echo -e "${YELLOW}请检查工作空间构建状态${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ 消息接口已加载${NC}"
+
 # 配置文件路径
 CONFIG_FILE="${PROJECT_ROOT}/config/baseline_filters_config.yaml"
 

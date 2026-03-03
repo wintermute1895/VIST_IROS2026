@@ -906,7 +906,7 @@ class FullFlowSimulator:
                 try:
                     if self.data_logger is not None:
                         self.data_logger.save()
-                        print(f"✅ 数据已保存到: {self.data_logger.save_dir}")
+                        print(f"✅  保存到: {self.data_logger.save_dir}")
 
                     if self.metrics is not None:
                         # 保存性能指标报告
