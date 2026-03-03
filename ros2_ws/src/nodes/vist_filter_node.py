@@ -465,6 +465,13 @@ class VISTFilterNode(Node):
             10
         )
 
+        # VIST 诊断发布器（用于实时监控）
+        self.vist_diagnostics_pub = self.create_publisher(
+            Float64MultiArray,
+            '/vist_diagnostics',
+            10
+        )
+
         self.get_logger().info(f'Publishing to: {filtered_topic}')
 
     def exo_callback(self, msg: JointState):
@@ -681,6 +688,58 @@ class VISTFilterNode(Node):
             intent_msg = Float64MultiArray()
             intent_msg.data = [alpha, alpha_geo, alpha_vel, alpha_alignment, Q_norm, R_norm, K_norm]
             self.intent_pub.publish(intent_msg)
+
+            # 发布 VIST 诊断数据（用于实时监控）
+            if self.filter_type == 'vist' and hasattr(self.current_filter, 'vist_filter'):
+                vist_filter = self.current_filter.vist_filter
+                diagnostics_msg = Float64MultiArray()
+
+                # 获取笛卡尔速度和其他诊断信息
+                velocity_norm = float(getattr(vist_filter, 'current_velocity_norm', 0.0))
+                alpha_value = float(getattr(vist_filter, 'current_alpha', 0.0))
+
+                # 计算 R 放大倍数
+                r_scale = 1.0
+                if hasattr(vist_filter, 'R') and hasattr(vist_filter, 'R_base'):
+                    r_scale = float(np.trace(vist_filter.R) / np.trace(vist_filter.R_base))
+
+                # 计算 Q 速度方差
+                q_variance = 0.0
+                if hasattr(vist_filter, 'Q'):
+                    q_variance = float(np.trace(vist_filter.Q[vist_filter.n_joints:, vist_filter.n_joints:]))
+
+                # 获取笛卡尔速度分量（如果有）
+                cart_vel_x = 0.0
+                cart_vel_y = 0.0
+                cart_vel_z = 0.0
+                if hasattr(vist_filter, 'state') and hasattr(vist_filter, '_compute_jacobian'):
+                    try:
+                        q_pred = vist_filter.state[:vist_filter.n_joints]
+                        q_dot_pred = vist_filter.state[vist_filter.n_joints:]
+                        J_pos = vist_filter._compute_jacobian(q_pred)
+                        cart_vel = J_pos @ q_dot_pred
+                        cart_vel_x = float(cart_vel[0])
+                        cart_vel_y = float(cart_vel[1])
+                        cart_vel_z = float(cart_vel[2])
+                    except:
+                        pass
+
+                # 诊断数据格式：
+                # [0]: 笛卡尔速度范数 (m/s)
+                # [1]: 意图因子 α
+                # [2]: R 放大倍数
+                # [3]: Q 速度方差
+                # [4-6]: 笛卡尔速度 xyz
+                diagnostics_msg.data = [
+                    velocity_norm,
+                    alpha_value,
+                    r_scale,
+                    q_variance,
+                    cart_vel_x,
+                    cart_vel_y,
+                    cart_vel_z
+                ]
+                self.vist_diagnostics_pub.publish(diagnostics_msg)
 
             # 发布性能数据
             if self.enable_performance_monitoring:
