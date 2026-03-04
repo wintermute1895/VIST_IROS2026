@@ -121,6 +121,12 @@ class RobotMeshcatVisualizer(Node):
                 # 更新左臂关节（前7个）
                 joint_values = np.array(msg.position[:7])
 
+                # 对第2、3、4、5个关节（索引1、2、3、4）方向取反
+                #joint_values[1] = -joint_values[1]
+                joint_values[2] = -joint_values[2]
+                joint_values[3] = -joint_values[3]
+                joint_values[4] = -joint_values[4]
+
                 # 统一转换为弧度（Pinocchio必须使用弧度）
                 # 假设输入可能是角度，统一转换
                 # 如果已经是弧度，转换后数值会很小但不影响正确性判断
@@ -129,12 +135,7 @@ class RobotMeshcatVisualizer(Node):
                     joint_values = np.deg2rad(joint_values)
                 # 如果数值在合理的弧度范围内，直接使用
 
-                # 注释掉关节方向修正：核心算法中已经对3、4、5、6号关节取反
-                # 如果这里再次取反，会导致方向又错回去
-                # joint_values[2] = -joint_values[2]  # Joint 3
-                # joint_values[3] = -joint_values[3]  # Joint 4
-                # joint_values[4] = -joint_values[4]  # Joint 5
-                # joint_values[5] = -joint_values[5]  # Joint 6
+
 
                 # 更新关节状态
                 for i in range(min(7, len(joint_values))):

@@ -98,8 +98,8 @@ class VISTKalmanFilter:
         # ==========================================
 
         # 意图因子参数（扩大速度响应范围）
-        self.velocity_threshold_low = 0.005   # m/s，精密对准阈值（降低）
-        self.velocity_threshold_high = 0.15   # m/s，自由移动阈值（提高）
+        self.velocity_threshold_low = 0.01   # m/s，精密对准阈值（降低）
+        self.velocity_threshold_high = 0.04   # m/s，自由移动阈值（提高）
 
         # α的上下限（避免极端值）
         self.alpha_min = 0.05
@@ -107,8 +107,8 @@ class VISTKalmanFilter:
 
         # 位置距离参数
         self.target_position_xy = np.array([0.41, -0.11])  # 目标孔位XY坐标
-        self.distance_threshold_near = 0.01   # m，接近阈值
-        self.distance_threshold_far = 0.10    # m，远离阈值
+        self.distance_threshold_near = 0.02   # m，接近阈值
+        self.distance_threshold_far = 0.15    # m，远离阈值
 
         # 意图因子融合权重
         self.velocity_weight = 0.6   # 速度权重
@@ -283,7 +283,7 @@ class VISTKalmanFilter:
 
     def _pullback_process_noise(self, alpha, J_pos):
         """
-        过程噪声协方差回拉（VIST 的灵魂）
+        过程噪声协方差回拉（VIST 的灵魂）+ Epsilon Offset
 
         论文公式：Q_joint = J† Σ_task (J†)^T
 
@@ -291,13 +291,14 @@ class VISTKalmanFilter:
         - 任务空间各向异性约束（XY 小方差，Z 大方差）
         - 投影到关节空间产生非对称阻尼
         - 横向硬约束，进给方向柔顺
+        - Epsilon Offset：解决几何退化关节（如J6）的"生存问题"
 
         Args:
             alpha: 意图因子 [0, 1]
             J_pos: 位置雅可比矩阵 (3x7)
 
         Returns:
-            Q_pullback: 回拉后的过程噪声协方差 (7x7，速度部分)
+            Q_final: 回拉后的过程噪声协方差 + epsilon offset (7x7，速度部分)
         """
         # 任务空间约束方差矩阵 Σ_task (3x3)
         # α=0 时无约束，α=1 时强约束
@@ -309,10 +310,20 @@ class VISTKalmanFilter:
         # 计算雅可比伪逆
         J_pinv = self._compute_damped_pseudoinverse(J_pos)  # 7x3
 
-        # 回拉映射：Q_joint = J† Σ_task (J†)^T
+        # 1. 回拉映射：Q_pullback = J† Σ_task (J†)^T（这是任务相关的）
         Q_pullback = J_pinv @ Sigma_task @ J_pinv.T  # 7x7
 
-        return Q_pullback
+        # 2. 增加保底方差（Epsilon Offset）
+        # 给所有关节一个微小但恒定的过程噪声，解决几何退化关节的问题
+        # 物理意义：即使雅可比认为某关节对位置没贡献，也允许它保留一点自主运动能力
+        q_epsilon = 1e-6  # 基础epsilon
+        Q_final = Q_pullback + np.eye(self.n_joints) * q_epsilon
+
+        # 3. 针对 J6（索引6）单独补偿
+        # J6（腕部Roll）对末端位置贡献小，但对姿态重要，给它额外的自由度
+        Q_final[6, 6] += 5e-6
+
+        return Q_final
 
     def _construct_full_Q(self, Q_joint_velocity):
         """

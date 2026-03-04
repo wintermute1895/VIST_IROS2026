@@ -601,6 +601,14 @@ class VISTFilterNode(Node):
 
             filtered_state = np.array(q_out)
 
+            # 🔧 VIST滤波器单位转换：输出弧度转回角度（与其他滤波器保持一致）
+            if self.filter_type == 'vist':
+                filtered_state = np.rad2deg(filtered_state)
+
+                if not hasattr(self, '_vist_output_conversion_logged'):
+                    self.get_logger().info('✓ VIST滤波器：输出单位转换（弧度 → 角度）')
+                    self._vist_output_conversion_logged = True
+
             # 🔍 关节序号验证（每100帧打印一次）
             if not hasattr(self, '_joint_mapping_check_count'):
                 self._joint_mapping_check_count = 0
@@ -636,11 +644,23 @@ class VISTFilterNode(Node):
             filtered_state: 滤波后的关节角度数组
         """
         try:
+            # 只有在使用VIST滤波器且为左臂时，才对特定关节方向取反
+            if self.filter_type == 'vist' and self.arm_side == 'left':
+                filtered_state_copy = filtered_state.copy()
+                # 第2、3、5、6个关节（索引1、2、4、5）方向取反
+                # 配合桥接节点的negation配置（索引3、5取反）
+                #filtered_state_copy[1] = -filtered_state_copy[1]
+                filtered_state_copy[2] = -filtered_state_copy[2]
+                filtered_state_copy[4] = -filtered_state_copy[4]
+                #filtered_state_copy[3] = -filtered_state_copy[3]
+            else:
+                filtered_state_copy = filtered_state
+
             msg = JointState()
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.header.frame_id = 'base_link'
-            msg.name = [f'joint_{i}' for i in range(len(filtered_state))]
-            msg.position = filtered_state.tolist()
+            msg.name = [f'joint_{i}' for i in range(len(filtered_state_copy))]
+            msg.position = filtered_state_copy.tolist()
 
             # 发布滤波后的数据
             self.filtered_pub.publish(msg)
