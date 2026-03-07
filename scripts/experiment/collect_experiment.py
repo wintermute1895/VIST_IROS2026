@@ -12,6 +12,11 @@ import subprocess
 import signal
 import time
 import threading
+import json
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # 使用非交互式后端
+import matplotlib.pyplot as plt
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional
@@ -127,6 +132,32 @@ def load_recording_config(config_path: str) -> Dict:
         sys.exit(1)
 
 
+def load_filter_type_from_baseline_config(project_root: Path) -> str:
+    """
+    从 baseline_filters_config.yaml 读取滤波器类型
+
+    Args:
+        project_root: 项目根目录
+
+    Returns:
+        滤波器类型 (vist, oneeuro, kalman, none)
+    """
+    config_path = project_root / 'config' / 'baseline_filters_config.yaml'
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+        # 从 /vist_filter_node/ros__parameters/filter_type 路径提取
+        # 注意：YAML 中的键是 '/vist_filter_node'（带斜杠）
+        filter_type = config.get('/vist_filter_node', {}).get('ros__parameters', {}).get('filter_type', 'vist')
+        return filter_type
+    except FileNotFoundError:
+        print(Colors.yellow(f"⚠ 配置文件不存在: {config_path}，使用默认值 'vist'"))
+        return 'vist'
+    except yaml.YAMLError as e:
+        print(Colors.yellow(f"⚠ 配置文件格式错误: {e}，使用默认值 'vist'"))
+        return 'vist'
+
+
 def extract_enabled_topics(config: Dict) -> List[str]:
     """
     从配置中提取所有 enabled: true 的话题（静默）
@@ -210,7 +241,7 @@ def countdown_display(duration: int):
 # 元数据生成
 # ============================================================================
 def generate_metadata(data_dir: str, experiment_name: str, duration: int,
-                     topics: List[str], config: Dict):
+                     topics: List[str], config: Dict, filter_type: str):
     """
     生成实验元数据文件（静默）
 
@@ -220,13 +251,16 @@ def generate_metadata(data_dir: str, experiment_name: str, duration: int,
         duration: 录制时长
         topics: 录制的话题列表
         config: 配置字典
+        filter_type: 滤波器类型（从 baseline_filters_config.yaml 读取）
     """
     metadata = {
         'experiment': {
             'name': experiment_name,
             'type': 'teleoperation_experiment',
             'duration': f'{duration}s',
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'task_label': config.get('experiment', {}).get('task_label', ''),
+            'filter_type': filter_type
         },
         'components': [
             {'camera': 'RealSense D435i'},
@@ -248,6 +282,155 @@ def generate_metadata(data_dir: str, experiment_name: str, duration: int,
             yaml.dump(metadata, f, default_flow_style=False, allow_unicode=True)
     except Exception:
         pass  # 静默失败
+
+
+# ============================================================================
+# 意图因子数据提取和可视化
+# ============================================================================
+def extract_and_visualize_intent_factors(data_dir: str):
+    """
+    从rosbag中提取VIST意图因子数据并生成可视化
+
+    Args:
+        data_dir: 实验数据目录
+    """
+    try:
+        from rosbag2_py import SequentialReader, StorageOptions, ConverterOptions
+        from rclpy.serialization import deserialize_message
+        from std_msgs.msg import Float64MultiArray
+    except ImportError as e:
+        print(Colors.yellow(f"⚠ 无法导入ROS2库，跳过意图因子提取: {e}"))
+        return
+
+    print()
+    print(Colors.yellow("提取VIST意图因子数据..."))
+
+    storage_options = StorageOptions(uri=str(data_dir), storage_id='sqlite3')
+    converter_options = ConverterOptions(
+        input_serialization_format='cdr',
+        output_serialization_format='cdr'
+    )
+
+    try:
+        reader = SequentialReader()
+        reader.open(storage_options, converter_options)
+    except Exception as e:
+        print(Colors.yellow(f"⚠ 无法打开rosbag: {e}"))
+        return
+
+    alpha_list = []
+    alpha_distance_list = []
+    alpha_velocity_list = []
+    alpha_alignment_list = []
+    q_norm_list = []
+    r_norm_list = []
+    k_norm_list = []
+    timestamps = []
+
+    topic = '/vist_intent_factors'
+    while reader.has_next():
+        topic_name, data, timestamp = reader.read_next()
+        if topic_name == topic:
+            try:
+                msg = deserialize_message(data, Float64MultiArray)
+                if len(msg.data) >= 7:
+                    alpha_list.append(msg.data[0])
+                    alpha_distance_list.append(msg.data[1])
+                    alpha_velocity_list.append(msg.data[2])
+                    alpha_alignment_list.append(msg.data[3])
+                    q_norm_list.append(msg.data[4])
+                    r_norm_list.append(msg.data[5])
+                    k_norm_list.append(msg.data[6])
+                    timestamps.append(timestamp * 1e-9)
+            except Exception:
+                continue
+
+    if not alpha_list:
+        print(Colors.yellow("⚠ 未找到意图因子数据"))
+        return
+
+    print(Colors.green(f"✓ 提取到 {len(alpha_list)} 个意图因子样本"))
+
+    # 归零时间戳
+    t0 = timestamps[0]
+    timestamps_relative = [t - t0 for t in timestamps]
+
+    # 保存原始时间序列数据 - 每一行对应一个时间点的所有数据
+    timeseries_data = []
+    for i in range(len(timestamps)):
+        timeseries_data.append({
+            'time': timestamps_relative[i],
+            'alpha': alpha_list[i],
+            'alpha_velocity': alpha_velocity_list[i],
+            'alpha_distance': alpha_distance_list[i],
+            'alpha_alignment': alpha_alignment_list[i],
+            'q_norm': q_norm_list[i],
+            'r_norm': r_norm_list[i],
+            'k_norm': k_norm_list[i]
+        })
+
+    timeseries_file = os.path.join(data_dir, 'intent_factors_timeseries.json')
+    try:
+        with open(timeseries_file, 'w') as f:
+            json.dump(timeseries_data, f, indent=2)
+        print(Colors.green(f"✓ 时间序列数据已保存: intent_factors_timeseries.json"))
+    except Exception as e:
+        print(Colors.yellow(f"⚠ 保存时间序列失败: {e}"))
+        return
+
+    # 生成可视化
+    print(Colors.yellow("生成意图因子可视化..."))
+    try:
+        # 使用归零后的时间戳
+        t = np.array(timestamps_relative)
+        alpha = np.array(alpha_list)
+        alpha_velocity = np.array(alpha_velocity_list)
+        alpha_distance = np.array(alpha_distance_list)
+        k_norm = np.array(k_norm_list)
+
+        # 创建3个子图
+        fig, axes = plt.subplots(3, 1, figsize=(15, 10))
+
+        # α总意图因子
+        ax = axes[0]
+        ax.plot(t, alpha, 'b-', linewidth=1.5, label='α (total)')
+        ax.axhline(y=0.5, color='r', linestyle='--', alpha=0.5, label='Precision threshold')
+        ax.fill_between(t, 0.5, 1.0, alpha=0.1, color='red', label='Precision mode')
+        ax.fill_between(t, 0.0, 0.5, alpha=0.1, color='green', label='Free mode')
+        ax.set_ylabel('α')
+        ax.set_title('VIST Intent Factor α')
+        ax.legend(loc='upper right')
+        ax.grid(True, alpha=0.3)
+        ax.set_ylim([0, 1])
+
+        # α分量对比
+        ax = axes[1]
+        ax.plot(t, alpha_velocity, 'g-', linewidth=1.5, label='α_velocity', alpha=0.7)
+        ax.plot(t, alpha_distance, 'orange', linewidth=1.5, label='α_distance', alpha=0.7)
+        ax.set_ylabel('α components')
+        ax.set_title('Intent Factor Components')
+        ax.legend(loc='upper right')
+        ax.grid(True, alpha=0.3)
+        ax.set_ylim([0, 1])
+
+        # 卡尔曼增益
+        ax = axes[2]
+        ax.plot(t, k_norm, 'red', linewidth=1.5, label='K_norm')
+        ax.set_ylabel('K norm')
+        ax.set_title('Kalman Gain Norm')
+        ax.set_xlabel('Time (s)')
+        ax.legend(loc='upper right')
+        ax.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+
+        output_file = os.path.join(data_dir, 'intent_factors.png')
+        plt.savefig(output_file, dpi=300)
+        plt.close()
+
+        print(Colors.green(f"✓ 可视化已保存: intent_factors.png"))
+    except Exception as e:
+        print(Colors.yellow(f"⚠ 生成可视化失败: {e}"))
 
 
 # ============================================================================
@@ -330,7 +513,10 @@ def main():
     # ========================================
     duration = int(sys.argv[1]) if len(sys.argv) > 1 else 300
     experiment_name = sys.argv[2] if len(sys.argv) > 2 else f"experiment_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-    data_dir = f"data/experiments/{experiment_name}"
+
+    # 数据保存到外接硬盘
+    base_data_dir = "/media/ilex/Cyan_data/data/gello/01_gello_usb_data"
+    data_dir = f"{base_data_dir}/{experiment_name}"
 
     print(Colors.blue("========================================"))
     print(Colors.blue("完整实验数据采集"))
@@ -350,6 +536,10 @@ def main():
     print(f"配置文件: {config_path}")
     config = load_recording_config(str(config_path))
 
+    # 从 baseline_filters_config.yaml 读取滤波器类型
+    filter_type = load_filter_type_from_baseline_config(project_root)
+    print(f"滤波器类型: {filter_type}")
+
     print()
     print(Colors.yellow("提取启用的话题..."))
     topics = extract_enabled_topics(config)
@@ -366,15 +556,16 @@ def main():
     # ========================================
     # 3. 创建数据目录的父目录
     # ========================================
-    # 只创建父目录，让 ros2 bag record 创建实验目录
-    os.makedirs("data/experiments", exist_ok=True)
+    # 创建外接硬盘上的基础目录
+    os.makedirs(base_data_dir, exist_ok=True)
 
     # ========================================
     # 4. 检查 ROS2 节点
     # ========================================
     print(Colors.yellow("检查系统状态..."))
     required_nodes = [
-        '/realsense_camera_node',  # 相机节点
+        '/camera_global/camera_global',  # D435i 全局相机节点
+        '/camera_wrist/camera_wrist',    # D405 腕部相机节点
         '/linker_hand_advanced_l10',  # 灵巧手节点
         '/linkerta_node',  # 外骨骼节点
         '/vist_filter_node',  # VIST 滤波器节点
@@ -514,14 +705,23 @@ def main():
     # ========================================
     # 10. 生成元数据（静默）
     # ========================================
-    generate_metadata(data_dir, experiment_name, duration, topics, config)
+    generate_metadata(data_dir, experiment_name, duration, topics, config, filter_type)
 
     # ========================================
-    # 11. 询问是否运行分析
+    # 11. 提取和可视化意图因子（仅当滤波器为vist时）
     # ========================================
-    if record_exit_code == 0:
-        if prompt_analysis(data_dir):
-            run_analysis(data_dir)
+    if record_exit_code == 0 and filter_type == 'vist' and '/vist_intent_factors' in topics:
+        print(Colors.yellow(f"检测到VIST滤波器，正在提取意图因子..."))
+        extract_and_visualize_intent_factors(data_dir)
+    elif record_exit_code == 0 and filter_type != 'vist':
+        print(Colors.blue(f"当前滤波器类型: {filter_type}，跳过意图因子分析"))
+
+    # ========================================
+    # 12. 询问是否运行分析（已注释，避免影响录制进程）
+    # ========================================
+    # if record_exit_code == 0:
+    #     if prompt_analysis(data_dir):
+    #         run_analysis(data_dir)
 
     print()
     print(Colors.blue("========================================"))

@@ -98,8 +98,8 @@ class VISTKalmanFilter:
         # ==========================================
 
         # 意图因子参数（扩大速度响应范围）
-        self.velocity_threshold_low = 0.01   # m/s，精密对准阈值（降低）
-        self.velocity_threshold_high = 0.04   # m/s，自由移动阈值（提高）
+        self.velocity_threshold_low = 0.0   # m/s，精密对准阈值（降低）
+        self.velocity_threshold_high = 0.10   # m/s，自由移动阈值（提高）
 
         # α的上下限（避免极端值）
         self.alpha_min = 0.05
@@ -107,12 +107,14 @@ class VISTKalmanFilter:
 
         # 位置距离参数
         self.target_position_xy = np.array([0.41, -0.11])  # 目标孔位XY坐标
-        self.distance_threshold_near = 0.02   # m，接近阈值
-        self.distance_threshold_far = 0.15    # m，远离阈值
+        self.distance_threshold_near = 0.12   # m，接近阈值
+        self.distance_threshold_far = 0.50    # m，远离阈值
 
-        # 意图因子融合权重
-        self.velocity_weight = 0.6   # 速度权重
-        self.distance_weight = 0.4   # 距离权重
+        # 意图因子融合权重（动态权重范围）
+        # 远离目标时（alpha_d≈0）：主要看距离，速度权重小
+        # 接近目标时（alpha_d≈1）：主要看速度，速度权重大
+        self.velocity_weight_min = 0.2   # 远离时的速度权重（距离权重=0.8）
+        self.velocity_weight_max = 0.8   # 接近时的速度权重（距离权重=0.2）
 
         # 观测噪声调度参数
         self.r_scale_max = 100.0  # α=1 时 R_human 的放大倍数
@@ -130,6 +132,10 @@ class VISTKalmanFilter:
         self.current_velocity_norm = 0.0
         self.current_distance_xy = 0.0
         self.is_precision_mode = False
+
+        # 意图因子分量（用于录制和分析）
+        self.alpha_velocity = 0.0  # 速度因素 α_v
+        self.alpha_distance = 0.0  # 距离因素 α_d
 
         # 速度历史（用于平滑）
         self.velocity_history = []
@@ -155,7 +161,7 @@ class VISTKalmanFilter:
         print(f"   - α范围: [{self.alpha_min}, {self.alpha_max}]")
         print(f"   - 目标位置XY: {self.target_position_xy}")
         print(f"   - 距离阈值: 近={self.distance_threshold_near} m, 远={self.distance_threshold_far} m")
-        print(f"   - 意图融合权重: 速度={self.velocity_weight}, 距离={self.distance_weight}")
+        print(f"   - 意图融合权重（动态）: 速度=[{self.velocity_weight_min}, {self.velocity_weight_max}]")
         print(f"   - R 放大倍数: {self.r_scale_max}x (α=1 时)")
         print(f"   - 任务空间约束: σ_xy={self.sigma_task_xy}, σ_z={self.sigma_task_z}")
         print(f"   - 雅可比阻尼: λ={self.jacobian_damping}")
@@ -211,11 +217,16 @@ class VISTKalmanFilter:
 
     def _compute_intent_factor(self, cart_velocity_norm, ee_position):
         """
-        计算意图因子 α ∈ [0.05, 0.95]（v3.0 改进版）
+        计算意图因子 α ∈ [0.05, 0.95]（v3.0 动态权重版）
 
         融合两个因素：
         1. 速度因素：速度大 → 自由移动，速度小 → 精密对准
         2. 距离因素：距离远 → 自由移动，距离近 → 精密对准
+
+        **动态权重机制**：
+        - 远离目标时（alpha_d≈0）：主要依赖距离判断，velocity_weight=0.2, distance_weight=0.8
+        - 接近目标时（alpha_d≈1）：主要依赖速度判断，velocity_weight=0.8, distance_weight=0.2
+        - 权重随alpha_d线性插值，保证 velocity_weight + distance_weight = 1.0
 
         Args:
             cart_velocity_norm: 笛卡尔速度范数 (m/s)
@@ -251,13 +262,24 @@ class VISTKalmanFilter:
                     (self.distance_threshold_far - self.distance_threshold_near)
             alpha_d = 1.0 - ratio
 
-        # 3. 融合两个因素（加权平均）
-        alpha_raw = self.velocity_weight * alpha_v + self.distance_weight * alpha_d
+        # 3. 动态权重计算（基于距离因子alpha_d）
+        # 使用alpha_d作为插值参数：
+        # - alpha_d = 0（远离）→ velocity_weight = 0.2, distance_weight = 0.8
+        # - alpha_d = 1（接近）→ velocity_weight = 0.8, distance_weight = 0.2
+        velocity_weight = self.velocity_weight_min + alpha_d * (self.velocity_weight_max - self.velocity_weight_min)
+        distance_weight = 1.0 - velocity_weight
 
-        # 4. 限制在 [alpha_min, alpha_max] 范围内（避免极端值）
+        # 4. 融合两个因素（动态加权平均）
+        alpha_raw = velocity_weight * alpha_v + distance_weight * alpha_d
+
+        # 5. 限制在 [alpha_min, alpha_max] 范围内（避免极端值）
         alpha = np.clip(alpha_raw, self.alpha_min, self.alpha_max)
 
-        # 5. 更新精密模式标志
+        # 6. 保存意图因子分量（用于录制和分析）
+        self.alpha_velocity = alpha_v
+        self.alpha_distance = alpha_d
+
+        # 7. 更新精密模式标志
         self.is_precision_mode = (alpha > 0.5)
 
         return alpha
@@ -471,6 +493,11 @@ class VISTKalmanFilter:
             self.current_K = K
 
         filtered_joints = self.state[:self.n_joints].copy()
+
+        # 计算并保存协方差范数（用于数据记录）
+        self.Q_norm = float(np.linalg.norm(self.Q, 'fro'))  # Frobenius范数
+        self.R_norm = float(np.linalg.norm(self.R_human, 'fro'))
+        self.K_norm = float(np.linalg.norm(self.current_K, 'fro'))
 
         # 计算关节变化量
         if self.last_joints is not None:

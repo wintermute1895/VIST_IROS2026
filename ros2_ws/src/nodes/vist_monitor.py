@@ -33,6 +33,14 @@ class VISTMonitor(Node):
             10
         )
 
+        # 订阅意图因子话题
+        self.create_subscription(
+            Float64MultiArray,
+            '/vist_intent_factors',
+            self.intent_factors_callback,
+            10
+        )
+
         # 统计信息
         self.frame_count = 0
         self.last_print_time = time.time()
@@ -44,8 +52,33 @@ class VISTMonitor(Node):
         self.distance_history = []
         self.max_history_size = 100
 
+        # 意图因子数据
+        self.alpha_velocity = 0.0
+        self.alpha_distance = 0.0
+        self.q_norm = 0.0
+        self.r_norm = 0.0
+        self.k_norm = 0.0
+
         self.get_logger().info('等待 VIST 诊断数据...')
-        self.get_logger().info('提示：确保 vist_filter_node 发布 /vist_diagnostics 话题')
+        self.get_logger().info('提示：确保 vist_filter_node 发布 /vist_diagnostics 和 /vist_intent_factors 话题')
+
+    def intent_factors_callback(self, msg):
+        """
+        意图因子数据格式：
+        [0]: alpha (总意图因子)
+        [1]: alpha_distance (距离因素)
+        [2]: alpha_velocity (速度因素)
+        [3]: alpha_alignment (对齐因素)
+        [4]: Q_norm
+        [5]: R_norm
+        [6]: K_norm
+        """
+        if len(msg.data) >= 7:
+            self.alpha_velocity = msg.data[2]
+            self.alpha_distance = msg.data[1]
+            self.q_norm = msg.data[4]
+            self.r_norm = msg.data[5]
+            self.k_norm = msg.data[6]
 
     def diagnostics_callback(self, msg):
         """
@@ -142,6 +175,8 @@ class VISTMonitor(Node):
 
         # 意图因子
         self.get_logger().info(f'  {color}意图因子 α: {alpha:.3f}{reset} (平均: {avg_alpha:.3f}, 范围: [0.05, 0.95])')
+        self.get_logger().info(f'    ├─ α_velocity (速度因素): {self.alpha_velocity:.3f}')
+        self.get_logger().info(f'    └─ α_distance (距离因素): {self.alpha_distance:.3f}')
 
         # 观测噪声
         self.get_logger().info(f'  R_human 放大: {r_human_scale:.2f}x (α越大越不信任人类)')
@@ -149,6 +184,9 @@ class VISTMonitor(Node):
 
         # 过程噪声
         self.get_logger().info(f'  Q 速度方差: {q_variance:.6f}')
+
+        # 协方差范数
+        self.get_logger().info(f'  协方差范数: Q={self.q_norm:.4f}, R={self.r_norm:.4f}, K={self.k_norm:.4f}')
 
         # 滤波器状态
         self.get_logger().info(f'  关节变化量: {joint_delta_norm:.6f}')

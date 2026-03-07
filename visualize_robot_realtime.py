@@ -124,7 +124,7 @@ class RobotMeshcatVisualizer(Node):
                 # 对第2、3、4、5个关节（索引1、2、3、4）方向取反
                 #joint_values[1] = -joint_values[1]
                 joint_values[2] = -joint_values[2]
-                joint_values[3] = -joint_values[3]
+                #joint_values[3] = -joint_values[3]
                 joint_values[4] = -joint_values[4]
 
                 # 统一转换为弧度（Pinocchio必须使用弧度）

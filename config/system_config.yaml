@@ -50,7 +50,7 @@ robot:
     - -1  # Joint 2: Shoulder_Yaw (反向)
     - 1  # Joint 3: Elbow_Pitch (反向，让角度映射正确)
     - 1   # Joint 4: Wrist_Yaw
-    - 1   # Joint 5: Wrist_Pitch
+    - 1  # Joint 5: Wrist_Pitch (反向)
     - 1   # Joint 6: Wrist_Roll
 
   # 关节零位偏移（单位：弧度）

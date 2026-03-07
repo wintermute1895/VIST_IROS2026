@@ -695,11 +695,12 @@ class VISTFilterNode(Node):
             # 尝试从滤波器获取意图因子和协方差范数
             if self.filter_type == 'vist' and hasattr(self.current_filter, 'vist_filter'):
                 vist_filter = self.current_filter.vist_filter
-                if hasattr(vist_filter, 'alpha'):
-                    alpha = float(vist_filter.alpha)
-                    alpha_geo = float(getattr(vist_filter, 'alpha_geo', 0.0))
-                    alpha_vel = float(getattr(vist_filter, 'alpha_vel', 0.0))
-                    alpha_alignment = float(getattr(vist_filter, 'alpha_alignment', 0.0))
+                if hasattr(vist_filter, 'current_alpha'):
+                    alpha = float(vist_filter.current_alpha)
+                    # v3.0: 读取速度因素和距离因素
+                    alpha_vel = float(getattr(vist_filter, 'alpha_velocity', 0.0))
+                    alpha_geo = float(getattr(vist_filter, 'alpha_distance', 0.0))  # 距离因素作为几何因素
+                    alpha_alignment = 0.0  # v3.0 不使用对齐因素
                     Q_norm = float(getattr(vist_filter, 'Q_norm', 0.0))
                     R_norm = float(getattr(vist_filter, 'R_norm', 0.0))
                     K_norm = float(getattr(vist_filter, 'K_norm', 0.0))

@@ -852,10 +852,15 @@ def main():
     parser = argparse.ArgumentParser(description='完整性能指标分析')
     parser.add_argument('--rosbag', help='rosbag目录路径')
     parser.add_argument('--all', action='store_true',
-                        help='分析 data/experiments 目录下的所有实验')
+                        help='分析实验目录下的所有实验')
     parser.add_argument('--config', default='config/analysis_config.yaml',
                         help='配置文件路径')
-    parser.add_argument('--output', default='data/analysis', help='输出目录')
+    parser.add_argument('--experiments-dir',
+                        default='/media/ilex/Cyan_data/data/GELLO/01_gello_usb_data',
+                        help='实验数据目录')
+    parser.add_argument('--output',
+                        default='/media/ilex/Cyan_data/data/GELLO/01_gello_usb_metrics',
+                        help='输出目录')
 
     args = parser.parse_args()
 
@@ -868,7 +873,7 @@ def main():
 
     # 批量分析模式
     if args.all:
-        experiments_dir = Path('data/experiments')
+        experiments_dir = Path(args.experiments_dir)
         if not experiments_dir.exists():
             print(f"错误: 实验目录不存在: {experiments_dir}")
             return

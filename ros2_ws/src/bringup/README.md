@@ -93,6 +93,7 @@ conda activate robot_env
 ```bash
 # 启动相机
 ros2 launch bringup camera.launch.py
+ros2 launch bringup camera_sync.launch.py
 
 # 启动外骨骼
 ros2 launch bringup exoskeleton.launch.py

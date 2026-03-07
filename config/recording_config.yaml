@@ -1,6 +1,11 @@
 # 数据录制配置文件
 # 用于配置录制哪些话题，支持多层级数据采集
 
+# 实验配置
+experiment:
+  # 任务标签（用于标识当前录制的任务类型）
+  task_label: "normal"  # 可选: grab_object, place_object, push_button, etc.
+
 # 录制模式
 recording_mode:
   # 可选: raw, processed, both
@@ -12,22 +17,49 @@ recording_mode:
 # 话题配置
 topics:
   # ========================================
-  # 相机模块 (Camera)
+  # 相机模块 (Cameras)
   # ========================================
-  camera_color_image:
-    enabled: true  # 如果硬盘空间不足可设为 false
-    topic: "/camera/color/image_raw"
-    description: "RealSense 彩色图像原始数据 (640x480, 30Hz)"
-
-  camera_depth_image:
-    enabled: true  # 如果硬盘空间不足可设为 false
-    topic: "/camera/depth/image_rect_raw"
-    description: "RealSense 深度图像矫正后数据 (640x480, 30Hz)"
-
-  camera_info:
+  # D435i 主相机 (camera_global)
+  camera_global_color_image:
     enabled: true
-    topic: "/camera/color/camera_info"
-    description: "相机标定信息和内参"
+    topic: "/camera_global/camera_global/color/image_raw"
+    description: "D435i 彩色图像原始数据 (640x480, 30Hz, 全局时间戳)"
+
+  camera_global_depth_image:
+    enabled: true
+    topic: "/camera_global/camera_global/depth/image_rect_raw"
+    description: "D435i 深度图像原始数据 (640x480, 30Hz, 全局时间戳)"
+
+  camera_global_color_info:
+    enabled: true
+    topic: "/camera_global/camera_global/color/camera_info"
+    description: "D435i 彩色相机标定信息和内参"
+
+  camera_global_depth_info:
+    enabled: true
+    topic: "/camera_global/camera_global/depth/camera_info"
+    description: "D435i 深度相机标定信息和内参"
+
+  # D435i 腕部相机 (camera_wrist)
+  camera_wrist_color_image:
+    enabled: true
+    topic: "/camera_wrist/camera_wrist/color/image_raw"
+    description: "D435i 腕部相机彩色图像 (640x480, 30Hz, 全局时间戳)"
+
+  camera_wrist_depth_image:
+    enabled: true
+    topic: "/camera_wrist/camera_wrist/depth/image_rect_raw"
+    description: "D435i 腕部相机深度图像 (640x480, 30Hz, 全局时间戳)"
+
+  camera_wrist_color_info:
+    enabled: true
+    topic: "/camera_wrist/camera_wrist/color/camera_info"
+    description: "D435i 腕部相机彩色相机标定信息"
+
+  camera_wrist_depth_info:
+    enabled: true
+    topic: "/camera_wrist/camera_wrist/depth/camera_info"
+    description: "D435i 腕部相机深度相机标定信息"
 
   # ========================================
   # 左臂外骨骼 (Exoskeleton Left Arm)
@@ -149,9 +181,9 @@ topics:
     description: "VIST 系统整体性能指标"
 
   vist_intent_factors:
-    enabled: false
+    enabled: true
     topic: "/vist_intent_factors"
-    description: "VIST 意图因子（距离、速度、对齐、冲突）"
+    description: "VIST 意图因子 v3.0 [alpha, alpha_distance, alpha_velocity, alpha_alignment, Q_norm, R_norm, K_norm]"
 
 # 评估配置
 evaluation:

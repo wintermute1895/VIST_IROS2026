@@ -9,6 +9,8 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 import argparse
+import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
 
 
 def load_metrics_from_file(json_path):
@@ -19,6 +21,113 @@ def load_metrics_from_file(json_path):
     except Exception as e:
         print(f"警告: 无法读取 {json_path}: {e}")
         return None
+
+
+def load_and_aggregate_intent_timeseries(experiments_dir, analysis_dir):
+    """
+    加载所有实验的意图因子时间序列并计算帧对齐平均值
+
+    Args:
+        experiments_dir: 实验数据目录 (e.g., data/experiments)
+        analysis_dir: 分析结果目录 (e.g., data/analysis)
+
+    Returns:
+        aggregated_timeseries: 包含平均时间序列的字典
+    """
+    experiments_path = Path(experiments_dir)
+    analysis_path = Path(analysis_dir)
+
+    if not experiments_path.exists():
+        print(f"警告: 实验目录不存在: {experiments_dir}")
+        return None
+
+    # 查找所有 intent_factors_timeseries.json 文件
+    timeseries_files = list(experiments_path.glob('*/intent_factors_timeseries.json'))
+
+    if not timeseries_files:
+        print(f"警告: 未找到任何意图因子时间序列文件")
+        return None
+
+    print(f"\\n找到 {len(timeseries_files)} 个实验的意图因子时间序列:")
+    for f in timeseries_files:
+        print(f"  - {f.parent.name}")
+
+    # 加载所有时间序列
+    all_timeseries = []
+    for ts_file in timeseries_files:
+        try:
+            with open(ts_file, 'r') as f:
+                data = json.load(f)
+                # 新格式：每一行是一个字典 {time, alpha, alpha_velocity, ...}
+                # 转换为旧格式以便处理
+                converted_data = {
+                    'timestamps': [item['time'] for item in data],
+                    'alpha': [item['alpha'] for item in data],
+                    'alpha_velocity': [item['alpha_velocity'] for item in data],
+                    'alpha_distance': [item['alpha_distance'] for item in data],
+                    'alpha_alignment': [item['alpha_alignment'] for item in data],
+                    'q_norm': [item['q_norm'] for item in data],
+                    'r_norm': [item['r_norm'] for item in data],
+                    'k_norm': [item['k_norm'] for item in data]
+                }
+                all_timeseries.append(converted_data)
+        except Exception as e:
+            print(f"  警告: 无法读取 {ts_file}: {e}")
+
+    if not all_timeseries:
+        return None
+
+    # 找到最短的时间序列长度
+    min_length = min(len(ts['timestamps']) for ts in all_timeseries)
+    print(f"\\n对齐到最短序列长度: {min_length} 帧")
+
+    # 对齐并平均所有时间序列
+    aggregated = {
+        'timestamps': [],
+        'alpha': [],
+        'alpha_velocity': [],
+        'alpha_distance': [],
+        'alpha_alignment': [],
+        'q_norm': [],
+        'r_norm': [],
+        'k_norm': []
+    }
+
+    # 对每一帧计算平均值
+    for i in range(min_length):
+        # 平均时间戳（已经是从0开始的相对时间）
+        avg_t = np.mean([ts['timestamps'][i] for ts in all_timeseries])
+        aggregated['timestamps'].append(avg_t)
+
+        # 平均各个参数
+        for key in ['alpha', 'alpha_velocity', 'alpha_distance', 'alpha_alignment',
+                    'q_norm', 'r_norm', 'k_norm']:
+            values = [ts[key][i] for ts in all_timeseries]
+            aggregated[key].append(float(np.mean(values)))
+
+    # 绘制聚合的alpha曲线
+    output_dir = analysis_path
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(aggregated['timestamps'], aggregated['alpha'], 'b-', linewidth=2, label='α (averaged)')
+    ax.axhline(y=0.5, color='r', linestyle='--', alpha=0.5, label='Precision threshold')
+    ax.fill_between(aggregated['timestamps'], 0.5, 1.0, alpha=0.1, color='red', label='Precision mode')
+    ax.fill_between(aggregated['timestamps'], 0.0, 0.5, alpha=0.1, color='green', label='Free mode')
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('α')
+    ax.set_title(f'Aggregated Intent Factor α (averaged over {len(all_timeseries)} experiments)')
+    ax.legend(loc='upper right')
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim([0, 1])
+    plt.tight_layout()
+
+    output_file = output_dir / 'aggregated_intent_factors.png'
+    plt.savefig(output_file, dpi=300)
+    plt.close()
+    print(f"✓ 聚合意图因子曲线已保存到: {output_file}")
+
+    return aggregated
 
 
 def aggregate_metrics(analysis_dir):
@@ -56,7 +165,7 @@ def aggregate_metrics(analysis_dir):
         return None
 
     # 按数据源分组收集指标
-    # 数据源: command, feedback_raw, feedback_cleaned, exo_output
+    # 数据源: command, feedback_raw, feedback_cleaned, exo_output, intent_factors
     aggregated = {}
 
     # 获取所有可能的数据源
@@ -68,6 +177,10 @@ def aggregate_metrics(analysis_dir):
 
     # 对每个数据源进行聚合
     for source in all_sources:
+        # 跳过 intent_factors (单独处理时间序列)
+        if source == 'intent_factors':
+            continue
+
         source_metrics = []
 
         # 收集该数据源在所有实验中的指标
@@ -271,12 +384,18 @@ def generate_comparison_table(aggregated, output_path):
 
 def main():
     parser = argparse.ArgumentParser(description='聚合所有实验的分析结果')
-    parser.add_argument('--input', default='data/analysis',
-                        help='分析结果目录 (默认: data/analysis)')
-    parser.add_argument('--output', default='data/analysis/aggregated_metrics.json',
-                        help='输出文件路径 (默认: data/analysis/aggregated_metrics.json)')
-    parser.add_argument('--table', default='data/analysis/comparison_table.md',
-                        help='对比表格输出路径 (默认: data/analysis/comparison_table.md)')
+    parser.add_argument('--input',
+                        default='/media/ilex/Cyan_data/data/FSM/FSM_0306_metrics',
+                        help='分析结果目录')
+    parser.add_argument('--experiments',
+                        default='/media/ilex/Cyan_data/data/FSM/FSM_0306_data',
+                        help='实验数据目录')
+    parser.add_argument('--output',
+                        default='/media/ilex/Cyan_data/data/FSM/FSM_0306_metrics/aggregated_metrics.json',
+                        help='输出文件路径')
+    parser.add_argument('--table',
+                        default='/media/ilex/Cyan_data/data/FSM/FSM_0306_metrics/comparison_table.md',
+                        help='对比表格输出路径')
 
     args = parser.parse_args()
 
@@ -294,6 +413,12 @@ def main():
 
     # 生成对比表格
     generate_comparison_table(aggregated, args.table)
+
+    # 聚合意图因子时间序列
+    print(f"\n{'='*80}")
+    print(f"聚合意图因子时间序列")
+    print(f"{'='*80}")
+    load_and_aggregate_intent_timeseries(args.experiments, args.input)
 
     print(f"\n{'='*80}")
     print(f"聚合分析完成")
