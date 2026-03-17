@@ -102,11 +102,11 @@ class VISTKalmanFilter:
         self.velocity_threshold_high = 0.10   # m/s，自由移动阈值（提高）
 
         # α的上下限（避免极端值）
-        self.alpha_min = 0.05
-        self.alpha_max = 0.95
+        self.alpha_min = 0.3
+        self.alpha_max = 0.98
 
         # 位置距离参数
-        self.target_position_xy = np.array([0.41, -0.11])  # 目标孔位XY坐标
+        self.target_position_xy = np.array([0.42, -0.11])  # 目标孔位XY坐标
         self.distance_threshold_near = 0.12   # m，接近阈值
         self.distance_threshold_far = 0.50    # m，远离阈值
 
@@ -118,7 +118,7 @@ class VISTKalmanFilter:
 
         # 观测噪声调度参数
         self.r_scale_max = 100.0  # α=1 时 R_human 的放大倍数
-        self.r_scale_min = 0.1    # α=0 时 R_virtual 的缩小倍数
+        self.r_scale_min = 0.01    # α=0 时 R_virtual 的缩小倍数
 
         # 任务空间约束方差（Σ_task）
         self.sigma_task_xy = 0.0001  # XY 方向小方差（硬约束）
@@ -270,6 +270,7 @@ class VISTKalmanFilter:
         distance_weight = 1.0 - velocity_weight
 
         # 4. 融合两个因素（动态加权平均）
+        alpha_v = 0
         alpha_raw = velocity_weight * alpha_v + distance_weight * alpha_d
 
         # 5. 限制在 [alpha_min, alpha_max] 范围内（避免极端值）
