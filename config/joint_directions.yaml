@@ -1,0 +1,35 @@
+# 关节方向配置文件
+# 用于统一管理左右臂的关节方向修正
+
+# 关节方向修正说明：
+# - 值为 1：正向（不反转）
+# - 值为 -1：反向（反转）
+
+# 左臂关节方向（7个关节）
+left_arm_joint_directions:
+  - 1   # 关节0: Shoulder_Pitch
+  - 1   # 关节1: Shoulder_Roll
+  - -1  # 关节2: Shoulder_Yaw (反转)
+  - 1   # 关节3: Elbow_Pitch
+  - -1  # 关节4: Wrist_Yaw (反转)
+  - 1   # 关节5: Wrist_Pitch
+  - 1   # 关节6: Wrist_Roll
+
+# 右臂关节方向（7个关节）
+right_arm_joint_directions:
+  - -1  # 关节0: Shoulder_Pitch (反转)
+  - 1   # 关节1: Shoulder_Roll
+  - -1  # 关节2: Shoulder_Yaw (反转)
+  - 1   # 关节3: Elbow_Pitch
+  - -1  # 关节4: Wrist_Yaw (反转)
+  - -1  # 关节5: Wrist_Pitch (反转)
+  - 1   # 关节6: Wrist_Roll
+
+# 方向控制位置说明：
+# 1. 滤波节点输入时：应用方向修正（对所有滤波器）
+# 2. 滤波节点输出时：不需要再次修正（已经是正确方向）
+# 3. 可视化节点：不需要修正（接收的已经是正确方向）
+#
+# 对于VIST滤波器：
+# - 输入修正后，雅可比计算使用正确的关节方向
+# - 输出时已经是正确方向，不需要再次修正

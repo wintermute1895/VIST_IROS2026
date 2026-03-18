@@ -53,7 +53,7 @@ int main(int argc, char ** argv)
 		    // right_joint_states.velocity.push_back(velocity);
         }
 
-        // rclcpp::Rate loop(80);
+        rclcpp::Rate loop(80);
         while (g_running && rclcpp::ok()) {
             std::vector<float> position = arm.getJointPosition();
             std::vector<bool> error_code = arm.getJointErrorCode();
@@ -80,7 +80,7 @@ int main(int argc, char ** argv)
 		    }
 		    msg.data = ss.str();
 		    pub_joint_error_code->publish(msg);
-            // loop.sleep();
+            loop.sleep();
         }
     } catch (const std::exception &e) {
         RCLCPP_ERROR(node->get_logger(), "[ERROR] %s", e.what());

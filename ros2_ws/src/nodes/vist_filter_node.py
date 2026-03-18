@@ -299,6 +299,25 @@ class VISTFilterNode(Node):
         self.enable_performance_monitoring = self.get_parameter('enable_performance_monitoring').value
         self.performance_topic = self.get_parameter('performance_topic').value
 
+        # 加载关节方向配置
+        joint_directions_path = project_root / 'config' / 'joint_directions.yaml'
+        try:
+            with open(joint_directions_path, 'r') as f:
+                import yaml
+                directions_config = yaml.safe_load(f)
+                if self.arm_side == 'left':
+                    self.joint_directions = np.array(directions_config['left_arm_joint_directions'])
+                else:
+                    self.joint_directions = np.array(directions_config['right_arm_joint_directions'])
+                self.get_logger().info(f'✓ 加载{self.arm_side}臂关节方向配置: {self.joint_directions.tolist()}')
+        except Exception as e:
+            self.get_logger().warn(f'⚠️ 无法加载关节方向配置: {e}，使用默认值')
+            # 默认值：左臂索引2和4反转，右臂索引0、2、4、5反转
+            if self.arm_side == 'left':
+                self.joint_directions = np.array([1, 1, -1, 1, -1, 1, 1])
+            else:
+                self.joint_directions = np.array([1, 1, -1, 1, -1, 1, 1])
+
     def initialize_vist_components(self):
         """初始化VIST核心组件 - 使用策略模式"""
         self.get_logger().info(f'Initializing VIST components with filter type: {self.filter_type}')
@@ -566,34 +585,39 @@ class VISTFilterNode(Node):
                     self.get_logger().warn(f'⚠️ 无法提取机械臂真实关节角: {e}')
 
             # 调用滤波器（FSM 会使用 robot_joints，其他滤波器会忽略）
-            # 🔍 VIST滤波器单位转换：LinkerTA输出的是角度（degree），需要转换为弧度
+            # 🔍 统一的输入预处理
+            q_in_array = np.array(q_in)
+
+            # 1. 应用关节方向修正（对所有滤波器）
+            q_in_corrected = q_in_array * self.joint_directions
+
+            # 2. VIST滤波器需要额外的单位转换
             if self.filter_type == 'vist':
-                q_in_array = np.array(q_in)
-                q_in_rad = np.deg2rad(q_in_array)
-
-                # 🔧 关节方向修正：反转第3和第5关节（索引2和4）
-                q_in_rad[2] = -q_in_rad[2]
-                q_in_rad[4] = -q_in_rad[4]
-
-                # 转换回列表
-                q_in_rad = q_in_rad.tolist()
+                # 单位转换：角度 → 弧度
+                q_in_processed = np.deg2rad(q_in_corrected)
 
                 # 首次转换时打印日志
                 if not hasattr(self, '_vist_unit_conversion_logged'):
-                    self.get_logger().info('✓ VIST滤波器：遥操臂输入单位转换（角度 → 弧度）')
-                    self.get_logger().info('✓ VIST滤波器：关节方向修正（反转索引2和4）')
+                    self.get_logger().info(f'✓ {self.arm_side}臂滤波器：应用关节方向修正')
+                    self.get_logger().info(f'  方向系数: {self.joint_directions.tolist()}')
+                    self.get_logger().info(f'✓ VIST滤波器：遥操臂输入单位转换（角度 → 弧度）')
                     self._vist_unit_conversion_logged = True
 
                 if robot_joints is not None:
-                    q_out = self.current_filter.update(q_in_rad, dt, robot_joints=robot_joints)
+                    q_out = self.current_filter.update(q_in_processed.tolist(), dt, robot_joints=robot_joints)
                 else:
-                    q_out = self.current_filter.update(q_in_rad, dt)
+                    q_out = self.current_filter.update(q_in_processed.tolist(), dt)
             else:
-                # 其他滤波器（FSM等）保持原始单位
+                # 其他滤波器（GELLO/OneEuro/FSM/APF）保持原始单位（角度）
+                if not hasattr(self, '_direction_correction_logged'):
+                    self.get_logger().info(f'✓ {self.arm_side}臂滤波器：应用关节方向修正')
+                    self.get_logger().info(f'  方向系数: {self.joint_directions.tolist()}')
+                    self._direction_correction_logged = True
+
                 if robot_joints is not None:
-                    q_out = self.current_filter.update(q_in, dt, robot_joints=robot_joints)
+                    q_out = self.current_filter.update(q_in_corrected.tolist(), dt, robot_joints=robot_joints)
                 else:
-                    q_out = self.current_filter.update(q_in, dt)
+                    q_out = self.current_filter.update(q_in_corrected.tolist(), dt)
 
             if q_out is None:
                 self.get_logger().error('❌ Filter returned None!')
@@ -644,23 +668,12 @@ class VISTFilterNode(Node):
             filtered_state: 滤波后的关节角度数组
         """
         try:
-            # 只有在使用VIST滤波器且为左臂时，才对特定关节方向取反
-            if self.filter_type == 'vist' and self.arm_side == 'left':
-                filtered_state_copy = filtered_state.copy()
-                # 第2、3、5、6个关节（索引1、2、4、5）方向取反
-                # 配合桥接节点的negation配置（索引3、5取反）
-                #filtered_state_copy[1] = -filtered_state_copy[1]
-                filtered_state_copy[2] = -filtered_state_copy[2]
-                filtered_state_copy[4] = -filtered_state_copy[4]
-                #filtered_state_copy[3] = -filtered_state_copy[3]
-            else:
-                filtered_state_copy = filtered_state
-
+            # 直接发布，不需要再次方向修正（已在输入时处理）
             msg = JointState()
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.header.frame_id = 'base_link'
-            msg.name = [f'joint_{i}' for i in range(len(filtered_state_copy))]
-            msg.position = filtered_state_copy.tolist()
+            msg.name = [f'joint_{i}' for i in range(len(filtered_state))]
+            msg.position = filtered_state.tolist()
 
             # 发布滤波后的数据
             self.filtered_pub.publish(msg)
