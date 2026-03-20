@@ -1,0 +1,106 @@
+{
+  "configById": {
+    "RawMessages!1": {
+      "topicPath": "/left_arm_joint_control",
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false
+    },
+    "RawMessages!2": {
+      "topicPath": "/filtered_left_joint_control",
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false
+    },
+    "Plot!1": {
+      "paths": [
+        {
+          "value": "/left_arm_joint_control.position[0]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/filtered_left_joint_control.position[0]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        }
+      ],
+      "xAxisVal": "timestamp",
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true,
+      "xAxisPath": {
+        "value": "",
+        "enabled": false
+      }
+    },
+    "Plot!2": {
+      "paths": [
+        {
+          "value": "/left_arm_joint_control.position[0]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/left_arm_joint_control.position[1]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/left_arm_joint_control.position[2]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/left_arm_joint_control.position[3]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/left_arm_joint_control.position[4]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/left_arm_joint_control.position[5]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/left_arm_joint_control.position[6]",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        }
+      ],
+      "xAxisVal": "timestamp",
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "first": {
+      "first": "RawMessages!1",
+      "second": "RawMessages!2",
+      "direction": "row",
+      "splitPercentage": 50
+    },
+    "second": {
+      "first": "Plot!1",
+      "second": "Plot!2",
+      "direction": "row",
+      "splitPercentage": 50
+    },
+    "direction": "column",
+    "splitPercentage": 50
+  }
+}

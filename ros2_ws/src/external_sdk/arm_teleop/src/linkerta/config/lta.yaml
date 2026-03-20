@@ -1,6 +1,6 @@
 linkerta_node:
   ros__parameters:
     calibration: 0                                                        # 0关闭标定 1开启标定           注意：每次更改后需编译和重启程序！
-    arm_channel: "can0"                                                   # CAN接口 can0或can1
+    arm_channel: "can1"                                                   # CAN接口 can0或can1
     arm_id: 0x123                                                         # 外骨骼ID
     arm_baudrate: 1000000                                                 # CAN波特率

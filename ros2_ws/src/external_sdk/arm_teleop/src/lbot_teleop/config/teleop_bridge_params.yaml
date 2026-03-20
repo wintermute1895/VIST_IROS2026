@@ -5,7 +5,7 @@ teleop_bridge_node:
   ros__parameters:
     # 话题配置
     master_left_topic: "/filtered_left_joint_control"  # 订阅滤波后的左臂话题
-    master_right_topic: "/right_arm_disabled"  # 禁用右臂
+    master_right_topic: "/filtered_right_joint_control"  # 订阅滤波后的右臂话题
 
     # 转换配置
     scale_factor: 1.0
@@ -18,7 +18,7 @@ teleop_bridge_node:
 
     # 使能配置
     enable_left_arm: true  # 启用左臂
-    enable_right_arm: false  # 禁用右臂
+    enable_right_arm: true  # 启用右臂
 
     # 关节映射
     left_joint_mapping: [0, 1, 2, 3, 4, 5, 6]
